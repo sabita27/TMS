@@ -102,7 +102,7 @@
             @csrf
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                 <div class="form-group">
-                    <label class="form-label">Client Name</label>
+                    <label class="form-label">Organization Name</label>
                     <input type="text" name="name" class="form-control" required placeholder="Company or Individual Name">
                 </div>
                 <div class="form-group">
@@ -168,22 +168,7 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Project Start Date</label>
-                        <input type="date" name="project_start_date" class="form-control">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Project End Date</label>
-                        <input type="date" name="project_end_date" class="form-control">
-                    </div>
-                    <div class="form-group" style="grid-column: span 2;">
-                        <label class="form-label">Project Description</label>
-                        <textarea name="project_description" id="add_project_description" class="form-control"></textarea>
-                    </div>
-                    <div class="form-group" style="grid-column: span 2;">
-                        <label class="form-label">Attachment</label>
-                        <input type="file" name="attachment" class="form-control">
-                    </div>
+                    
                 </div>
 
                 <!-- Remarks and Status (Common) -->

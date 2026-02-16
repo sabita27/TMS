@@ -17,12 +17,20 @@ class ProjectController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255|unique:projects',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date',
+            'description' => 'nullable|string',
+            'attachment' => 'nullable|file|max:2048',
+            'remarks' => 'nullable|string',
         ]);
 
-        Project::create([
-            'name' => $request->name,
-            'status' => true,
-        ]);
+        $data = $request->except('attachment');
+        if ($request->hasFile('attachment')) {
+            $data['attachment'] = $request->file('attachment')->store('projects', 'public');
+        }
+        $data['status'] = true;
+
+        Project::create($data);
 
         return back()->with('success', 'Project created successfully.');
     }
@@ -36,12 +44,20 @@ class ProjectController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255|unique:projects,name,' . $project->id,
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date',
+            'description' => 'nullable|string',
+            'attachment' => 'nullable|file|max:2048',
+            'remarks' => 'nullable|string',
         ]);
 
-        $project->update([
-            'name' => $request->name,
-            'status' => $request->status,
-        ]);
+        $data = $request->except('attachment');
+        if ($request->hasFile('attachment')) {
+            $data['attachment'] = $request->file('attachment')->store('projects', 'public');
+        }
+        $data['status'] = $request->status;
+
+        $project->update($data);
 
         return back()->with('success', 'Project updated successfully.');
     }
