@@ -73,12 +73,12 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('/positions/{position}', 'destroy')->name('admin.positions.delete');
         });
         // Projects
-        Route::controller(\App\Http\Controllers\ProjectController::class)->group(function () {
-            Route::get('/projects', 'index')->name('admin.projects');
-            Route::post('/projects', 'store')->name('admin.projects.store');
-            Route::get('/projects/{project}/edit', 'edit')->name('admin.projects.edit');
-            Route::put('/projects/{project}', 'update')->name('admin.projects.update');
-            Route::delete('/projects/{project}', 'destroy')->name('admin.projects.delete');
+        Route::controller(MasterController::class)->group(function () {
+            Route::get('/projects', 'projects')->name('admin.projects');
+            Route::post('/projects', 'storeProject')->name('admin.projects.store');
+            Route::get('/projects/{project}/edit', 'editProject')->name('admin.projects.edit');
+            Route::put('/projects/{project}', 'updateProject')->name('admin.projects.update');
+            Route::delete('/projects/{project}', 'destroyProject')->name('admin.projects.delete');
         });
         
         Route::get('/products', [MasterController::class, 'products'])->name('admin.products');

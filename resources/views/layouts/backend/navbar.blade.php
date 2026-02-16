@@ -15,6 +15,7 @@
                 <i class="fas fa-th-large"></i> Dashboard
             </a>
             
+            <!-- <div class="nav-label">MANAGEMENT</div> -->
             <div class="nav-label">MANAGEMENT</div>
             <a href="{{ route('admin.users') }}" class="nav-item-link {{ $curr == 'admin.users' ? 'active' : '' }}">
                 <i class="fas fa-users-cog"></i> User Master
@@ -34,6 +35,7 @@
             <a href="{{ route('admin.projects') }}" class="nav-item-link {{ str_contains($curr, 'admin.projects') ? 'active' : '' }}">
                 <i class="fas fa-project-diagram"></i> Project Master
             </a>
+
             <a href="#" onclick="toggleSettingsMenu(event)" class="nav-item-link {{ (str_contains($curr, 'admin.roles') || str_contains($curr, 'admin.designations') || str_contains($curr, 'admin.positions')) ? 'active' : '' }}" style="justify-content: space-between;">
                 <div style="display: flex; align-items: center; gap: 0.75rem;">
                     <i class="fas fa-cogs"></i> Settings
@@ -50,7 +52,6 @@
                 <a href="{{ route('admin.positions') }}" class="nav-item-link" style="padding-left: 3rem; font-size: 0.85rem; {{ str_contains($curr, 'admin.positions') ? 'color: #fff;' : '' }}">
                     <i class="fas fa-chair" style="font-size: 0.9rem;"></i> Position
                 </a>
-
             </div>
 
         @elseif(optional(Auth::user()->role)->name == 'user')
@@ -156,10 +157,10 @@
         
         // Initialize arrow state if submenu is open on load
         document.addEventListener('DOMContentLoaded', function() {
-            const submenu = document.getElementById('settings-submenu');
-            const arrow = document.getElementById('settings-arrow');
-            if (submenu && submenu.style.display === 'block' && arrow) {
-                arrow.style.transform = 'rotate(180deg)';
+            const settingsSubmenu = document.getElementById('settings-submenu');
+            const settingsArrow = document.getElementById('settings-arrow');
+            if (settingsSubmenu && settingsSubmenu.style.display === 'block' && settingsArrow) {
+                settingsArrow.style.transform = 'rotate(180deg)';
             }
         });
     </script>
