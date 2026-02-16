@@ -1,0 +1,93 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+
+class AuthController extends Controller
+{
+    public function showLogin()
+    {
+        if (Auth::check()) {
+            return $this->redirectUser(Auth::user());
+        }
+        return view('auth.login');
+    }
+
+    public function login(Request $request)
+    {
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required'],
+        ]);
+
+        if (Auth::attempt($credentials)) {
+            if (Auth::user()->status == 0) {
+                Auth::logout();
+                return back()->withErrors(['email' => 'Your account is currently deactivated. Please contact support.']);
+            }
+            $request->session()->regenerate();
+            return $this->redirectUser(Auth::user())->with('success', 'Logged in successfully!');
+        }
+
+        return back()->withErrors([
+            'email' => 'The provided credentials do not match our records.',
+        ])->onlyInput('email');
+    }
+
+    public function showRegister()
+    {
+        return view('auth.register');
+    }
+
+    public function register(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'phone' => 'nullable|string|max:15',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        $userRole = \App\Models\Role::where('name', 'user')->first();
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'phone' => $request->phone,
+            'role_id' => $userRole->id, // Default role ID
+            'password' => Hash::make($request->password),
+        ]);
+
+        Auth::login($user);
+
+        return $this->redirectUser($user)->with('success', 'Account created and logged in successfully!');
+    }
+
+    public function logout(Request $request)
+    {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return redirect()->route('login');
+    }
+
+    private function redirectUser($user)
+    {
+        $role = $user->role ? $user->role->name : 'user';
+
+        switch ($role) {
+            case 'admin':
+                return redirect()->route('admin.dashboard');
+            case 'manager':
+                return redirect()->route('manager.dashboard');
+            case 'staff':
+                return redirect()->route('staff.dashboard');
+            default:
+                return redirect()->route('user.dashboard');
+        }
+    }
+}
