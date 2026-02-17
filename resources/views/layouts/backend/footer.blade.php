@@ -8,7 +8,7 @@
                     setTimeout(function() {
                         alert.style.display = 'none';
                     }, 500); // Wait for transition
-                }, 5000); // 5 seconds
+                }, 3000); // 3 seconds
             });
         });
     </script>

@@ -12,7 +12,7 @@ class Client extends Model
     protected $fillable = [
         'name', 'email', 'phone', 'address', 'status',
         'contact_person_name', 'contact_person_phone',
-        'product_id', 'project_id', 'project_start_date', 'project_end_date', 'remarks',
+        'product_id', 'project_id', 'service_id', 'project_start_date', 'project_end_date', 'remarks',
         'contact_person1_name', 'contact_person1_phone', 'contact_person2_name', 'contact_person2_phone',
         'business_type', 'project_title', 'project_description', 'attachment'
     ];
@@ -20,6 +20,7 @@ class Client extends Model
     protected $casts = [
         'product_id' => 'array',
         'project_id' => 'array',
+        'service_id' => 'array',
         'project_start_date' => 'date',
         'project_end_date' => 'date',
     ];

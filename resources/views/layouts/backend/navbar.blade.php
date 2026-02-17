@@ -35,6 +35,9 @@
             <a href="{{ route('admin.projects') }}" class="nav-item-link {{ str_contains($curr, 'admin.projects') ? 'active' : '' }}">
                 <i class="fas fa-project-diagram"></i> Project Master
             </a>
+            <a href="{{ route('admin.services') }}" class="nav-item-link {{ str_contains($curr, 'admin.services') ? 'active' : '' }}">
+                <i class="fas fa-concierge-bell"></i> Service Master
+            </a>
 
             <a href="#" onclick="toggleSettingsMenu(event)" class="nav-item-link {{ (str_contains($curr, 'admin.roles') || str_contains($curr, 'admin.designations') || str_contains($curr, 'admin.positions') || str_contains($curr, 'admin.ticket_statuses') || str_contains($curr, 'admin.ticket_priorities')) ? 'active' : '' }}" style="justify-content: space-between;">
                 <div style="display: flex; align-items: center; gap: 0.75rem;">

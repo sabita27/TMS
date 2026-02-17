@@ -9,6 +9,7 @@ use App\Models\ProductSubCategory;
 use App\Models\Project;
 use App\Models\TicketStatus;
 use App\Models\TicketPriority;
+use App\Models\Service;
 use Illuminate\Http\Request;
 
 class MasterController extends Controller
@@ -19,7 +20,8 @@ class MasterController extends Controller
         $clients = Client::latest()->paginate(10);
         $products = Product::where('status', true)->get();
         $projects = Project::where('status', true)->get();
-        return view('admin.masters.clients', compact('clients', 'products', 'projects'));
+        $services = Service::where('status', true)->get();
+        return view('admin.masters.clients', compact('clients', 'products', 'projects', 'services'));
     }
 
     public function storeClient(Request $request)
@@ -27,15 +29,16 @@ class MasterController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:clients',
-            'phone' => 'nullable|string',
-            'address' => 'nullable|string',
-            'business_type' => 'required|string|in:product,project,both',
+            'phone' => 'required|string',
+            'address' => 'required|string',
+            'business_type' => 'required|string|in:product,project,service,both',
             'product_id' => 'nullable|array',
             'project_id' => 'nullable|array',
+            'service_id' => 'nullable|array',
             'project_start_date' => 'nullable|date',
             'project_end_date' => 'nullable|date',
-            'contact_person1_name' => 'nullable|string|max:255',
-            'contact_person1_phone' => 'nullable|string|max:20',
+            'contact_person1_name' => 'required|string|max:255',
+            'contact_person1_phone' => 'required|string|max:20',
             'contact_person2_name' => 'nullable|string|max:255',
             'contact_person2_phone' => 'nullable|string|max:20',
             'project_description' => 'nullable|string',
@@ -62,13 +65,16 @@ class MasterController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:clients,email,' . $client->id,
-            'business_type' => 'required|string|in:product,project,both',
+            'phone' => 'required|string',
+            'address' => 'required|string',
+            'business_type' => 'required|string|in:product,project,service,both',
             'product_id' => 'nullable|array',
             'project_id' => 'nullable|array',
+            'service_id' => 'nullable|array',
             'project_start_date' => 'nullable|date',
             'project_end_date' => 'nullable|date',
-            'contact_person1_name' => 'nullable|string|max:255',
-            'contact_person1_phone' => 'nullable|string|max:20',
+            'contact_person1_name' => 'required|string|max:255',
+            'contact_person1_phone' => 'required|string|max:20',
             'contact_person2_name' => 'nullable|string|max:255',
             'contact_person2_phone' => 'nullable|string|max:20',
             'project_description' => 'nullable|string',
@@ -214,6 +220,53 @@ class MasterController extends Controller
     {
         $product->delete();
         return back()->with('success', 'Product deleted successfully.');
+    }
+
+    // Services
+    public function services()
+    {
+        $services = Service::with(['category', 'subcategory'])->latest()->paginate(10);
+        $categories = ProductCategory::where('status', true)->get();
+        return view('admin.masters.services', compact('services', 'categories'));
+    }
+
+    public function storeService(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|unique:services',
+            'category_id' => 'nullable|exists:product_categories,id',
+            'subcategory_id' => 'nullable|exists:product_sub_categories,id',
+            'price' => 'nullable|numeric|min:0',
+            'description' => 'nullable|string',
+        ]);
+
+        Service::create($request->all());
+        return back()->with('success', 'Service created successfully.');
+    }
+
+    public function editService(Service $service)
+    {
+        return response()->json($service);
+    }
+
+    public function updateService(Request $request, Service $service)
+    {
+        $request->validate([
+            'name' => 'required|string|unique:services,name,' . $service->id,
+            'category_id' => 'nullable|exists:product_categories,id',
+            'subcategory_id' => 'nullable|exists:product_sub_categories,id',
+            'price' => 'nullable|numeric|min:0',
+            'description' => 'nullable|string',
+        ]);
+
+        $service->update($request->all());
+        return back()->with('success', 'Service updated successfully.');
+    }
+
+    public function destroyService(Service $service)
+    {
+        $service->delete();
+        return back()->with('success', 'Service deleted successfully.');
     }
 
     public function getSubCategories(ProductCategory $category)

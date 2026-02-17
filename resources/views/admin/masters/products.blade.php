@@ -53,7 +53,7 @@
 </div>
 
 <!-- Add Product Modal -->
-<div id="addProductModal" style="display:none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5);">
+<div id="addProductModal" style="display:none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); overflow-y: auto;">
     <div style="background: white; width: 500px; margin: 5% auto; padding: 2rem; border-radius: 0.5rem;">
         <h3 style="margin-top:0;">Add New Product</h3>
         <form action="{{ route('admin.products.store') }}" method="POST">
@@ -85,7 +85,14 @@
             </div>
             <div class="form-group">
                 <label class="form-label">Description</label>
-                <textarea name="description" class="form-control" rows="3"></textarea>
+                <textarea name="description" id="add_description" class="form-control" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Status</label>
+                <select name="status" class="form-control">
+                    <option value="1" selected>Active</option>
+                    <option value="0">Inactive</option>
+                </select>
             </div>
             <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
                 <button type="submit" class="btn btn-primary" style="flex:1;">Add Product</button>
@@ -96,7 +103,7 @@
 </div>
 
 <!-- Edit Product Modal -->
-<div id="editProductModal" style="display:none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5);">
+<div id="editProductModal" style="display:none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); overflow-y: auto;">
     <div style="background: white; width: 500px; margin: 5% auto; padding: 2rem; border-radius: 0.5rem;">
         <h3 style="margin-top:0;">Edit Product</h3>
         <form id="editProductForm" method="POST">
@@ -147,7 +154,12 @@
 </div>
 
 @section('scripts')
+<script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
 <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        CKEDITOR.replace('add_description');
+        CKEDITOR.replace('edit_description');
+    });
     function fetchSubCategories(categoryId, type, selectedSubCategoryId = null) {
         const subCategorySelect = document.getElementById(`${type}_sub_category_id`);
         subCategorySelect.innerHTML = '<option value="">Loading...</option>';
@@ -184,7 +196,9 @@
                 document.getElementById('edit_name').value = data.name;
                 document.getElementById('edit_category_id').value = data.category_id;
                 document.getElementById('edit_price').value = data.price;
-                document.getElementById('edit_description').value = data.description || '';
+                if (CKEDITOR.instances['edit_description']) {
+                    CKEDITOR.instances['edit_description'].setData(data.description || '');
+                }
                 document.getElementById('edit_status').value = data.status;
                 
                 // Fetch subcategories and select the current one

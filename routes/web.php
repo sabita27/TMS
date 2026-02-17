@@ -80,6 +80,15 @@ Route::middleware(['auth'])->group(function () {
             Route::put('/projects/{project}', 'updateProject')->name('admin.projects.update');
             Route::delete('/projects/{project}', 'destroyProject')->name('admin.projects.delete');
         });
+
+        // Services
+        Route::controller(MasterController::class)->group(function () {
+            Route::get('/services', 'services')->name('admin.services');
+            Route::post('/services', 'storeService')->name('admin.services.store');
+            Route::get('/services/{service}/edit', 'editService')->name('admin.services.edit');
+            Route::put('/services/{service}', 'updateService')->name('admin.services.update');
+            Route::delete('/services/{service}', 'destroyService')->name('admin.services.delete');
+        });
         
         Route::get('/products', [MasterController::class, 'products'])->name('admin.products');
         Route::post('/products', [MasterController::class, 'storeProduct'])->name('admin.products.store');
