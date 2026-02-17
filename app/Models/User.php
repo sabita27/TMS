@@ -7,17 +7,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Models\Role;
-
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
     protected $fillable = [
         'name',
         'email',
@@ -32,7 +26,7 @@ class User extends Authenticatable
      *
      * @var array
      */
-    protected $with = ['role'];
+    protected $with = ['role', 'client_detail'];
 
     /**
      * Get the role associated with the user.
@@ -45,6 +39,11 @@ class User extends Authenticatable
     public function staff_detail()
     {
         return $this->hasOne(StaffDetail::class);
+    }
+
+    public function client_detail()
+    {
+        return $this->hasOne(ClientDetail::class);
     }
 
     /**

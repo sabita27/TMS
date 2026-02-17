@@ -98,6 +98,24 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/subcategories/{subcategory}/edit', [MasterController::class, 'editSubCategory'])->name('admin.subcategories.edit');
         Route::put('/subcategories/{subcategory}', [MasterController::class, 'updateSubCategory'])->name('admin.subcategories.update');
         Route::delete('/subcategories/{subcategory}', [MasterController::class, 'destroySubCategory'])->name('admin.subcategories.delete');
+
+        // Ticket Statuses
+        Route::controller(MasterController::class)->group(function () {
+            Route::get('/ticket-statuses', 'ticketStatuses')->name('admin.ticket_statuses');
+            Route::post('/ticket-statuses', 'storeTicketStatus')->name('admin.ticket_statuses.store');
+            Route::get('/ticket-statuses/{status}/edit', 'editTicketStatus')->name('admin.ticket_statuses.edit');
+            Route::put('/ticket-statuses/{status}', 'updateTicketStatus')->name('admin.ticket_statuses.update');
+            Route::delete('/ticket-statuses/{status}', 'destroyTicketStatus')->name('admin.ticket_statuses.delete');
+        });
+
+        // Ticket Priorities
+        Route::controller(MasterController::class)->group(function () {
+            Route::get('/ticket-priorities', 'ticketPriorities')->name('admin.ticket_priorities');
+            Route::post('/ticket-priorities', 'storeTicketPriority')->name('admin.ticket_priorities.store');
+            Route::get('/ticket-priorities/{priority}/edit', 'editTicketPriority')->name('admin.ticket_priorities.edit');
+            Route::put('/ticket-priorities/{priority}', 'updateTicketPriority')->name('admin.ticket_priorities.update');
+            Route::delete('/ticket-priorities/{priority}', 'destroyTicketPriority')->name('admin.ticket_priorities.delete');
+        });
     });
 
     // User Routes

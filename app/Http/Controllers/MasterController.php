@@ -7,6 +7,8 @@ use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\ProductSubCategory;
 use App\Models\Project;
+use App\Models\TicketStatus;
+use App\Models\TicketPriority;
 use Illuminate\Http\Request;
 
 class MasterController extends Controller
@@ -216,20 +218,27 @@ class MasterController extends Controller
 
     public function getSubCategories(ProductCategory $category)
     {
-        return response()->json($category->subCategories);
+        return response()->json($category->subCategories()->get());
     }
 
     // Projects
     public function projects()
     {
-        $projects = Project::latest()->paginate(10);
-        return view('admin.masters.projects', compact('projects'));
+        $projects = Project::with(['category', 'subcategory', 'projectStatus', 'priority'])->latest()->paginate(10);
+        $categories = ProductCategory::where('status', true)->get();
+        $statuses = TicketStatus::where('status', true)->get();
+        $priorities = TicketPriority::where('status', true)->get();
+        return view('admin.masters.projects', compact('projects', 'categories', 'statuses', 'priorities'));
     }
 
     public function storeProject(Request $request)
     {
         $request->validate([
             'name' => 'required|string|max:255|unique:projects',
+            'category_id' => 'nullable|exists:product_categories,id',
+            'subcategory_id' => 'nullable|exists:product_sub_categories,id',
+            'status_id' => 'nullable|exists:ticket_statuses,id',
+            'priority_id' => 'nullable|exists:ticket_priorities,id',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date',
             'description' => 'nullable|string',
@@ -256,6 +265,10 @@ class MasterController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255|unique:projects,name,' . $project->id,
+            'category_id' => 'nullable|exists:product_categories,id',
+            'subcategory_id' => 'nullable|exists:product_sub_categories,id',
+            'status_id' => 'nullable|exists:ticket_statuses,id',
+            'priority_id' => 'nullable|exists:ticket_priorities,id',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date',
             'description' => 'nullable|string',
@@ -277,5 +290,81 @@ class MasterController extends Controller
     {
         $project->delete();
         return back()->with('success', 'Project deleted successfully.');
+    }
+
+    // Ticket Statuses
+    public function ticketStatuses()
+    {
+        $statuses = TicketStatus::latest()->paginate(10);
+        return view('admin.masters.ticket_statuses', compact('statuses'));
+    }
+
+    public function storeTicketStatus(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|unique:ticket_statuses',
+            'color' => 'required|string|max:7'
+        ]);
+        TicketStatus::create($request->all());
+        return back()->with('success', 'Ticket Status added successfully.');
+    }
+
+    public function editTicketStatus(TicketStatus $status)
+    {
+        return response()->json($status);
+    }
+
+    public function updateTicketStatus(Request $request, TicketStatus $status)
+    {
+        $request->validate([
+            'name' => 'required|string|unique:ticket_statuses,name,' . $status->id,
+            'color' => 'required|string|max:7'
+        ]);
+        $status->update($request->all());
+        return back()->with('success', 'Ticket Status updated successfully.');
+    }
+
+    public function destroyTicketStatus(TicketStatus $status)
+    {
+        $status->delete();
+        return back()->with('success', 'Ticket Status deleted successfully.');
+    }
+
+    // Ticket Priorities
+    public function ticketPriorities()
+    {
+        $priorities = TicketPriority::latest()->paginate(10);
+        return view('admin.masters.ticket_priorities', compact('priorities'));
+    }
+
+    public function storeTicketPriority(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|unique:ticket_priorities',
+            'color' => 'required|string|max:7'
+        ]);
+        TicketPriority::create($request->all());
+        return back()->with('success', 'Ticket Priority added successfully.');
+    }
+
+    public function editTicketPriority(TicketPriority $priority)
+    {
+        return response()->json($priority);
+    }
+
+    public function updateTicketPriority(Request $request, TicketPriority $priority)
+    {
+        $request->validate([
+            'name' => 'required|string|unique:ticket_priorities,name,' . $priority->id,
+            'color' => 'required|string|max:7'
+        ]);
+        $priority->update($request->all());
+        return back()->with('success', 'Ticket Priority updated successfully.');
+    }
+
+    public function destroyTicketPriority(TicketPriority $priority)
+    {
+        $priority->delete();
+        return back()->with('success', 'Ticket Priority deleted successfully.');
     }
 }

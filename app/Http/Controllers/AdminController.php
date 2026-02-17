@@ -32,10 +32,11 @@ class AdminController extends Controller
 
     public function users()
     {
-        $users = User::with(['role', 'staff_detail.designation', 'staff_detail.position'])->latest()->paginate(10);
+        $users = User::with(['role', 'staff_detail.designation', 'staff_detail.position', 'client_detail.client'])->latest()->paginate(10);
         $roles = \App\Models\Role::all();
         $designations = \App\Models\Designation::where('status', true)->get();
-        return view('admin.users', compact('users', 'roles', 'designations'));
+        $clients = \App\Models\Client::where('status', true)->get();
+        return view('admin.users', compact('users', 'roles', 'designations', 'clients'));
     }
 
     public function storeUser(Request $request)
@@ -49,12 +50,20 @@ class AdminController extends Controller
         ]);
 
         $role = Role::find($request->role_id);
-        $isStaff = ($role && strtolower($role->name) == 'staff');
+        $roleName = strtolower($role->name);
+        $isStaff = ($roleName == 'staff');
+        $isUser = ($roleName == 'user');
 
         if ($isStaff) {
             $request->validate([
                 'designation_id' => 'required|exists:designations,id',
                 'position_id' => 'required|exists:positions,id',
+            ]);
+        }
+
+        if ($isUser) {
+            $request->validate([
+                'client_id' => 'required|exists:clients,id',
             ]);
         }
 
@@ -73,12 +82,18 @@ class AdminController extends Controller
             ]);
         }
 
+        if ($isUser) {
+            $user->client_detail()->create([
+                'client_id' => $request->client_id,
+            ]);
+        }
+
         return back()->with('success', 'User created successfully.');
     }
 
     public function editUser(User $user)
     {
-        $user->load('staff_detail');
+        $user->load(['staff_detail.designation', 'staff_detail.position', 'client_detail.client']);
         return response()->json($user);
     }
 
@@ -92,6 +107,24 @@ class AdminController extends Controller
             'status' => 'required|in:0,1',
         ]);
 
+        $role = Role::find($request->role_id);
+        $roleName = strtolower($role->name);
+        $isStaff = ($roleName == 'staff');
+        $isUser = ($roleName == 'user');
+
+        if ($isStaff) {
+            $request->validate([
+                'designation_id' => 'required|exists:designations,id',
+                'position_id' => 'required|exists:positions,id',
+            ]);
+        }
+
+        if ($isUser) {
+            $request->validate([
+                'client_id' => 'required|exists:clients,id',
+            ]);
+        }
+
         $user->update([
             'name' => $request->name,
             'email' => $request->email,
@@ -104,16 +137,6 @@ class AdminController extends Controller
             $user->update(['password' => Hash::make($request->password)]);
         }
 
-        $role = Role::find($request->role_id);
-        $isStaff = ($role && strtolower($role->name) == 'staff');
-
-        if ($isStaff) {
-            $request->validate([
-                'designation_id' => 'required|exists:designations,id',
-                'position_id' => 'required|exists:positions,id',
-            ]);
-        }
-
         if ($isStaff) {
             $user->staff_detail()->updateOrCreate(
                 ['user_id' => $user->id],
@@ -122,9 +145,18 @@ class AdminController extends Controller
                     'position_id' => $request->position_id,
                 ]
             );
-        } else {
-            // Remove staff detail if role is no longer staff
+            $user->client_detail()->delete();
+        } elseif ($isUser) {
+            $user->client_detail()->updateOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'client_id' => $request->client_id,
+                ]
+            );
             $user->staff_detail()->delete();
+        } else {
+            $user->staff_detail()->delete();
+            $user->client_detail()->delete();
         }
 
         return back()->with('success', 'User updated successfully.');

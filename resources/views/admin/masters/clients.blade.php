@@ -10,7 +10,7 @@
     </div>
 
     @if($errors->any())
-    <div style="background: #fee2e2; border: 1px solid #ef4444; color: #b91c1c; padding: 1rem; border-radius: 0.5rem; margin-bottom: 2rem;">
+    <div class="alert-message" style="background: #fee2e2; border: 1px solid #ef4444; color: #b91c1c; padding: 1rem; border-radius: 0.5rem; margin-bottom: 2rem; transition: opacity 0.5s ease-out;">
         <ul style="margin: 0; padding-left: 1.5rem;">
             @foreach($errors->all() as $error)
                 <li>{{ $error }}</li>
@@ -385,16 +385,26 @@
 @section('scripts')
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-<script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
+<script src="https://cdn.ckeditor.com/ckeditor5/41.1.0/classic/ckeditor.js"></script>
 <script>
     let addEditor, editEditor;
 
     $(document).ready(function() {
-        // Initialize CKEditor
-        CKEDITOR.replace('add_project_description');
-        CKEDITOR.replace('edit_project_description');
+        // Initialize CKEditor 5
+        ClassicEditor
+            .create(document.querySelector('#add_project_description'), {
+                toolbar: [ 'heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote' ],
+            })
+            .then(editor => { addEditor = editor; })
+            .catch(error => { console.error(error); });
 
-        // Initialize Select2 for Add Modal
+        ClassicEditor
+            .create(document.querySelector('#edit_project_description'), {
+                toolbar: [ 'heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote' ],
+            })
+            .then(editor => { editEditor = editor; })
+            .catch(error => { console.error(error); });
+
         // Initialize Select2 with improved visibility
         const select2Options = {
             allowClear: true,
@@ -466,8 +476,8 @@
                 document.getElementById('edit_project_end_date').value = data.project_end_date ? data.project_end_date.split('T')[0] : '';
                 
                 // Set CKEditor content
-                if (CKEDITOR.instances['edit_project_description']) {
-                    CKEDITOR.instances['edit_project_description'].setData(data.project_description || '');
+                if (editEditor) {
+                    editEditor.setData(data.project_description || '');
                 }
 
                 document.getElementById('edit_remarks').value = data.remarks || '';
@@ -486,5 +496,10 @@
             });
     }
 </script>
-@endsection
+
+<style>
+    .ck-editor__editable_inline {
+        min-height: 200px;
+    }
+</style>
 @endsection
