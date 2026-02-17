@@ -23,11 +23,38 @@ class AdminController extends Controller
             'clients' => Client::count(),
             'tickets' => Ticket::count(),
             'open_tickets' => Ticket::where('status', 'open')->count(),
+            'closed_tickets' => Ticket::where('status', 'closed')->count(),
+            'categories' => \App\Models\ProductCategory::count(),
+            'agents' => User::whereHas('role', function($q) { $q->where('name', 'staff'); })->count(),
         ];
+
+        // Stats for Charts
+        $tickets_by_status = Ticket::select('status', \DB::raw('count(*) as count'))
+            ->groupBy('status')
+            ->pluck('count', 'status');
+
+        $tickets_by_priority = Ticket::select('priority', \DB::raw('count(*) as count'))
+            ->groupBy('priority')
+            ->pluck('count', 'priority');
+
+        $tickets_by_category = Ticket::join('product_categories', 'tickets.category_id', '=', 'product_categories.id')
+            ->select('product_categories.name', \DB::raw('count(*) as count'))
+            ->groupBy('product_categories.name')
+            ->pluck('count', 'name');
+
+        $tickets_by_agent = User::whereHas('role', function($q) { $q->where('name', 'staff'); })
+            ->withCount('assignedTickets')
+            ->pluck('assigned_tickets_count', 'name');
+
+        $tickets_this_year = Ticket::whereYear('created_at', date('Y'))
+            ->select(\DB::raw('MONTH(created_at) as month'), \DB::raw('count(*) as count'))
+            ->groupBy('month')
+            ->orderBy('month')
+            ->pluck('count', 'month');
         
         $recent_tickets = Ticket::with(['user', 'product'])->latest()->take(5)->get();
 
-        return view('admin.dashboard', compact('stats', 'recent_tickets'));
+        return view('admin.dashboard', compact('stats', 'recent_tickets', 'tickets_by_status', 'tickets_by_priority', 'tickets_by_category', 'tickets_by_agent', 'tickets_this_year'));
     }
 
     public function users()
