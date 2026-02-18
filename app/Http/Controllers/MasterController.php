@@ -10,10 +10,50 @@ use App\Models\Project;
 use App\Models\TicketStatus;
 use App\Models\TicketPriority;
 use App\Models\Service;
+use App\Models\Role;
+use App\Models\Designation;
+use App\Models\Position;
 use Illuminate\Http\Request;
 
 class MasterController extends Controller
 {
+    // Setup (Unified View)
+    public function setup(Request $request)
+    {
+        $type = $request->query('type', 'category');
+        $data = [];
+
+        switch ($type) {
+            case 'global':
+                // Placeholder for global settings
+                break;
+            case 'role':
+                $data['roles'] = Role::latest()->get();
+                break;
+            case 'designation':
+                $data['designations'] = Designation::latest()->get();
+                break;
+            case 'position':
+                $data['positions'] = Position::latest()->get();
+                break;
+            case 'category':
+                $data['categories'] = ProductCategory::with('subCategories')->latest()->get();
+                break;
+            case 'subcategory':
+                $data['subcategories'] = ProductSubCategory::with('category')->latest()->get();
+                $data['categories'] = ProductCategory::all();
+                break;
+            case 'status':
+                $data['statuses'] = TicketStatus::latest()->get();
+                break;
+            case 'priority':
+                $data['priorities'] = TicketPriority::latest()->get();
+                break;
+        }
+
+        return view('admin.masters.setup', compact('type', 'data'));
+    }
+
     // Clients
     public function clients()
     {

@@ -125,6 +125,9 @@ Route::middleware(['auth'])->group(function () {
             Route::put('/ticket-priorities/{priority}', 'updateTicketPriority')->name('admin.ticket_priorities.update');
             Route::delete('/ticket-priorities/{priority}', 'destroyTicketPriority')->name('admin.ticket_priorities.delete');
         });
+
+        // Unified Setup
+        Route::get('/setup', [MasterController::class, 'setup'])->name('admin.setup');
     });
 
     // User Routes

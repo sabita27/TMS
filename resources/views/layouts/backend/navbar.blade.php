@@ -20,12 +20,6 @@
             <a href="{{ route('admin.users') }}" class="nav-item-link {{ $curr == 'admin.users' ? 'active' : '' }}">
                 <i class="fas fa-users-cog"></i> User Master
             </a>
-            <a href="{{ route('admin.categories') }}" class="nav-item-link {{ str_contains($curr, 'admin.categories') ? 'active' : '' }}">
-                <i class="fas fa-tags"></i> Categories
-            </a>
-            <a href="{{ route('admin.subcategories') }}" class="nav-item-link {{ str_contains($curr, 'admin.subcategories') ? 'active' : '' }}">
-                <i class="fas fa-layer-group"></i> Sub-Categories
-            </a>
             <a href="{{ route('admin.products') }}" class="nav-item-link {{ str_contains($curr, 'admin.products') ? 'active' : '' }}">
                 <i class="fas fa-box-open"></i> Product Master
             </a>
@@ -39,29 +33,10 @@
                 <i class="fas fa-concierge-bell"></i> Service Master
             </a>
 
-            <a href="#" onclick="toggleSettingsMenu(event)" class="nav-item-link {{ (str_contains($curr, 'admin.roles') || str_contains($curr, 'admin.designations') || str_contains($curr, 'admin.positions') || str_contains($curr, 'admin.ticket_statuses') || str_contains($curr, 'admin.ticket_priorities')) ? 'active' : '' }}" style="justify-content: space-between;">
-                <div style="display: flex; align-items: center; gap: 0.75rem;">
-                    <i class="fas fa-cogs"></i> Settings
-                </div>
-                <i class="fas fa-chevron-down" style="font-size: 0.8rem; transition: transform 0.3s;" id="settings-arrow"></i>
+            <div class="nav-label">SYSTEM</div>
+            <a href="{{ route('admin.setup') }}" class="nav-item-link {{ str_contains($curr, 'admin.setup') ? 'active' : '' }}">
+                <i class="fas fa-tools"></i> Setup Hub
             </a>
-            <div id="settings-submenu" style="display: {{ (str_contains($curr, 'admin.roles') || str_contains($curr, 'admin.designations') || str_contains($curr, 'admin.positions') || str_contains($curr, 'admin.ticket_statuses') || str_contains($curr, 'admin.ticket_priorities')) ? 'block' : 'none' }}; background: rgba(0,0,0,0.2);">
-                <a href="{{ route('admin.roles') }}" class="nav-item-link" style="padding-left: 3rem; font-size: 0.85rem; {{ str_contains($curr, 'admin.roles') ? 'color: #fff;' : '' }}">
-                    <i class="fas fa-user-shield" style="font-size: 0.9rem;"></i> Role
-                </a>
-                <a href="{{ route('admin.designations') }}" class="nav-item-link" style="padding-left: 3rem; font-size: 0.85rem; {{ str_contains($curr, 'admin.designations') ? 'color: #fff;' : '' }}">
-                    <i class="fas fa-id-badge" style="font-size: 0.9rem;"></i> Designation
-                </a>
-                <a href="{{ route('admin.positions') }}" class="nav-item-link" style="padding-left: 3rem; font-size: 0.85rem; {{ str_contains($curr, 'admin.positions') ? 'color: #fff;' : '' }}">
-                    <i class="fas fa-chair" style="font-size: 0.9rem;"></i> Position
-                </a>
-                <a href="{{ route('admin.ticket_statuses') }}" class="nav-item-link" style="padding-left: 3rem; font-size: 0.85rem; {{ str_contains($curr, 'admin.ticket_statuses') ? 'color: #fff;' : '' }}">
-                    <i class="fas fa-info-circle" style="font-size: 0.9rem;"></i> Ticket Status
-                </a>
-                <a href="{{ route('admin.ticket_priorities') }}" class="nav-item-link" style="padding-left: 3rem; font-size: 0.85rem; {{ str_contains($curr, 'admin.ticket_priorities') ? 'color: #fff;' : '' }}">
-                    <i class="fas fa-flag" style="font-size: 0.9rem;"></i> Ticket Priority
-                </a>
-            </div>
 
         @elseif(optional(Auth::user()->role)->name == 'user')
             <div class="nav-label">MAIN</div>
