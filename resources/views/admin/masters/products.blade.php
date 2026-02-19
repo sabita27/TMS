@@ -55,7 +55,12 @@
 <!-- Add Product Modal -->
 <div id="addProductModal" style="display:none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); overflow-y: auto;">
     <div style="background: white; width: 500px; margin: 5% auto; padding: 2rem; border-radius: 0.5rem;">
-        <h3 style="margin-top:0;">Add New Product</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid #eee; padding-bottom: 1rem;">
+            <h3 style="margin: 0;">Add New Product</h3>
+            <button type="button" onclick="document.getElementById('addProductModal').style.display='none'" style="background: none; border: none; font-size: 1.25rem; color: #94a3b8; cursor: pointer;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
         <form action="{{ route('admin.products.store') }}" method="POST">
             @csrf
             <div class="form-group">
@@ -96,7 +101,6 @@
             </div>
             <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
                 <button type="submit" class="btn btn-primary" style="flex:1;">Add Product</button>
-                <button type="button" onclick="document.getElementById('addProductModal').style.display='none'" class="btn" style="flex:1; background: #e5e7eb;">Cancel</button>
             </div>
         </form>
     </div>
@@ -105,7 +109,12 @@
 <!-- Edit Product Modal -->
 <div id="editProductModal" style="display:none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); overflow-y: auto;">
     <div style="background: white; width: 500px; margin: 5% auto; padding: 2rem; border-radius: 0.5rem;">
-        <h3 style="margin-top:0;">Edit Product</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid #eee; padding-bottom: 1rem;">
+            <h3 style="margin: 0;">Edit Product</h3>
+            <button type="button" onclick="document.getElementById('editProductModal').style.display='none'" style="background: none; border: none; font-size: 1.25rem; color: #94a3b8; cursor: pointer;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
         <form id="editProductForm" method="POST">
             @csrf
             @method('PUT')
@@ -147,7 +156,6 @@
             </div>
             <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
                 <button type="submit" class="btn btn-primary" style="flex:1;">Update Product</button>
-                <button type="button" onclick="document.getElementById('editProductModal').style.display='none'" class="btn" style="flex:1; background: #e5e7eb;">Cancel</button>
             </div>
         </form>
     </div>

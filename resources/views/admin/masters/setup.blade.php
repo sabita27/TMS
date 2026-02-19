@@ -1,7 +1,7 @@
 @extends('layouts.backend.master')
 
 @section('content')
-<div class="setup-container">
+<div class="setup-container" style="margin-bottom: 2rem;">
     <div style="margin-bottom: 2rem;">
         @php
             $displayType = $type;
@@ -23,7 +23,7 @@
         </nav>
     </div>
 
-    <div style="display: grid; grid-template-columns: 280px 1fr; gap: 2rem; align-items: stretch;">
+    <div style="display: grid; grid-template-columns: 280px 1fr; gap: 2rem; align-items: stretch; min-height: 600px;">
         <!-- Internal Sidebar -->
         <div style="background: white; border-radius: 1.25rem; padding: 1.5rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.04); border: 1px solid #f1f5f9; height: 100%;">
             <div style="display: flex; flex-direction: column; gap: 0.5rem;">
@@ -95,8 +95,8 @@
         </div>
 
         <!-- Content Area (Table Design) -->
-        <div style="background: white; border-radius: 1.25rem; padding: 2rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.04); border: 1px solid #f1f5f9; min-height: 500px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <div style="background: white; border-radius: 1.25rem; padding: 2rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.04); border: 1px solid #f1f5f9; min-height: 500px; height: 100%;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding: 0 1.5rem;">
                 <h2 style="margin: 0; font-size: 1.5rem; font-weight: 700; color: #1e293b;">
                     @if($type == 'global') Global Settings @elseif($type == 'role') Roles @elseif($type == 'designation') Designations @elseif($type == 'position') Positions @elseif($type == 'category') Product Categories @elseif($type == 'subcategory') Sub-Categories @elseif($type == 'priority') Ticket Priorities @else Ticket Statuses @endif
                 </h2>
@@ -217,6 +217,17 @@
                                                 <h4 style="margin: 0 0 2rem; padding-bottom: 1rem; border-bottom: 1px solid #f1f5f9; font-size: 1.1rem; color: #1e293b; display: flex; align-items: center; gap: 0.75rem;">
                                                     <i class="fas fa-envelope-open-text" style="color: #6366f1; background: #eef2ff; padding: 0.5rem; border-radius: 0.5rem;"></i> Mail Configuration (SMTP)
                                                 </h4>
+
+                                                {{-- Gmail Help Notice --}}
+                                                <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 0.75rem; padding: 1rem 1.25rem; margin-bottom: 1.5rem; display: flex; gap: 0.75rem; align-items: flex-start;">
+                                                    <i class="fas fa-info-circle" style="color: #3b82f6; margin-top: 2px; flex-shrink: 0;"></i>
+                                                    <div style="font-size: 0.85rem; color: #1d4ed8; line-height: 1.6;">
+                                                        <strong>Gmail Users:</strong> Use <code style="background:#dbeafe; padding:1px 5px; border-radius:3px;">smtp.gmail.com</code> as host, port <code style="background:#dbeafe; padding:1px 5px; border-radius:3px;">587</code>, encryption <code style="background:#dbeafe; padding:1px 5px; border-radius:3px;">TLS</code>.
+                                                        The <strong>Username</strong> must be your <strong>Gmail address</strong> and the <strong>Password</strong> must be a <strong>16-digit App Password</strong>
+                                                        (not your regular password) — generate one at <a href="https://myaccount.google.com/apppasswords" target="_blank" style="color:#2563eb;">myaccount.google.com/apppasswords</a>.
+                                                    </div>
+                                                </div>
+
                                                 <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;">
                                                     <div class="form-group">
                                                         <label class="form-label">Mail Host</label>
@@ -229,21 +240,25 @@
                                                     <div class="form-group">
                                                         <label class="form-label">Mail Encryption</label>
                                                         <select name="mail_encryption" class="form-control">
-                                                            <option value="tls" {{ ($data['settings']['mail_encryption'] ?? '') == 'tls' ? 'selected' : '' }}>TLS</option>
+                                                            <option value="tls" {{ ($data['settings']['mail_encryption'] ?? 'tls') == 'tls' ? 'selected' : '' }}>TLS (Recommended)</option>
                                                             <option value="ssl" {{ ($data['settings']['mail_encryption'] ?? '') == 'ssl' ? 'selected' : '' }}>SSL</option>
                                                         </select>
                                                     </div>
                                                     <div class="form-group">
-                                                        <label class="form-label">Username</label>
-                                                        <input type="text" name="mail_username" class="form-control" value="{{ $data['settings']['mail_username'] ?? '' }}" placeholder="info@company.com">
+                                                        <label class="form-label">Username <small style="color:#94a3b8;">(Gmail address)</small></label>
+                                                        <input type="email" name="mail_username" class="form-control" value="{{ $data['settings']['mail_username'] ?? '' }}" placeholder="yourname@gmail.com">
                                                     </div>
                                                     <div class="form-group">
-                                                        <label class="form-label">Password</label>
-                                                        <input type="password" name="mail_password" class="form-control" value="{{ $data['settings']['mail_password'] ?? '' }}" placeholder="********">
+                                                        <label class="form-label">App Password <small style="color:#94a3b8;">(16 chars)</small></label>
+                                                        <input type="password" name="mail_password" class="form-control" value="{{ $data['settings']['mail_password'] ?? '' }}" placeholder="xxxx xxxx xxxx xxxx" autocomplete="new-password">
                                                     </div>
                                                     <div class="form-group">
-                                                        <label class="form-label">From Address</label>
-                                                        <input type="email" name="mail_from_address" class="form-control" value="{{ $data['settings']['mail_from_address'] ?? '' }}" placeholder="noreply@company.com">
+                                                        <label class="form-label">From Address <small style="color:#94a3b8;">(sender email)</small></label>
+                                                        <input type="email" name="mail_from_address" class="form-control" value="{{ $data['settings']['mail_from_address'] ?? '' }}" placeholder="noreply@yourcompany.com">
+                                                    </div>
+                                                    <div class="form-group" style="grid-column: span 3;">
+                                                        <label class="form-label">From Name <small style="color:#94a3b8;">(shown to recipients)</small></label>
+                                                        <input type="text" name="mail_from_name" class="form-control" value="{{ $data['settings']['mail_from_name'] ?? config('app.name') }}" placeholder="TMS PROD Support">
                                                     </div>
                                                 </div>
                                             </div>
@@ -390,7 +405,12 @@
 <!-- All Modals -->
 <div id="roleModal" class="modal-overlay">
     <div class="modal-content">
-        <h3 id="roleModalTitle" class="modal-title">Add Role</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h3 id="roleModalTitle" class="modal-title" style="margin: 0;">Add Role</h3>
+            <button type="button" onclick="closeModal('roleModal')" style="background: none; border: none; font-size: 1.25rem; color: #94a3b8; cursor: pointer;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
         <form id="roleForm" action="{{ route('admin.roles.store') }}" method="POST">
             @csrf
             <input type="hidden" name="_method" id="roleMethod" value="POST">
@@ -399,7 +419,6 @@
                 <input type="text" name="name" id="roleName" class="form-control" required placeholder="Manager, Staff, etc...">
             </div>
             <div class="modal-actions">
-                <button type="button" onclick="closeModal('roleModal')" class="btn-cancel">Cancel</button>
                 <button type="submit" class="btn-save">Save changes</button>
             </div>
         </form>
@@ -408,7 +427,12 @@
 
 <div id="designationModal" class="modal-overlay">
     <div class="modal-content">
-        <h3 id="designationModalTitle" class="modal-title">Add Designation</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h3 id="designationModalTitle" class="modal-title" style="margin: 0;">Add Designation</h3>
+            <button type="button" onclick="closeModal('designationModal')" style="background: none; border: none; font-size: 1.25rem; color: #94a3b8; cursor: pointer;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
         <form id="designationForm" action="{{ route('admin.designations.store') }}" method="POST">
             @csrf
             <input type="hidden" name="_method" id="designationMethod" value="POST">
@@ -417,7 +441,6 @@
                 <input type="text" name="name" id="designationName" class="form-control" required placeholder="Senior Developer, HR Manager, etc...">
             </div>
             <div class="modal-actions">
-                <button type="button" onclick="closeModal('designationModal')" class="btn-cancel">Cancel</button>
                 <button type="submit" class="btn-save">Save changes</button>
             </div>
         </form>
@@ -426,7 +449,12 @@
 
 <div id="positionModal" class="modal-overlay">
     <div class="modal-content">
-        <h3 id="positionModalTitle" class="modal-title">Add Position</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h3 id="positionModalTitle" class="modal-title" style="margin: 0;">Add Position</h3>
+            <button type="button" onclick="closeModal('positionModal')" style="background: none; border: none; font-size: 1.25rem; color: #94a3b8; cursor: pointer;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
         <form id="positionForm" action="{{ route('admin.positions.store') }}" method="POST">
             @csrf
             <input type="hidden" name="_method" id="positionMethod" value="POST">
@@ -435,7 +463,6 @@
                 <input type="text" name="name" id="positionName" class="form-control" required placeholder="Floor 1 - Desk 4, etc...">
             </div>
             <div class="modal-actions">
-                <button type="button" onclick="closeModal('positionModal')" class="btn-cancel">Cancel</button>
                 <button type="submit" class="btn-save">Save changes</button>
             </div>
         </form>
@@ -444,7 +471,12 @@
 
 <div id="categoryModal" class="modal-overlay">
     <div class="modal-content">
-        <h3 id="categoryModalTitle" class="modal-title">Add Category</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h3 id="categoryModalTitle" class="modal-title" style="margin: 0;">Add Category</h3>
+            <button type="button" onclick="closeModal('categoryModal')" style="background: none; border: none; font-size: 1.25rem; color: #94a3b8; cursor: pointer;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
         <form id="categoryForm" action="{{ route('admin.categories.store') }}" method="POST">
             @csrf
             <input type="hidden" name="_method" id="categoryMethod" value="POST">
@@ -453,7 +485,6 @@
                 <input type="text" name="name" id="categoryName" class="form-control" required placeholder="Name...">
             </div>
             <div class="modal-actions">
-                <button type="button" onclick="closeModal('categoryModal')" class="btn-cancel">Cancel</button>
                 <button type="submit" class="btn-save">Save changes</button>
             </div>
         </form>
@@ -462,7 +493,12 @@
 
 <div id="subcategoryModal" class="modal-overlay">
     <div class="modal-content">
-        <h3 id="subcategoryModalTitle" class="modal-title">Add Sub-Category</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h3 id="subcategoryModalTitle" class="modal-title" style="margin: 0;">Add Sub-Category</h3>
+            <button type="button" onclick="closeModal('subcategoryModal')" style="background: none; border: none; font-size: 1.25rem; color: #94a3b8; cursor: pointer;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
         <form id="subcategoryForm" action="{{ route('admin.subcategories.store') }}" method="POST">
             @csrf
             <input type="hidden" name="_method" id="subcategoryMethod" value="POST">
@@ -482,7 +518,6 @@
                 <input type="text" name="name" id="subcategoryName" class="form-control" required placeholder="Name...">
             </div>
             <div class="modal-actions">
-                <button type="button" onclick="closeModal('subcategoryModal')" class="btn-cancel">Cancel</button>
                 <button type="submit" class="btn-save">Save changes</button>
             </div>
         </form>
@@ -491,7 +526,12 @@
 
 <div id="priorityModal" class="modal-overlay">
     <div class="modal-content">
-        <h3 id="priorityModalTitle" class="modal-title">Add Priority</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h3 id="priorityModalTitle" class="modal-title" style="margin: 0;">Add Priority</h3>
+            <button type="button" onclick="closeModal('priorityModal')" style="background: none; border: none; font-size: 1.25rem; color: #94a3b8; cursor: pointer;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
         <form id="priorityForm" method="POST">
             @csrf
             <input type="hidden" name="_method" id="priorityMethod" value="POST">
@@ -504,7 +544,6 @@
                 <input type="color" name="color" id="priorityColor" class="form-control" style="height: 45px;">
             </div>
             <div class="modal-actions">
-                <button type="button" onclick="closeModal('priorityModal')" class="btn-cancel">Cancel</button>
                 <button type="submit" class="btn-save">Save changes</button>
             </div>
         </form>
@@ -513,7 +552,12 @@
 
 <div id="statusModal" class="modal-overlay">
     <div class="modal-content">
-        <h3 id="statusModalTitle" class="modal-title">Add Status</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h3 id="statusModalTitle" class="modal-title" style="margin: 0;">Add Status</h3>
+            <button type="button" onclick="closeModal('statusModal')" style="background: none; border: none; font-size: 1.25rem; color: #94a3b8; cursor: pointer;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
         <form id="statusForm" method="POST">
             @csrf
             <input type="hidden" name="_method" id="statusMethod" value="POST">
@@ -526,7 +570,6 @@
                 <input type="color" name="color" id="statusColor" class="form-control" style="height: 45px;">
             </div>
             <div class="modal-actions">
-                <button type="button" onclick="closeModal('statusModal')" class="btn-cancel">Cancel</button>
                 <button type="submit" class="btn-save">Save changes</button>
             </div>
         </form>
@@ -713,7 +756,7 @@
         from { opacity: 0; transform: scale(0.95) translateY(10px); }
         to { opacity: 1; transform: scale(1) translateY(0); }
     }
-    .modal-title { font-size: 1.25rem; font-weight: 800; color: #0f172a; margin: 0 0 1.5rem; }
+    .modal-title { font-size: 1.25rem; font-weight: 800; color: #0f172a; margin: 0; }
     .form-label { display: block; font-size: 0.875rem; font-weight: 700; color: #475569; margin-bottom: 0.5rem; }
     .form-control {
         width: 100%;

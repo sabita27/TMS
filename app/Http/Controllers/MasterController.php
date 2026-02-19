@@ -16,6 +16,8 @@ use App\Models\Position;
 use App\Models\Setting;
 use App\Models\ClientService;
 use Illuminate\Http\Request;
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception as PHPMailerException;
 
 class MasterController extends Controller
 {
@@ -73,7 +75,9 @@ class MasterController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:clients',
             'phone' => 'required|string',
-            'address' => 'required|string',
+            'address' => 'nullable|string',
+            'country' => 'required|string|max:100',
+            'state' => 'required|string|max:100',
             'business_type' => 'required|string|in:product,project,service,both',
             'product_id' => 'nullable|array',
             'project_id' => 'nullable|array',
@@ -123,7 +127,9 @@ class MasterController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:clients,email,' . $client->id,
             'phone' => 'required|string',
-            'address' => 'required|string',
+            'address' => 'nullable|string',
+            'country' => 'required|string|max:100',
+            'state' => 'required|string|max:100',
             'business_type' => 'required|string|in:product,project,service,both',
             'product_id' => 'nullable|array',
             'project_id' => 'nullable|array',
@@ -165,6 +171,95 @@ class MasterController extends Controller
     {
         $client->delete();
         return back()->with('success', 'Client deleted successfully.');
+    }
+
+    public function sendReminder(ClientService $clientService)
+    {
+        try {
+            // Load relationships
+            $clientService->load('client', 'service');
+
+            if (!$clientService->client || !$clientService->client->email) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Client email address not found. Please update this client with a valid email first.'
+                ], 422);
+            }
+
+            // Load SMTP settings from DB
+            $settings = Setting::whereIn('key', [
+                'mail_host', 'mail_port', 'mail_encryption',
+                'mail_username', 'mail_password', 'mail_from_address', 'mail_from_name'
+            ])->pluck('value', 'key')->toArray();
+
+            // Resolve values — default to Gmail if host not saved
+            $smtpHost       = !empty($settings['mail_host'])         ? trim($settings['mail_host'])         : 'smtp.gmail.com';
+            $smtpPort       = !empty($settings['mail_port'])         ? (int) $settings['mail_port']         : 587;
+            $smtpEncryption = !empty($settings['mail_encryption'])   ? strtolower(trim($settings['mail_encryption'])) : 'tls';
+            $smtpPassword   = $settings['mail_password']  ?? null;
+            $fromAddress    = !empty($settings['mail_from_address']) ? trim($settings['mail_from_address']) : null;
+            $fromName       = !empty($settings['mail_from_name'])    ? trim($settings['mail_from_name'])    : config('app.name');
+            // For Gmail: auth username must be the sender email address
+            $smtpUsername   = $fromAddress ?? (!empty($settings['mail_username']) ? trim($settings['mail_username']) : null);
+
+            if (empty($smtpUsername) || empty($smtpPassword)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'SMTP not configured. Please set credentials in Setup Hub → SMTP Setting.'
+                ], 422);
+            }
+
+            // Render the Blade email template to HTML string
+            $html = view('emails.service_reminder', [
+                'clientService' => $clientService
+            ])->render();
+
+            // Build PHPMailer instance
+            $mail = new PHPMailer(true);
+            $mail->isSMTP();
+            $mail->Host       = $smtpHost;
+            $mail->Port       = $smtpPort;
+            $mail->SMTPAuth   = true;
+            $mail->Username   = $smtpUsername;
+            $mail->Password   = $smtpPassword;
+
+            // Encryption
+            if ($smtpEncryption === 'ssl') {
+                $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+            } else {
+                $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            }
+
+            // Sender & Recipient
+            $mail->setFrom($fromAddress ?? $smtpUsername, $fromName);
+            $mail->addAddress($clientService->client->email, $clientService->client->name);
+
+            // Email content
+            $mail->isHTML(true);
+            $mail->Subject = 'Service Renewal Reminder: ' . ($clientService->service->name ?? 'Your Service');
+            $mail->Body    = $html;
+            $mail->AltBody = strip_tags(str_replace(['<br>', '<br/>'], "\n", $html));
+
+            $mail->send();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Reminder sent successfully to ' . $clientService->client->email
+            ]);
+
+        } catch (PHPMailerException $e) {
+            \Log::error('PHPMailer Error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Mail error: ' . $e->getMessage()
+            ], 500);
+        } catch (\Exception $e) {
+            \Log::error('Reminder Error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     // Categories

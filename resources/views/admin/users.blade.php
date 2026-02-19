@@ -81,7 +81,12 @@
 <!-- Add User Modal -->
 <div id="addUserModal" style="display:none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); overflow-y: auto;">
     <div style="background: white; width: 400px; margin: 2rem auto; padding: 2rem; border-radius: 0.5rem; position: relative;">
-        <h3 style="margin-top:0;">Add New User</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid #eee; padding-bottom: 1rem;">
+            <h3 style="margin: 0;">Add New User</h3>
+            <button type="button" onclick="document.getElementById('addUserModal').style.display='none'" style="background: none; border: none; font-size: 1.25rem; color: #94a3b8; cursor: pointer;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
         <form action="{{ route('admin.users.store') }}" method="POST" autocomplete="off">
             @csrf
             <div class="form-group">
@@ -141,7 +146,6 @@
             </div>
             <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
                 <button type="submit" class="btn btn-primary" style="flex:1;">Save User</button>
-                <button type="button" onclick="document.getElementById('addUserModal').style.display='none'" class="btn" style="flex:1; background: #e5e7eb;">Cancel</button>
             </div>
         </form>
     </div>
@@ -242,8 +246,8 @@
         </div>
 
         <!-- Footer Button -->
-        <div style="padding: 1.25rem 2rem; background: #f8fafc; border-top: 1px solid #f1f5f9; display: flex; justify-content: flex-end;">
-            <button onclick="closeViewModal()" style="padding: 0.6rem 2rem; background: #1e293b; color: white; border: none; border-radius: 0.75rem; font-weight: 700; cursor: pointer; transition: 0.2s;">
+        <div style="padding: 1.25rem 2rem; background: #f8fafc; border-top: 1px solid #f1f5f9; display: flex; gap: 1rem;">
+            <button onclick="closeViewModal()" style="flex: 1; padding: 0.85rem 2rem; background: #1e293b; color: white; border: none; border-radius: 0.75rem; font-weight: 700; cursor: pointer; transition: 0.2s;">
                 Dismiss
             </button>
         </div>
@@ -260,7 +264,12 @@
 <!-- Edit User Modal -->
 <div id="editUserModal" style="display:none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); overflow-y: auto;">
     <div style="background: white; width: 400px; margin: 2rem auto; padding: 2rem; border-radius: 0.5rem; position: relative;">
-        <h3 style="margin-top:0;">Edit User</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid #eee; padding-bottom: 1rem;">
+            <h3 style="margin: 0;">Edit User</h3>
+            <button type="button" onclick="document.getElementById('editUserModal').style.display='none'" style="background: none; border: none; font-size: 1.25rem; color: #94a3b8; cursor: pointer;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
         <form id="editUserForm" method="POST">
             @csrf
             @method('PUT')
@@ -328,7 +337,6 @@
             </div>
             <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
                 <button type="submit" class="btn btn-primary" style="flex:1;">Update User</button>
-                <button type="button" onclick="document.getElementById('editUserModal').style.display='none'" class="btn" style="flex:1; background: #e5e7eb;">Cancel</button>
             </div>
         </form>
     </div>

@@ -72,7 +72,12 @@
 <!-- Add Service Modal -->
 <div id="addServiceModal" style="display:none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); overflow-y: auto;">
     <div style="background: white; width: 800px; margin: 2rem auto; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);">
-        <h3 style="margin-top:0; border-bottom: 1px solid #eee; padding-bottom: 1rem;">Add New Service</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid #eee; padding-bottom: 1rem;">
+            <h3 style="margin: 0;">Add New Service</h3>
+            <button type="button" onclick="closeAddModal()" style="background: none; border: none; font-size: 1.25rem; color: #94a3b8; cursor: pointer;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
         <form action="{{ route('admin.services.store') }}" method="POST">
             @csrf
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
@@ -118,7 +123,6 @@
             </div>
             <div style="display: flex; gap: 1rem; margin-top: 2rem; border-top: 1px solid #eee; padding-top: 1.5rem;">
                 <button type="submit" class="btn btn-primary" style="flex:1;">Save Service</button>
-                <button type="button" onclick="closeAddModal()" class="btn" style="flex:1; background: #e5e7eb;">Cancel</button>
             </div>
         </form>
     </div>
@@ -127,7 +131,12 @@
 <!-- Edit Service Modal -->
 <div id="editServiceModal" style="display:none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); overflow-y: auto;">
     <div style="background: white; width: 800px; margin: 2rem auto; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);">
-        <h3 style="margin-top:0; border-bottom: 1px solid #eee; padding-bottom: 1rem;">Edit Service</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid #eee; padding-bottom: 1rem;">
+            <h3 style="margin: 0;">Edit Service</h3>
+            <button type="button" onclick="closeEditModal()" style="background: none; border: none; font-size: 1.25rem; color: #94a3b8; cursor: pointer;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
         <form id="editServiceForm" method="POST">
             @csrf
             @method('PUT')
@@ -174,7 +183,6 @@
             </div>
             <div style="display: flex; gap: 1rem; margin-top: 2rem; border-top: 1px solid #eee; padding-top: 1.5rem;">
                 <button type="submit" class="btn btn-primary" style="flex:1;">Update Service</button>
-                <button type="button" onclick="closeEditModal()" class="btn" style="flex:1; background: #e5e7eb;">Cancel</button>
             </div>
         </form>
     </div>

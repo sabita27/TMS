@@ -51,7 +51,12 @@
 <!-- Add Sub Category Modal -->
 <div id="addSubCatModal" style="display:none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5);">
     <div style="background: white; width: 400px; margin: 10% auto; padding: 2rem; border-radius: 0.5rem;">
-        <h3 style="margin-top:0;">Add New Sub Category</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid #eee; padding-bottom: 1rem;">
+            <h3 style="margin: 0;">Add New Sub Category</h3>
+            <button type="button" onclick="document.getElementById('addSubCatModal').style.display='none'" style="background: none; border: none; font-size: 1.25rem; color: #94a3b8; cursor: pointer;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
         <form action="{{ route('admin.subcategories.store') }}" method="POST">
             @csrf
             <div class="form-group">
@@ -68,8 +73,7 @@
                 <input type="text" name="name" class="form-control" placeholder="e.g. Laptops" required>
             </div>
             <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
-                <button type="submit" class="btn btn-primary" style="flex:1;">Save</button>
-                <button type="button" onclick="document.getElementById('addSubCatModal').style.display='none'" class="btn" style="flex:1; background: #e5e7eb;">Cancel</button>
+                <button type="submit" class="btn btn-primary" style="flex:1;">Save Sub Category</button>
             </div>
         </form>
     </div>
@@ -78,7 +82,12 @@
 <!-- Edit Sub Category Modal -->
 <div id="editSubCatModal" style="display:none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5);">
     <div style="background: white; width: 400px; margin: 10% auto; padding: 2rem; border-radius: 0.5rem;">
-        <h3 style="margin-top:0;">Edit Sub Category</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid #eee; padding-bottom: 1rem;">
+            <h3 style="margin: 0;">Edit Sub Category</h3>
+            <button type="button" onclick="document.getElementById('editSubCatModal').style.display='none'" style="background: none; border: none; font-size: 1.25rem; color: #94a3b8; cursor: pointer;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
         <form id="editSubCatForm" method="POST">
             @csrf
             @method('PUT')
@@ -96,8 +105,7 @@
                 <input type="text" name="name" id="edit_sub_name" class="form-control" required>
             </div>
             <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
-                <button type="submit" class="btn btn-primary" style="flex:1;">Update</button>
-                <button type="button" onclick="document.getElementById('editSubCatModal').style.display='none'" class="btn" style="flex:1; background: #e5e7eb;">Cancel</button>
+                <button type="submit" class="btn btn-primary" style="flex:1;">Update Sub Category</button>
             </div>
         </form>
     </div>

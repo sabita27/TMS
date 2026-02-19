@@ -166,8 +166,8 @@
         </div>
 
         <!-- Footer -->
-        <div style="padding: 1.5rem 2.5rem; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 1rem;">
-            <button type="button" onclick="closeViewModal()" style="padding: 0.75rem 2.5rem; background: #0f172a; color: white; border-radius: 0.75rem; border: none; font-weight: 700; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">Dismiss View</button>
+        <div style="padding: 1.5rem 2.5rem; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; gap: 1rem;">
+            <button type="button" onclick="closeViewModal()" style="flex: 1; padding: 0.85rem 2.5rem; background: #0f172a; color: white; border-radius: 0.75rem; border: none; font-weight: 700; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(15, 23, 42, 0.15);">Dismiss View</button>
         </div>
     </div>
 </div>
@@ -182,7 +182,12 @@
 <!-- Add Project Modal -->
 <div id="addProjectModal" style="display:none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); overflow-y: auto;">
     <div style="background: white; width: 800px; margin: 2rem auto; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);">
-        <h3 style="margin-top:0; border-bottom: 1px solid #eee; padding-bottom: 1rem;">Add New Project</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid #eee; padding-bottom: 1rem;">
+            <h3 style="margin: 0;">Add New Project</h3>
+            <button type="button" onclick="closeAddModal()" style="background: none; border: none; font-size: 1.25rem; color: #94a3b8; cursor: pointer;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
         <form action="{{ route('admin.projects.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
@@ -259,7 +264,6 @@
             </div>
             <div style="display: flex; gap: 1rem; margin-top: 2rem; border-top: 1px solid #eee; padding-top: 1.5rem;">
                 <button type="submit" class="btn btn-primary" style="flex:1;">Save Project</button>
-                <button type="button" onclick="closeAddModal()" class="btn" style="flex:1; background: #e5e7eb;">Cancel</button>
             </div>
         </form>
     </div>
@@ -268,7 +272,12 @@
 <!-- Edit Project Modal -->
 <div id="editProjectModal" style="display:none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); overflow-y: auto;">
     <div style="background: white; width: 800px; margin: 2rem auto; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);">
-        <h3 style="margin-top:0; border-bottom: 1px solid #eee; padding-bottom: 1rem;">Edit Project</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid #eee; padding-bottom: 1rem;">
+            <h3 style="margin: 0;">Edit Project</h3>
+            <button type="button" onclick="closeEditModal()" style="background: none; border: none; font-size: 1.25rem; color: #94a3b8; cursor: pointer;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
         <form id="editProjectForm" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
@@ -350,7 +359,6 @@
             </div>
             <div style="display: flex; gap: 1rem; margin-top: 2rem; border-top: 1px solid #eee; padding-top: 1.5rem;">
                 <button type="submit" class="btn btn-primary" style="flex:1;">Update Project</button>
-                <button type="button" onclick="closeEditModal()" class="btn" style="flex:1; background: #e5e7eb;">Cancel</button>
             </div>
         </form>
     </div>

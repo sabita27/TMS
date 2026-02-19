@@ -197,67 +197,86 @@
             opacity: 0.6 !important;
         }
 
-        .dataTables_paginate {
+        /* DataTables Premium Pagination Styling (Global) */
+        .dataTables_paginate, 
+        .dataTables_wrapper .dataTables_paginate {
             padding-top: 1.5rem !important;
             display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: nowrap !important;
             justify-content: flex-end !important;
+            align-items: center !important;
+            gap: 0.25rem !important;
         }
-
         .dataTables_paginate .pagination {
             display: flex !important;
-            gap: 4px !important;
+            flex-direction: row !important;
+            flex-wrap: nowrap !important;
+            gap: 0.25rem !important;
             margin: 0 !important;
             padding: 0 !important;
             list-style: none !important;
         }
+        .dataTables_paginate span {
+            display: flex !important;
+            flex-direction: row !important;
+        }
 
+        /* Target core button elements */
+        .dataTables_wrapper .dataTables_paginate .paginate_button,
         .dataTables_paginate .pagination .page-item .page-link {
+            padding: 0.45rem 0.6rem !important;
+            border-radius: 8px !important;
+            border: 1px solid #94a3b8 !important;
+            background: #cbd5e1 !important; 
+            color: #000000 !important;
+            font-size: 0.85rem !important;
+            font-weight: 800 !important;
+            cursor: pointer !important;
+            transition: all 0.2s !important;
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
-            min-width: 38px !important;
-            height: 38px !important;
-            padding: 0 0.75rem !important;
-            border-radius: 6px !important;
-            border: 1px solid #e2e8f0 !important;
-            background: #ffffff !important;
-            color: #64748b !important;
-            font-size: 0.85rem !important;
-            font-weight: 600 !important;
             text-decoration: none !important;
-            transition: all 0.2s !important;
             box-shadow: none !important;
+            min-width: 30px !important;
         }
 
-        .dataTables_paginate .pagination .page-item.active .page-link {
-            background: #4f46e5 !important;
-            color: #ffffff !important;
-            border-color: #4f46e5 !important;
-            box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2) !important;
-        }
-
+        .dataTables_wrapper .dataTables_paginate .paginate_button:hover:not(.disabled),
         .dataTables_paginate .pagination .page-item:hover:not(.active):not(.disabled) .page-link {
-            background: #f1f5f9 !important;
-            color: #1e293b !important;
-            border-color: #cbd5e1 !important;
+            background: #94a3b8 !important;
+            border-color: #64748b !important;
+            color: #000000 !important;
         }
 
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current,
+        .dataTables_paginate .pagination .page-item.active .page-link {
+            background: #cbd5e1 !important;
+            color: #000000 !important;
+            border-color: #6366f1 !important;
+            border-width: 2px !important;
+            font-weight: 800 !important;
+        }
+
+        /* Specialized small Previous/Next buttons */
+        .dataTables_wrapper .dataTables_paginate .paginate_button.previous,
+        .dataTables_wrapper .dataTables_paginate .paginate_button.next,
+        .dataTables_paginate .pagination .page-item:first-child .page-link,
+        .dataTables_paginate .pagination .page-item:last-child .page-link {
+            font-size: 0.75rem !important;
+            padding: 0.35rem 0.5rem !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.05em !important;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button.disabled,
         .dataTables_paginate .pagination .page-item.disabled .page-link {
-            opacity: 0.5 !important;
-            background: #f8fafc !important;
-            color: #94a3b8 !important;
+            opacity: 0.7 !important;
             cursor: not-allowed !important;
-            border-color: #e2e8f0 !important;
-        }
-
-        /* Support for both DataTables default and Bootstrap 5 class names */
-        .paginate_button {
-            padding: 0.5rem 1rem !important;
-            border-radius: 6px !important;
-            border: 1px solid #e2e8f0 !important;
-            margin-left: 4px !important;
-            cursor: pointer !important;
-            display: inline-block !important;
+            background: #cbd5e1 !important;
+            color: #000000 !important;
+            border-color: #94a3b8 !important;
+            font-weight: 800 !important;
         }
     </style>
     @yield('styles')

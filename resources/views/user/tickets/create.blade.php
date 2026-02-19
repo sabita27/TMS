@@ -7,9 +7,14 @@
 @section('content')
 <div style="max-width: 800px; margin: 0 auto;">
     <div class="card" style="border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border-radius: 1.25rem;">
-        <div class="card-header" style="padding: 2rem; border-bottom: 2px solid #f8fafc;">
-            <h3 class="card-title" style="font-size: 1.5rem; font-weight: 800; color: #0f172a;">Create Support Request</h3>
-            <p style="margin: 0.25rem 0 0 0; color: #64748b;">Please fill out the details below to initiate a support case.</p>
+        <div class="card-header" style="padding: 2rem; border-bottom: 2px solid #f8fafc; display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+                <h3 class="card-title" style="font-size: 1.5rem; font-weight: 800; color: #0f172a;">Create Support Request</h3>
+                <p style="margin: 0.25rem 0 0 0; color: #64748b;">Please fill out the details below to initiate a support case.</p>
+            </div>
+            <a href="{{ route('user.dashboard') }}" style="background: none; border: none; font-size: 1.25rem; color: #94a3b8; cursor: pointer; text-decoration: none; line-height: 1; margin-top: 0.25rem;">
+                <i class="fas fa-times"></i>
+            </a>
         </div>
         
         <form action="{{ route('user.tickets.store') }}" method="POST" enctype="multipart/form-data" style="padding: 2rem;">
@@ -83,7 +88,6 @@
                 <button type="submit" class="btn btn-primary" style="padding: 1rem 2.5rem; border-radius: 0.75rem; font-weight: 800; font-size: 1rem; flex: 1; box-shadow: 0 10px 15px rgba(79, 70, 229, 0.2);">
                     <i class="fas fa-paper-plane"></i> Submit Ticket
                 </button>
-                <a href="{{ route('user.dashboard') }}" class="btn" style="padding: 1rem 2rem; border-radius: 0.75rem; background: #f3f4f6; color: #4b5563; font-weight: 700; text-decoration: none;">Cancel</a>
             </div>
         </form>
     </div>

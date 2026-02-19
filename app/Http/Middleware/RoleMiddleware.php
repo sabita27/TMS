@@ -19,14 +19,6 @@ class RoleMiddleware
     {
         $user = $request->user();
 
-        // Debug logging
-        \Log::info('RoleMiddleware Check', [
-            'user_id' => $user ? $user->id : 'null',
-            'user_email' => $user ? $user->email : 'null',
-            'user_role_id' => $user ? $user->role_id : 'null',
-            'user_role_name' => ($user && $user->role) ? $user->role->name : 'null',
-            'required_roles' => $roles,
-        ]);
 
         if (!$user) {
             return redirect()->route('login');

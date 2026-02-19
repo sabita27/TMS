@@ -44,6 +44,8 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/clients/{client}/edit', 'editClient')->name('admin.clients.edit');
             Route::put('/clients/{client}', 'updateClient')->name('admin.clients.update');
             Route::delete('/clients/{client}', 'destroyClient')->name('admin.clients.delete');
+            // Service Reminder Email
+            Route::post('/client-services/{clientService}/send-reminder', 'sendReminder')->name('admin.client_services.send_reminder');
         });
 
         // Roles

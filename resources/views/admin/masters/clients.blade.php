@@ -19,6 +19,30 @@
     </div>
     @endif
 
+    <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; background: #f8fafc; padding: 1.25rem; border-radius: 0.75rem; border: 1px solid #e2e8f0; align-items: flex-end;">
+        <div style="flex: 1;">
+            <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 0.5rem;">Filter by Product</label>
+            <select id="productFilter" class="form-control" style="width: 100%; height: 42px; border-radius: 8px;">
+                <option value="">All Products</option>
+                @foreach($products as $product)
+                    <option value="{{ $product->name }}">{{ $product->name }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div style="flex: 1;">
+            <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 0.5rem;">Filter by Service</label>
+            <select id="serviceFilter" class="form-control" style="width: 100%; height: 42px; border-radius: 8px;">
+                <option value="">All Services</option>
+                @foreach($services as $service)
+                    <option value="{{ $service->name }}">{{ $service->name }}</option>
+                @endforeach
+            </select>
+        </div>
+        <button onclick="resetFilters()" class="btn" style="background: #64748b; color: white; padding: 0.65rem 1.5rem; border-radius: 0.5rem; font-weight: 700; height: 42px;">
+            <i class="fas fa-undo"></i> Reset
+        </button>
+    </div>
+
     <div class="table-container">
         <table id="clientTable">
             <thead>
@@ -38,7 +62,9 @@
                 <tr>
                     <td>
                         <div style="font-weight: 600; color: #1e293b;">{{ $client->name }}</div>
-                        <div style="font-size: 0.75rem; color: #64748b;">{{ Str::limit($client->address, 30) }}</div>
+                        <div style="font-size: 0.75rem; color: #64748b;">
+                            {{ $client->state }}{{ $client->country ? ', ' . $client->country : '' }}
+                        </div>
                     </td>
                     <td>
                         <div style="font-weight: 500;">{{ $client->contact_person1_name ?? '-' }}</div>
@@ -129,7 +155,12 @@
 <!-- Add Client Modal -->
 <div id="addClientModal" style="display:none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); overflow-y: auto;">
     <div style="background: white; width: 800px; margin: 2rem auto; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);">
-        <h3 style="margin-top:0; border-bottom: 1px solid #eee; padding-bottom: 1rem;">Add New Client</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 1rem; margin-bottom: 1.5rem;">
+            <h3 style="margin: 0;">Add New Client</h3>
+            <button type="button" onclick="closeAddModal()" style="background: none; border: none; font-size: 1.25rem; color: #64748b; cursor: pointer;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
         <form action="{{ route('admin.clients.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
@@ -146,8 +177,16 @@
                     <input type="text" name="phone" class="form-control" placeholder="Enter Office Phone Number" required>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Address <span style="color: red;">*</span></label>
-                    <input type="text" name="address" class="form-control" placeholder="Full Address" required>
+                    <label class="form-label">Country <span style="color: red;">*</span></label>
+                    <input type="text" name="country" class="form-control" placeholder="Enter Country" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">State <span style="color: red;">*</span></label>
+                    <input type="text" name="state" class="form-control" placeholder="Enter State" required>
+                </div>
+                <div class="form-group" style="grid-column: span 2;">
+                    <label class="form-label">Full Address</label>
+                    <input type="text" name="address" class="form-control" placeholder="House/Office No., Street, City...">
                 </div>
                 
                 <!-- Contact Person 1 -->
@@ -241,7 +280,6 @@
             </div>
             <div style="display: flex; gap: 1rem; margin-top: 2rem; border-top: 1px solid #eee; padding-top: 1.5rem;">
                 <button type="submit" class="btn btn-primary" style="flex:1;">Save Client</button>
-                <button type="button" onclick="closeAddModal()" class="btn" style="flex:1; background: #e5e7eb;">Cancel</button>
             </div>
         </form>
     </div>
@@ -250,7 +288,12 @@
 <!-- Edit Client Modal -->
 <div id="editClientModal" style="display:none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); overflow-y: auto;">
     <div style="background: white; width: 800px; margin: 2rem auto; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);">
-        <h3 style="margin-top:0; border-bottom: 1px solid #eee; padding-bottom: 1rem;">Edit Client</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 1rem; margin-bottom: 1.5rem;">
+            <h3 style="margin: 0;">Edit Client</h3>
+            <button type="button" onclick="closeEditModal()" style="background: none; border: none; font-size: 1.25rem; color: #64748b; cursor: pointer;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
         <form id="editClientForm" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
@@ -268,8 +311,16 @@
                     <input type="text" name="phone" id="edit_phone" class="form-control" required>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Address <span style="color: red;">*</span></label>
-                    <input type="text" name="address" id="edit_address" class="form-control" required>
+                    <label class="form-label">Country <span style="color: red;">*</span></label>
+                    <input type="text" name="country" id="edit_country" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">State <span style="color: red;">*</span></label>
+                    <input type="text" name="state" id="edit_state" class="form-control" required>
+                </div>
+                <div class="form-group" style="grid-column: span 2;">
+                    <label class="form-label">Full Address</label>
+                    <input type="text" name="address" id="edit_address" class="form-control" placeholder="House/Office No., Street, City...">
                 </div>
 
                 <div class="section-divider" style="grid-column: span 2; margin-top: 1rem; border-top: 1px dashed #e2e8f0; padding-top: 1rem;">
@@ -366,7 +417,6 @@
             </div>
             <div style="display: flex; gap: 1rem; margin-top: 2rem; border-top: 1px solid #eee; padding-top: 1.5rem;">
                 <button type="submit" class="btn btn-primary" style="flex:1;">Update Client</button>
-                <button type="button" onclick="closeEditModal()" class="btn" style="flex:1; background: #e5e7eb;">Cancel</button>
             </div>
         </form>
     </div>
@@ -414,14 +464,27 @@
                         <div id="view_phone" style="font-size: 0.95rem; font-weight: 600; color: #334155;"></div>
                     </div>
                 </div>
-                <!-- Address -->
+                <!-- Location -->
                  <div style="display: flex; gap: 0.75rem; grid-column: span 2;">
                     <div style="width: 36px; height: 36px; background: #f5f3ff; color: #8b5cf6; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                         <i class="fas fa-map-marker-alt"></i>
                     </div>
-                    <div>
-                        <div style="font-size: 0.7rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 2px;">Address</div>
-                        <div id="view_address" style="font-size: 0.95rem; font-weight: 500; color: #334155;"></div>
+                    <div style="flex-grow: 1;">
+                        <div style="font-size: 0.7rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 2px;">Location</div>
+                        <div style="display: flex; gap: 1.5rem;">
+                            <div>
+                                <div style="font-size: 0.65rem; color: #94a3b8;">Country</div>
+                                <div id="view_country" style="font-size: 0.95rem; font-weight: 600; color: #334155;"></div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.65rem; color: #94a3b8;">State</div>
+                                <div id="view_state" style="font-size: 0.95rem; font-weight: 600; color: #334155;"></div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid #f1f5f9;">
+                            <div style="font-size: 0.65rem; color: #94a3b8;">Full Address</div>
+                            <div id="view_address" style="font-size: 0.9rem; color: #475569;"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -461,13 +524,13 @@
             </div>
 
             <!-- Remarks -->
-            <div style="background: #fff; border-radius: 0.5rem;">
+            <div style="background: #fff; border-radius: 0.5rem; margin-bottom: 1.5rem;">
                 <h4 style="margin: 0 0 0.5rem 0; font-size: 0.75rem; font-weight: 800; color: #64748b; text-transform: uppercase;">Remarks</h4>
                 <p id="view_remarks" style="color: #475569; font-size: 0.9rem; line-height: 1.5; margin: 0;"></p>
             </div>
 
         </div>
-    </div>
+ </div>
 </div>
 
 @endsection
@@ -522,6 +585,7 @@
         border-color: #0f172a;
         color: #fff;
     }
+
 </style>
 @endsection
 
@@ -546,7 +610,7 @@
         $('#edit_project_id_select2').select2({ ...select2Options, placeholder: "Select Projects" });
         $('#edit_service_id_select2').select2({ ...select2Options, placeholder: "Select Services" });
 
-        $('#clientTable').DataTable({
+        const table = $('#clientTable').DataTable({
             "pageLength": 10,
             "order": [],
             "dom": '<"top"Bf>rt<"bottom"ip><"clear">',
@@ -558,6 +622,20 @@
                 "searchPlaceholder": "Search clients..."
             }
         });
+
+        $('#productFilter').on('change', function() {
+            table.column(3).search(this.value).draw();
+        });
+
+        $('#serviceFilter').on('change', function() {
+            table.column(5).search(this.value).draw();
+        });
+
+        window.resetFilters = function() {
+            $('#productFilter').val('');
+            $('#serviceFilter').val('');
+            table.search('').columns().search('').draw();
+        };
 
         toggleClientFields('add');
     });
@@ -687,6 +765,8 @@
                 document.getElementById('edit_email').value = data.email;
                 document.getElementById('edit_phone').value = data.phone || '';
                 document.getElementById('edit_address').value = data.address || '';
+                document.getElementById('edit_country').value = data.country || '';
+                document.getElementById('edit_state').value = data.state || '';
                 document.getElementById('edit_contact_person1_name').value = data.contact_person1_name || '';
                 document.getElementById('edit_contact_person1_phone').value = data.contact_person1_phone || '';
                 document.getElementById('edit_contact_person2_name').value = data.contact_person2_name || '';
@@ -731,6 +811,8 @@
                 document.getElementById('view_name').innerText = data.name;
                 document.getElementById('view_email').innerText = data.email;
                 document.getElementById('view_phone').innerText = data.phone || 'N/A';
+                document.getElementById('view_country').innerText = data.country || 'N/A';
+                document.getElementById('view_state').innerText = data.state || 'N/A';
                 document.getElementById('view_address').innerText = data.address || 'N/A';
                 
                 document.getElementById('view_contact1').innerText = data.contact_person1_name || 'N/A';
@@ -823,14 +905,54 @@
                             }
                         }
 
-                        return `<div style="background: #fdf4ff; color: #a21caf; padding: 0.6rem 0.85rem; border-radius: 8px; border: 1px solid #f5d0fe; margin-bottom: 0.75rem; position: relative;">
-                            <strong style="display: block; font-size: 0.85rem; margin-bottom: 2px;">${sName}</strong>
-                            <span style="font-size: 0.7rem; color: #701a75; opacity: 0.8;">${startDate} — ${endDateLabel}</span>
-                            ${remainingDaysHtml}
-                        </div>`;
+                        return `
+<div style="
+    background: #fdf4ff;
+    color: #a21caf;
+    padding: 0.85rem 1rem;
+    border-radius: 8px;
+    border: 1px solid #f5d0fe;
+    margin-bottom: 0.75rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+">
+
+    <!-- Left Content -->
+    <div>
+        <strong style="display: block; font-size: 0.85rem; margin-bottom: 2px;">
+            ${sName}
+        </strong>
+
+        <span style="font-size: 0.7rem; color: #701a75; opacity: 0.8;">
+            ${startDate} — ${endDateLabel}
+        </span>
+
+        ${remainingDaysHtml}
+    </div>
+
+    <!-- Right Button -->
+    <button 
+        onclick="sendReminder(${cs.id}, this)"
+        style="
+            background: #4f46e5;
+            color: #fff;
+            border: none;
+            padding: 0.45rem 0.9rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            white-space: nowrap;
+        ">
+        <i class="fas fa-bell"></i> Reminder
+    </button>
+
+</div>
+`;
                     }).join('');
                 }
-
                 const engagementHtml = (productHtml || projectHtml || serviceHtml) 
                     ? `<div>
                         ${productHtml ? `<div style="font-size:0.75rem; color:#64748b; margin-bottom:0.25rem;">Products</div><div style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-bottom:1rem;">${productHtml}</div>` : ''}
@@ -840,9 +962,139 @@
                     : '<span style="color:#94a3b8; font-style:italic;">No active engagements.</span>';
 
                 document.getElementById('view_engagements').innerHTML = engagementHtml; 
-
                 document.getElementById('viewClientModal').style.display = 'block';
             });
     }
+
+    function sendReminder(serviceId, btn) {
+        if (!confirm("Send a reminder email to the client for this service?")) return;
+
+        const originalHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+
+        fetch(`/admin/client-services/${serviceId}/send-reminder`, {
+            method: "POST",
+            headers: {
+                "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                "Accept": "application/json",
+                "Content-Type": "application/json"
+            }
+        })
+        .then(async response => {
+            const contentType = response.headers.get('content-type') || '';
+            if (contentType.includes('application/json')) {
+                const data = await response.json();
+                if (data.success) {
+                    showToast('success', data.message);
+                } else {
+                    showToast('error', data.message || 'Unknown error.');
+                }
+            } else {
+                // Server returned HTML (likely a 500 error page)
+                const text = await response.text();
+                // Extract meaningful error from HTML if possible
+                const match = text.match(/<title>(.*?)<\/title>/i);
+                const errTitle = match ? match[1] : `Server Error (HTTP ${response.status})`;
+                showToast('error', '⚠ ' + errTitle + ' — Check laravel.log for details.');
+                console.error('Server error response:', text);
+            }
+        })
+        .catch(error => {
+            console.error('Fetch error:', error);
+            showToast('error', 'Network error: ' + error.message);
+        })
+        .finally(() => {
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
+        });
+    }
+
+    function showToast(type, message) {
+        // Remove any existing toast
+        const existing = document.getElementById('reminderToast');
+        if (existing) existing.remove();
+
+        const isSuccess = type === 'success';
+
+        const toast = document.createElement('div');
+        toast.id = 'reminderToast';
+        toast.style.cssText = `
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            z-index: 99999;
+            min-width: 320px;
+            max-width: 420px;
+            background: #ffffff;
+            border-radius: 14px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15), 0 4px 16px rgba(0,0,0,0.08);
+            overflow: hidden;
+            animation: toastPop 0.35s cubic-bezier(0.34,1.56,0.64,1);
+            border-left: 5px solid ${isSuccess ? '#22c55e' : '#ef4444'};
+            font-family: 'Inter', -apple-system, sans-serif;
+        `;
+
+        toast.innerHTML = `
+            <div style="display:flex; align-items:flex-start; gap:14px; padding:18px 18px 14px;">
+                <div style="
+                    flex-shrink:0;
+                    width:38px; height:38px;
+                    border-radius:50%;
+                    background:${isSuccess ? '#f0fdf4' : '#fef2f2'};
+                    display:flex; align-items:center; justify-content:center;
+                    font-size:1.1rem;
+                ">
+                    ${isSuccess
+                        ? `<svg width="18" height="18" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="10" fill="#22c55e"/><path d="M6 10.5l3 3 5-5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+                        : `<svg width="18" height="18" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="10" fill="#ef4444"/><path d="M10 6v4M10 13.5v.5" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>`
+                    }
+                </div>
+                <div style="flex:1; min-width:0;">
+                    <div style="font-size:0.8rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:${isSuccess ? '#16a34a' : '#dc2626'}; margin-bottom:3px;">
+                        ${isSuccess ? 'Email Sent' : 'Error'}
+                    </div>
+                    <div style="font-size:0.88rem; color:#334155; line-height:1.45; word-break:break-word;">
+                        ${message}
+                    </div>
+                </div>
+                <button onclick="document.getElementById('reminderToast').remove()" style="
+                    flex-shrink:0;
+                    background:none; border:none;
+                    color:#94a3b8; cursor:pointer;
+                    font-size:1.1rem; line-height:1;
+                    padding:2px; margin-top:-2px;
+                    transition: color 0.2s;
+                " onmouseover="this.style.color='#475569'" onmouseout="this.style.color='#94a3b8'">✕</button>
+            </div>
+            <div id="toastProgressBar" style="
+                height:3px;
+                background:${isSuccess ? '#22c55e' : '#ef4444'};
+                width:100%;
+                transform-origin:left;
+                animation:toastProgress 5s linear forwards;
+                opacity:0.5;
+            "></div>
+        `;
+
+        document.body.appendChild(toast);
+
+        // Auto-dismiss after 5s
+        setTimeout(() => { if (toast.parentElement) toast.remove(); }, 5000);
+    }
+
+    // Toast animations
+    const toastStyle = document.createElement('style');
+    toastStyle.textContent = `
+        @keyframes toastPop {
+            from { opacity:0; transform: translateY(20px) scale(0.95); }
+            to   { opacity:1; transform: translateY(0) scale(1); }
+        }
+        @keyframes toastProgress {
+            from { width: 100%; }
+            to   { width: 0%; }
+        }
+    `;
+    document.head.appendChild(toastStyle);
 </script>
 @endsection
