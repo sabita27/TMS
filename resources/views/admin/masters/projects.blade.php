@@ -234,11 +234,11 @@
                 
                 <div class="form-group">
                     <label class="form-label">Project Start Date</label>
-                    <input type="date" name="start_date" class="form-control">
+                    <input type="date" name="start_date" id="add_start_date" class="form-control">
                 </div>
                 <div class="form-group">
                     <label class="form-label">Project End Date</label>
-                    <input type="date" name="end_date" class="form-control">
+                    <input type="date" name="end_date" id="add_end_date" class="form-control">
                 </div>
                 <div class="form-group" style="grid-column: span 2;">
                     <label class="form-label">Project Description</label>
@@ -374,6 +374,25 @@
     $(document).ready(function() {
         CKEDITOR.replace('add_project_description');
         CKEDITOR.replace('edit_project_description');
+
+        // Set default dates and restrictions
+        const today = new Date().toISOString().split('T')[0];
+        
+        // Add Modal
+        const addStartDate = document.getElementById('add_start_date');
+        const addEndDate = document.getElementById('add_end_date');
+        if (addStartDate) {
+            addStartDate.value = today;
+        }
+        if (addEndDate) {
+            addEndDate.setAttribute('min', today);
+        }
+
+        // Edit Modal
+        const editEndDate = document.getElementById('edit_end_date');
+        if (editEndDate) {
+            editEndDate.setAttribute('min', today);
+        }
     });
 
     // Dynamic subcategory loading

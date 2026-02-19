@@ -5,7 +5,11 @@
     <div style="margin-bottom: 2rem;">
         @php
             $displayType = $type;
-            if($type == 'global') $displayType = 'Global Setting';
+            if($type == 'global') {
+                if($section == 'logo') $displayType = 'System Logo';
+                elseif($section == 'smtp') $displayType = 'SMTP Setting';
+                else $displayType = 'Home Page Setting';
+            }
             elseif($type == 'subcategory') $displayType = 'Sub-Category';
             elseif($type == 'priority') $displayType = 'Priority';
             elseif($type == 'status') $displayType = 'Ticket Status';
@@ -19,17 +23,25 @@
         </nav>
     </div>
 
-    <div style="display: grid; grid-template-columns: 280px 1fr; gap: 2rem; align-items: start;">
+    <div style="display: grid; grid-template-columns: 280px 1fr; gap: 2rem; align-items: stretch;">
         <!-- Internal Sidebar -->
-        <div style="background: white; border-radius: 1.25rem; padding: 1.5rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.04); border: 1px solid #f1f5f9;">
+        <div style="background: white; border-radius: 1.25rem; padding: 1.5rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.04); border: 1px solid #f1f5f9; height: 100%;">
             <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                <!-- 1. Global Setting -->
-                <a href="{{ route('admin.setup', ['type' => 'global']) }}" class="setup-tab {{ $type == 'global' ? 'active' : '' }}">
-                    <div style="display: flex; align-items: center; gap: 0.75rem;">
-                        <i class="fas fa-globe"></i>
-                        <span>Global Setting</span>
+                <!-- 1. Global Setting Dropdown -->
+                <div style="margin-bottom: 0.25rem;">
+                    <a href="javascript:void(0)" onclick="toggleGlobalMenu()" class="setup-tab {{ $type == 'global' ? 'active' : '' }}" style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                            <i class="fas fa-globe"></i>
+                            <span>Global Setting</span>
+                        </div>
+                        <i class="fas fa-chevron-down" style="font-size: 0.7rem; transition: transform 0.3s;" id="global-chevron"></i>
+                    </a>
+                    <div id="global-submenu" style="display: {{ $type == 'global' ? 'flex' : 'none' }}; flex-direction: column; gap: 0.25rem; padding: 0.5rem 0 0.5rem 2.25rem;">
+                        <a href="{{ route('admin.setup', ['type' => 'global', 'section' => 'identity']) }}" class="submenu-link {{ ($type == 'global' && $section == 'identity') ? 'active' : '' }}">Home Page Setting</a>
+                        <a href="{{ route('admin.setup', ['type' => 'global', 'section' => 'logo']) }}" class="submenu-link {{ ($type == 'global' && $section == 'logo') ? 'active' : '' }}">Logo & Favicon</a>
+                        <a href="{{ route('admin.setup', ['type' => 'global', 'section' => 'smtp']) }}" class="submenu-link {{ ($type == 'global' && $section == 'smtp') ? 'active' : '' }}">SMTP Setting</a>
                     </div>
-                </a>
+                </div>
                 <!-- 2. Role -->
                 <a href="{{ route('admin.setup', ['type' => 'role']) }}" class="setup-tab {{ $type == 'role' ? 'active' : '' }}">
                     <div style="display: flex; align-items: center; gap: 0.75rem;">
@@ -83,13 +95,17 @@
         </div>
 
         <!-- Content Area (Table Design) -->
-        <div style="background: white; border-radius: 0.75rem; padding: 2rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.04); border: 1px solid #f1f5f9; min-height: 500px;">
+        <div style="background: white; border-radius: 1.25rem; padding: 2rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.04); border: 1px solid #f1f5f9; min-height: 500px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
                 <h2 style="margin: 0; font-size: 1.5rem; font-weight: 700; color: #1e293b;">
                     @if($type == 'global') Global Settings @elseif($type == 'role') Roles @elseif($type == 'designation') Designations @elseif($type == 'position') Positions @elseif($type == 'category') Product Categories @elseif($type == 'subcategory') Sub-Categories @elseif($type == 'priority') Ticket Priorities @else Ticket Statuses @endif
                 </h2>
                 
-                @if($type == 'role')
+                @if($type == 'global')
+                    <div style="display: flex; align-items: center; gap: 0.5rem; background: #f1f5f9; padding: 0.3rem 0.8rem; border-radius: 2rem; font-size: 0.8rem; color: #64748b; font-weight: 600;">
+                        <i class="fas fa-lock"></i> System Secure
+                    </div>
+                @elseif($type == 'role')
                     <button onclick="openModal('roleModal')" class="btn btn-primary" style="background: #474affff; border: none; padding: 0.6rem 1.2rem; border-radius: 0.4rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem;">
                         <i class="fas fa-plus"></i> Add Role
                     </button>
@@ -120,8 +136,9 @@
                 @endif
             </div>
 
+            @if($type != 'global')
             <div style="overflow-x: auto;">
-                <table style="width: 100%; border-collapse: separate; border-spacing: 0;">
+                <table id="setupTable" style="width: 100%; border-collapse: separate; border-spacing: 0;">
                     <thead>
                         <tr style="background: #f8fafc;">
                             <th style="padding: 1rem 1.5rem; text-align: left; font-size: 0.85rem; font-weight: 700; color: #64748b; border-bottom: 2px solid #f1f5f9;">@if($type == 'category' || $type == 'subcategory') Category Name @else Name @endif</th>
@@ -136,13 +153,108 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @if($type == 'global')
-                            <tr>
-                                <td colspan="4" style="padding: 3rem; text-align: center; color: #64748b;">
-                                    <i class="fas fa-cogs" style="font-size: 3rem; opacity: 0.2; margin-bottom: 1rem; display: block;"></i>
-                                    Global Settings Implementation Coming Soon
-                                </td>
-                            </tr>
+            @endif
+
+            @if($type == 'global')
+                <form action="{{ route('admin.setup.settings') }}" method="POST" enctype="multipart/form-data" style="padding: 0;">
+                    @csrf
+                                        
+                                        @if($section == 'identity')
+                                            <!-- Home Page Identity Settings -->
+                                            <div style="padding: 0;">
+                                                <h4 style="margin: 0 0 2rem; padding-bottom: 1rem; border-bottom: 1px solid #f1f5f9; font-size: 1.1rem; color: #1e293b; display: flex; align-items: center; gap: 0.75rem;">
+                                                    <i class="fas fa-fingerprint" style="color: #6366f1; background: #eef2ff; padding: 0.5rem; border-radius: 0.5rem;"></i> Identity Profile
+                                                </h4>
+                                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                                                    <div class="form-group">
+                                                        <label class="form-label">System Title</label>
+                                                        <input type="text" name="system_name" class="form-control" value="{{ $data['settings']['system_name'] ?? 'TMS PRO' }}" placeholder="e.g. Enterprise TMS">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label class="form-label">Copyright Footer</label>
+                                                        <input type="text" name="system_footer" class="form-control" value="{{ $data['settings']['system_footer'] ?? '© 2026 Professional TMS' }}" placeholder="e.g. © 2026 Admin Panel">
+                                                    </div>
+                                                    <div class="form-group" style="grid-column: span 2;">
+                                                        <label class="form-label">Home Page Tagline</label>
+                                                        <input type="text" name="home_tagline" class="form-control" value="{{ $data['settings']['home_tagline'] ?? 'Smart Ticket Management System' }}">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @elseif($section == 'logo')
+                                            <!-- Logo & Favicon Branding Settings -->
+                                            <div style="padding: 0;">
+                                                <h4 style="margin: 0 0 2rem; padding-bottom: 1rem; border-bottom: 1px solid #f1f5f9; font-size: 1.1rem; color: #1e293b; display: flex; align-items: center; gap: 0.75rem;">
+                                                    <i class="fas fa-palette" style="color: #6366f1; background: #eef2ff; padding: 0.5rem; border-radius: 0.5rem;"></i> Visual Branding
+                                                </h4>
+                                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                                                    <div style="text-align: center; border: 2px dashed #e2e8f0; padding: 2.5rem; border-radius: 1rem; background: #f8fafc;">
+                                                        <label style="cursor: pointer;">
+                                                            @if(isset($data['settings']['system_logo']))
+                                                                <img src="{{ asset('storage/' . $data['settings']['system_logo']) }}" style="max-height: 80px; margin-bottom: 1rem; display: block; margin-left: auto; margin-right: auto;">
+                                                            @else
+                                                                <i class="fas fa-cloud-upload-alt" style="font-size: 2.5rem; color: #cbd5e1; margin-bottom: 1rem; display: block;"></i>
+                                                            @endif
+                                                            <span style="font-weight: 700; color: #64748b; font-size: 0.9rem;">Upload Main Logo</span>
+                                                            <input type="file" name="logo" style="display: none;">
+                                                        </label>
+                                                    </div>
+                                                    <div style="text-align: center; border: 2px dashed #e2e8f0; padding: 2rem; border-radius: 1rem; background: white;">
+                                                        <label style="cursor: pointer;">
+                                                            @if(isset($data['settings']['system_favicon']))
+                                                                <img src="{{ asset('storage/' . $data['settings']['system_favicon']) }}" style="height: 48px; width: 48px; margin-bottom: 1rem; display: block; margin-left: auto; margin-right: auto;">
+                                                            @else
+                                                                <i class="fas fa-image" style="font-size: 2.5rem; color: #cbd5e1; margin-bottom: 1rem; display: block;"></i>
+                                                            @endif
+                                                            <span style="font-weight: 700; color: #64748b; font-size: 0.9rem;">Upload Browser Favicon</span>
+                                                            <input type="file" name="favicon" style="display: none;">
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @elseif($section == 'smtp')
+                                            <!-- Professional SMTP Settings -->
+                                            <div style="padding: 0;">
+                                                <h4 style="margin: 0 0 2rem; padding-bottom: 1rem; border-bottom: 1px solid #f1f5f9; font-size: 1.1rem; color: #1e293b; display: flex; align-items: center; gap: 0.75rem;">
+                                                    <i class="fas fa-envelope-open-text" style="color: #6366f1; background: #eef2ff; padding: 0.5rem; border-radius: 0.5rem;"></i> Mail Configuration (SMTP)
+                                                </h4>
+                                                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;">
+                                                    <div class="form-group">
+                                                        <label class="form-label">Mail Host</label>
+                                                        <input type="text" name="mail_host" class="form-control" value="{{ $data['settings']['mail_host'] ?? '' }}" placeholder="smtp.gmail.com">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label class="form-label">Mail Port</label>
+                                                        <input type="text" name="mail_port" class="form-control" value="{{ $data['settings']['mail_port'] ?? '' }}" placeholder="587">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label class="form-label">Mail Encryption</label>
+                                                        <select name="mail_encryption" class="form-control">
+                                                            <option value="tls" {{ ($data['settings']['mail_encryption'] ?? '') == 'tls' ? 'selected' : '' }}>TLS</option>
+                                                            <option value="ssl" {{ ($data['settings']['mail_encryption'] ?? '') == 'ssl' ? 'selected' : '' }}>SSL</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label class="form-label">Username</label>
+                                                        <input type="text" name="mail_username" class="form-control" value="{{ $data['settings']['mail_username'] ?? '' }}" placeholder="info@company.com">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label class="form-label">Password</label>
+                                                        <input type="password" name="mail_password" class="form-control" value="{{ $data['settings']['mail_password'] ?? '' }}" placeholder="********">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label class="form-label">From Address</label>
+                                                        <input type="email" name="mail_from_address" class="form-control" value="{{ $data['settings']['mail_from_address'] ?? '' }}" placeholder="noreply@company.com">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endif
+                                        
+                                        <div style="margin-top: 1.5rem; display: flex; justify-content: flex-end;">
+                                            <button type="submit" class="btn btn-primary" style="background: #10b981; border: none; padding: 0.75rem 2rem; border-radius: 0.5rem; font-weight: 700; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2); transition: transform 0.2s;">
+                                                <i class="fas fa-save" style="margin-right: 0.5rem;"></i> Update {{ ucfirst($section) }}
+                                            </button>
+                                        </div>
+                                    </form>
                         @elseif($type == 'role')
                             @foreach($data['roles'] as $role)
                             <tr style="transition: background 0.2s;">
@@ -259,9 +371,13 @@
                             </tr>
                             @endforeach
                         @endif
+                @if($type != 'global')
                     </tbody>
                 </table>
             </div>
+            @else
+                </form>
+            @endif
         </div>
     </div>
 </div>
@@ -503,6 +619,24 @@
         color: white;
         box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.25);
     }
+    .submenu-link {
+        display: block;
+        padding: 0.6rem 1rem;
+        border-radius: 0.5rem;
+        text-decoration: none;
+        color: #64748b;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+    .submenu-link:hover {
+        background: #f1f5f9;
+        color: #0f172a;
+    }
+    .submenu-link.active {
+        color: #6366f1;
+        background: #eef2ff;
+    }
     .setup-tab i { font-size: 1.1rem; }
     
     /* Premium Card Styles */
@@ -604,5 +738,33 @@
     function closeModal(id) {
         document.getElementById(id).style.display = 'none';
     }
+    function toggleGlobalMenu() {
+        const menu = document.getElementById('global-submenu');
+        const chevron = document.getElementById('global-chevron');
+        if (menu.style.display === 'none') {
+            menu.style.display = 'flex';
+            chevron.style.transform = 'rotate(180deg)';
+        } else {
+            menu.style.display = 'none';
+            chevron.style.transform = 'rotate(0deg)';
+        }
+    }
+
+    $(document).ready(function() {
+        if ($('#setupTable').length > 0) {
+            $('#setupTable').DataTable({
+                "pageLength": 10,
+                "order": [],
+                "dom": '<"top"Bf>rt<"bottom"ip><"clear">',
+                "buttons": [
+                    'copy', 'csv', 'excel', 'pdf', 'print'
+                ],
+                "language": {
+                    "search": "_INPUT_",
+                    "searchPlaceholder": "Search..."
+                }
+            });
+        }
+    });
 </script>
 @endsection

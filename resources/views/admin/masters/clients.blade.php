@@ -20,7 +20,7 @@
     @endif
 
     <div class="table-container">
-        <table>
+        <table id="clientTable">
             <thead>
                 <tr>
                     <th>Client Name</th>
@@ -79,14 +79,17 @@
                         @endif
                     </td>
                     <td>
-                        @php
-                            $selectedServiceIds = $client->service_id ?? [];
-                            $serviceNames = $services->whereIn('id', $selectedServiceIds)->pluck('name')->toArray();
-                        @endphp
-                        @if(!empty($serviceNames))
-                            <div style="display: flex; flex-wrap: wrap; gap: 0.25rem;">
-                                @foreach($serviceNames as $sName)
-                                    <span class="badge" style="background: #fdf4ff; color: #a21caf; font-weight: 600;">{{ $sName }}</span>
+                        @if($client->services->isNotEmpty())
+                            <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+                                @foreach($client->services as $clientService)
+                                    @if($clientService->service)
+                                        <div style="font-size: 0.8rem; background: #fdf4ff; color: #a21caf; padding: 0.2rem 0.5rem; border-radius: 4px; border: 1px solid #f5d0fe;">
+                                            <strong>{{ $clientService->service->name }}</strong>
+                                            @if($clientService->start_date)
+                                                <div style="font-size: 0.7rem; color: #701a75;">{{ $clientService->start_date->format('d M Y') }} - {{ $clientService->end_date ? $clientService->end_date->format('d M Y') : 'N/A' }}</div>
+                                            @endif
+                                        </div>
+                                    @endif
                                 @endforeach
                             </div>
                         @else
@@ -120,8 +123,6 @@
             </tbody>
         </table>
     </div>
-    <div style="margin-top: 1rem;">
-        {{ $clients->links() }}
     </div>
 </div>
 
@@ -215,12 +216,10 @@
 
                 <!-- Service Section -->
                 <div id="add_service_section" class="form-group" style="grid-column: span 2; display: none;">
-                    <label class="form-label">Service Name (Multiple)</label>
-                    <select name="service_id[]" id="add_service_id" class="form-control select2-modal" multiple>
-                        @foreach($services as $service)
-                            <option value="{{ $service->id }}">{{ $service->name }}</option>
-                        @endforeach
-                    </select>
+                    <label class="form-label" style="margin-bottom: 0.75rem; display: block;">Client Services</label>
+                    <div id="add_service_container">
+                        <!-- Dynamic rows will appear here -->
+                    </div>
                 </div>
 
                 <!-- Remarks and Status -->
@@ -337,12 +336,10 @@
                 
                 <!-- Service Section -->
                 <div id="edit_service_section" class="form-group" style="grid-column: span 2; display: none;">
-                    <label class="form-label">Service Name (Multiple)</label>
-                    <select name="service_id[]" id="edit_service_id_select2" class="form-control select2-modal" multiple>
-                        @foreach($services as $service)
-                            <option value="{{ $service->id }}">{{ $service->name }}</option>
-                        @endforeach
-                    </select>
+                    <label class="form-label" style="margin-bottom: 0.75rem; display: block;">Client Services</label>
+                    <div id="edit_service_container">
+                        <!-- Dynamic rows will appear here -->
+                    </div>
                 </div>
                 
                 <div class="form-group" style="grid-column: span 2;">
@@ -529,7 +526,6 @@
 @endsection
 
 @section('scripts')
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
 <script>
@@ -550,6 +546,19 @@
         $('#edit_project_id_select2').select2({ ...select2Options, placeholder: "Select Projects" });
         $('#edit_service_id_select2').select2({ ...select2Options, placeholder: "Select Services" });
 
+        $('#clientTable').DataTable({
+            "pageLength": 10,
+            "order": [],
+            "dom": '<"top"Bf>rt<"bottom"ip><"clear">',
+            "buttons": [
+                'copy', 'csv', 'excel', 'pdf', 'print'
+            ],
+            "language": {
+                "search": "_INPUT_",
+                "searchPlaceholder": "Search clients..."
+            }
+        });
+
         toggleClientFields('add');
     });
 
@@ -559,18 +568,113 @@
             const checkedRadio = document.querySelector('#addClientModal input[name="business_type"]:checked');
             value = checkedRadio ? checkedRadio.value : 'product';
             document.getElementById('add_product_section').style.display = (value === 'product' || value === 'both') ? 'block' : 'none';
-            document.getElementById('add_project_section').style.display = (value === 'project' || value === 'both') ? 'grid' : 'none'; // Using grid to match previous layout if needed, or block
+            document.getElementById('add_project_section').style.display = (value === 'project' || value === 'both') ? 'block' : 'none';
             document.getElementById('add_service_section').style.display = (value === 'service' || value === 'both') ? 'block' : 'none';
+            
+            // Add initial row if empty and service is active
+            if((value === 'service' || value === 'both') && $('#add_service_container').children().length === 0) {
+                addServiceRow('add');
+            }
         } else {
             const checkedRadio = document.querySelector('#editClientModal input[name="business_type"]:checked');
             value = checkedRadio ? checkedRadio.value : 'product';
             document.getElementById('edit_product_section').style.display = (value === 'product' || value === 'both') ? 'block' : 'none';
-            document.getElementById('edit_project_section').style.display = (value === 'project' || value === 'both') ? 'grid' : 'none';
+            document.getElementById('edit_project_section').style.display = (value === 'project' || value === 'both') ? 'block' : 'none';
             document.getElementById('edit_service_section').style.display = (value === 'service' || value === 'both') ? 'block' : 'none';
         }
     }
 
-    function openAddModal() { document.getElementById('addClientModal').style.display = 'block'; }
+    let serviceIndex = 0;
+    function addServiceRow(type, data = null) {
+        const today = new Date().toISOString().split('T')[0];
+        const container = document.getElementById(type + '_service_container');
+        const isFirst = container.children.length === 0;
+        const index = serviceIndex++;
+        
+        const row = document.createElement('div');
+        row.className = 'service-row';
+        row.style = 'display: grid; grid-template-columns: 2fr 1fr 1fr 40px; gap: 0.5rem; margin-bottom: 0.75rem; align-items: end; background: #fff; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #e2e8f0;';
+        
+        let options = '<option value="">Select Service</option>';
+        servicesData.forEach(s => {
+            const selected = (data && data.service_id == s.id) ? 'selected' : '';
+            options += `<option value="${s.id}" ${selected}>${s.name}</option>`;
+        });
+
+        const actionButton = isFirst 
+            ? `<button type="button" onclick="addServiceRow('${type}')" class="btn" style="padding: 0; height: 38px; width: 38px; display: flex; align-items: center; justify-content: center; border-radius: 0.375rem; background: #4f46e5; color: white;">
+                <i class="fas fa-plus"></i>
+              </button>`
+            : `<button type="button" class="btn btn-danger remove-service" style="padding: 0; height: 38px; width: 38px; display: flex; align-items: center; justify-content: center; border-radius: 0.375rem;">
+                <i class="fas fa-times"></i>
+              </button>`;
+
+        const startDateValue = data ? (data.start_date ? data.start_date.split('T')[0] : '') : today;
+        const endDateValue = data ? (data.end_date ? data.end_date.split('T')[0] : '') : '';
+
+        row.innerHTML = `
+            <div>
+                ${isFirst ? '<label class="form-label" style="font-size: 0.7rem;">Service</label>' : ''}
+                <select name="services[${index}][id]" class="form-control service-select" required>
+                    ${options}
+                </select>
+            </div>
+            <div>
+                ${isFirst ? '<label class="form-label" style="font-size: 0.7rem;">Start Date</label>' : ''}
+                <input type="date" name="services[${index}][start_date]" class="form-control" value="${startDateValue}">
+            </div>
+            <div>
+                ${isFirst ? '<label class="form-label" style="font-size: 0.7rem;">End Date</label>' : ''}
+                <input type="date" name="services[${index}][end_date]" class="form-control" value="${endDateValue}" min="${today}">
+            </div>
+            ${actionButton}
+        `;
+
+        container.appendChild(row);
+
+        const select = row.querySelector('.service-select');
+        select.addEventListener('change', () => updateServiceDropdowns(type));
+
+        if (!isFirst) {
+            row.querySelector('.remove-service').addEventListener('click', function() {
+                row.remove();
+                updateServiceDropdowns(type);
+            });
+        }
+        
+        // Initial update
+        updateServiceDropdowns(type);
+    }
+
+    function updateServiceDropdowns(type) {
+        const container = document.getElementById(type + '_service_container');
+        const selects = container.querySelectorAll('.service-select');
+        const selectedValues = Array.from(selects).map(s => s.value).filter(v => v !== '');
+
+        selects.forEach(select => {
+            const currentValue = select.value;
+            const options = select.querySelectorAll('option');
+            
+            options.forEach(option => {
+                if (option.value === '') return; // Skip "Select Service"
+                
+                if (selectedValues.includes(option.value) && option.value !== currentValue) {
+                    option.style.display = 'none';
+                    option.disabled = true;
+                } else {
+                    option.style.display = 'block';
+                    option.disabled = false;
+                }
+            });
+        });
+    }
+
+    function openAddModal() { 
+        document.getElementById('addClientModal').style.display = 'block'; 
+        $('#add_service_container').empty();
+        addServiceRow('add');
+    }
+
     function closeAddModal() { document.getElementById('addClientModal').style.display = 'none'; }
     function closeEditModal() { document.getElementById('editClientModal').style.display = 'none'; }
     function closeViewModal() { document.getElementById('viewClientModal').style.display = 'none'; }
@@ -592,12 +696,18 @@
                 const radio = document.querySelector(`#editClientModal input[name="business_type"][value="${bizType}"]`);
                 if(radio) radio.checked = true;
                 
-                // Trigger toggle to show/hide fields properly before setting values
                 toggleClientFields('edit');
 
                 $('#edit_product_name_select2').val(data.product_id || []).trigger('change');
                 $('#edit_project_id_select2').val(data.project_id || []).trigger('change');
-                $('#edit_service_id_select2').val(data.service_id || []).trigger('change');
+                
+                // Clear and populate services
+                $('#edit_service_container').empty();
+                if(data.services && data.services.length > 0) {
+                    data.services.forEach(s => addServiceRow('edit', s));
+                } else {
+                    addServiceRow('edit');
+                }
 
                 if (CKEDITOR.instances['edit_project_description']) {
                     CKEDITOR.instances['edit_project_description'].setData(data.project_description || '');
@@ -653,24 +763,79 @@
                 // Projects Mapping
                 let projectHtml = '';
                 if(data.project_id && Array.isArray(data.project_id) && data.project_id.length > 0) {
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
                     const pIds = data.project_id.map(String);
                     const clientProjects = projectsData.filter(p => pIds.includes(String(p.id)));
-                    projectHtml = clientProjects.map(p => `<span style="display:inline-block; background: #f0fdf4; color: #15803d; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; margin-right: 0.5rem; margin-bottom: 0.5rem;">${p.name}</span>`).join('');
+                    
+                    projectHtml = clientProjects.map(p => {
+                        const startDate = p.start_date ? new Date(p.start_date).toLocaleDateString('en-GB') : 'N/A';
+                        const endDateObj = p.end_date ? new Date(p.end_date) : null;
+                        const endDateLabel = endDateObj ? endDateObj.toLocaleDateString('en-GB') : 'Open';
+                        
+                        let remainingDaysHtml = '';
+                        if (endDateObj) {
+                            endDateObj.setHours(0, 0, 0, 0);
+                            const diffTime = endDateObj - today;
+                            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                            
+                            if (diffDays < 0) {
+                                remainingDaysHtml = `<span style="display:inline-block; background: #fee2e2; color: #dc2626; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; border: 1px solid #fecaca; margin-top: 4px;">EXPIRED (${Math.abs(diffDays)} days ago)</span>`;
+                            } else if (diffDays === 0) {
+                                remainingDaysHtml = `<span style="display:inline-block; background: #fff7ed; color: #ea580c; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; border: 1px solid #ffedd5; margin-top: 4px;">EXPIRES TODAY</span>`;
+                            } else {
+                                remainingDaysHtml = `<span style="font-size: 0.7rem; color: #64748b; margin-top: 4px; display: block;">${diffDays} days remaining</span>`;
+                            }
+                        }
+
+                        return `<div style="background: #f0fdf4; color: #15803d; padding: 0.6rem 0.85rem; border-radius: 8px; border: 1px solid #dcfce7; margin-bottom: 0.75rem;">
+                            <strong style="display: block; font-size: 0.85rem; margin-bottom: 2px;">${p.name}</strong>
+                            <span style="font-size: 0.7rem; color: #166534; opacity: 0.8;">${startDate} — ${endDateLabel}</span>
+                            ${remainingDaysHtml}
+                        </div>`;
+                    }).join('');
                 }
                 
                 // Services Mapping
                 let serviceHtml = '';
-                if(data.service_id && Array.isArray(data.service_id) && data.service_id.length > 0) {
-                    const pIds = data.service_id.map(String);
-                    const clientServices = servicesData.filter(p => pIds.includes(String(p.id)));
-                    serviceHtml = clientServices.map(p => `<span style="display:inline-block; background: #fdf4ff; color: #a21caf; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; margin-right: 0.5rem; margin-bottom: 0.5rem;">${p.name}</span>`).join('');
+                if(data.services && data.services.length > 0) {
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+
+                    serviceHtml = data.services.map(cs => {
+                        const sName = cs.service ? cs.service.name : 'Unknown';
+                        const startDate = cs.start_date ? new Date(cs.start_date).toLocaleDateString('en-GB') : 'N/A';
+                        const endDateObj = cs.end_date ? new Date(cs.end_date) : null;
+                        const endDateLabel = endDateObj ? endDateObj.toLocaleDateString('en-GB') : 'Open';
+                        
+                        let remainingDaysHtml = '';
+                        if (endDateObj) {
+                            endDateObj.setHours(0, 0, 0, 0);
+                            const diffTime = endDateObj - today;
+                            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                            
+                            if (diffDays < 0) {
+                                remainingDaysHtml = `<span style="display:inline-block; background: #fee2e2; color: #dc2626; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; border: 1px solid #fecaca; margin-top: 4px;">EXPIRED (${Math.abs(diffDays)} days ago)</span>`;
+                            } else if (diffDays === 0) {
+                                remainingDaysHtml = `<span style="display:inline-block; background: #fff7ed; color: #ea580c; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; border: 1px solid #ffedd5; margin-top: 4px;">EXPIRES TODAY</span>`;
+                            } else {
+                                remainingDaysHtml = `<span style="font-size: 0.7rem; color: #64748b; margin-top: 4px; display: block;">${diffDays} days remaining</span>`;
+                            }
+                        }
+
+                        return `<div style="background: #fdf4ff; color: #a21caf; padding: 0.6rem 0.85rem; border-radius: 8px; border: 1px solid #f5d0fe; margin-bottom: 0.75rem; position: relative;">
+                            <strong style="display: block; font-size: 0.85rem; margin-bottom: 2px;">${sName}</strong>
+                            <span style="font-size: 0.7rem; color: #701a75; opacity: 0.8;">${startDate} — ${endDateLabel}</span>
+                            ${remainingDaysHtml}
+                        </div>`;
+                    }).join('');
                 }
 
                 const engagementHtml = (productHtml || projectHtml || serviceHtml) 
                     ? `<div>
-                        ${productHtml ? `<div style="font-size:0.75rem; color:#64748b; margin-bottom:0.25rem;">Products</div>${productHtml}` : ''}
-                        ${projectHtml ? `<div style="font-size:0.75rem; color:#64748b; margin-top:0.5rem; margin-bottom:0.25rem;">Projects</div>${projectHtml}` : ''}
-                        ${serviceHtml ? `<div style="font-size:0.75rem; color:#64748b; margin-top:0.5rem; margin-bottom:0.25rem;">Services</div>${serviceHtml}` : ''}
+                        ${productHtml ? `<div style="font-size:0.75rem; color:#64748b; margin-bottom:0.25rem;">Products</div><div style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-bottom:1rem;">${productHtml}</div>` : ''}
+                        ${projectHtml ? `<div style="font-size:0.75rem; color:#64748b; margin-bottom:0.25rem;">Projects</div><div style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-bottom:1rem;">${projectHtml}</div>` : ''}
+                        ${serviceHtml ? `<div style="font-size:0.75rem; color:#64748b; margin-bottom:0.25rem;">Services</div>${serviceHtml}` : ''}
                        </div>` 
                     : '<span style="color:#94a3b8; font-style:italic;">No active engagements.</span>';
 

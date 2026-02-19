@@ -26,13 +26,13 @@
             </div>
         </header>
 
-        <div style="padding: 2rem; max-width: 1400px; margin: 0 auto; width: 100%; box-sizing: border-box;">
+        <div style="padding: 2rem; width: 100%; box-sizing: border-box; flex-grow: 1;">
             @include('layouts.backend.notifications') {{-- Simple notifications if needed --}}
             @yield('content')
         </div>
-    </main>
 
-    @include('layouts.backend.footer')
+        @include('layouts.backend.footer')
+    </main>
 
     <style>
         @media (max-width: 1024px) {
@@ -51,3 +51,4 @@
         }
     </style>
 </body>
+</html>

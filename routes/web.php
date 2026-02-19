@@ -128,6 +128,7 @@ Route::middleware(['auth'])->group(function () {
 
         // Unified Setup
         Route::get('/setup', [MasterController::class, 'setup'])->name('admin.setup');
+        Route::post('/setup/settings', [MasterController::class, 'updateSettings'])->name('admin.setup.settings');
     });
 
     // User Routes

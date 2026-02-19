@@ -6,7 +6,14 @@
 <div style="display: flex; align-items: center; justify-content: center; min-height: 70vh;">
     <div style="background: white; padding: 2.5rem; border-radius: 1rem; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 400px;">
         <div style="text-align: center; margin-bottom: 2rem;">
-            <h1 style="font-size: 1.875rem; font-weight: 700; color: #111827; margin-bottom: 0.5rem;">TMS PRO</h1>
+            @php
+                $sys_logo = \App\Models\Setting::get('system_logo');
+                $sys_name = \App\Models\Setting::get('system_name', 'TMS PRO');
+            @endphp
+            @if($sys_logo)
+                <img src="{{ asset('storage/' . $sys_logo) }}" style="height: 50px; margin-bottom: 1rem;">
+            @endif
+            <h1 style="font-size: 1.875rem; font-weight: 700; color: #111827; margin-bottom: 0.5rem;">{{ $sys_name }}</h1>
             <p style="color: #6b7280; font-size: 0.875rem;">Enter your credentials to access your account</p>
         </div>
 

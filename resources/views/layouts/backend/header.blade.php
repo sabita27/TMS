@@ -3,9 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title') - Dashboard | TMS PRO</title>
+    @php
+        $sys_name = \App\Models\Setting::get('system_name', 'TMS PRO');
+        $sys_favicon = \App\Models\Setting::get('system_favicon');
+    @endphp
+    <title>@yield('title') - Dashboard | {{ $sys_name }}</title>
+    @if($sys_favicon)
+        <link rel="icon" type="image/x-icon" href="{{ asset('storage/' . $sys_favicon) }}">
+    @endif
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap5.min.css">
     <style>
         :root {
             --primary-color: #4f46e5;
@@ -54,6 +63,201 @@
         @media (max-width: 768px) {
             .card-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
             .btn { width: 100%; justify-content: center; }
+        }
+
+        /* Custom DataTables Styling (Refined Professional Theme) */
+        .dataTables_wrapper {
+            padding: 0;
+            margin-top: 1rem;
+        }
+        
+        .dataTables_wrapper .top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+            padding: 0 0.5rem;
+        }
+
+        .dataTables_wrapper .dt-buttons {
+            display: flex;
+            gap: 4px;
+        }
+
+        .dataTables_wrapper .dt-buttons .btn {
+            background: #334155 !important;
+            color: #ffffff !important;
+            border: none !important;
+            padding: 0.5rem 1.25rem !important;
+            font-size: 0.75rem !important;
+            font-weight: 600 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.5px !important;
+            border-radius: 4px !important;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
+            transition: all 0.2s ease !important;
+        }
+
+        .dataTables_wrapper .dt-buttons .btn:hover {
+            background: #1e293b !important;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1) !important;
+        }
+
+        .dataTables_filter {
+            margin: 0 !important;
+        }
+
+        .dataTables_filter label {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 600;
+            color: #64748b;
+            font-size: 0.85rem;
+        }
+
+        .dataTables_filter input {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 6px !important;
+            padding: 0.5rem 1rem !important;
+            width: 280px !important;
+            outline: none !important;
+            font-size: 0.85rem !important;
+            color: #1e293b !important;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.02) !important;
+            margin: 0 !important;
+        }
+
+        .dataTables_filter input:focus {
+            border-color: #4f46e5 !important;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1) !important;
+        }
+
+        #clientTable, #setupTable {
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 12px !important;
+            overflow: hidden !important;
+            margin-top: 0 !important;
+            width: 100% !important;
+            border-collapse: separate !important;
+            border-spacing: 0 !important;
+        }
+
+        #clientTable thead, #setupTable thead {
+            background-color: #cbd5e1 !important;
+        }
+
+        #clientTable thead tr th, #setupTable thead tr th {
+            color: #000000 !important;
+            background-color: #cbd5e1 !important;
+            font-weight: 800 !important;
+            text-transform: uppercase !important;
+            font-size: 0.75rem !important;
+            padding: 1.25rem 2rem 1.25rem 1rem !important; /* Increased padding-right to 2rem */
+            border: none !important;
+            letter-spacing: 0.05em !important;
+            border-bottom: 2px solid #94a3b8 !important;
+            position: relative !important;
+        }
+
+        /* Adjust Sorting Icons Position to prevent overlapping */
+        table.dataTable thead .sorting:before, table.dataTable thead .sorting:after,
+        table.dataTable thead .sorting_asc:before, table.dataTable thead .sorting_asc:after,
+        table.dataTable thead .sorting_desc:before, table.dataTable thead .sorting_desc:after {
+            right: 0.5rem !important; /* Fixed distance from the right edge */
+        }
+
+        #clientTable tbody td, #setupTable tbody td {
+            background: #ffffff !important;
+            padding: 1rem !important;
+            border-bottom: 1px solid #f1f5f9 !important;
+            color: #1e293b !important;
+            font-size: 0.875rem !important;
+        }
+
+        #clientTable tbody tr:last-child td, #setupTable tbody tr:last-child td {
+            border-bottom: none !important;
+        }
+
+        #clientTable tbody tr:nth-child(even) td, #setupTable tbody tr:nth-child(even) td {
+            background-color: #f8fafc !important;
+        }
+
+        #clientTable tbody tr:hover td, #setupTable tbody tr:hover td {
+            background-color: #f1f5f9 !important;
+        }
+
+        /* Sorting Icons Visibility (Dark for Grey Header) */
+        table.dataTable thead .sorting:before, table.dataTable thead .sorting:after,
+        table.dataTable thead .sorting_asc:before, table.dataTable thead .sorting_asc:after,
+        table.dataTable thead .sorting_desc:before, table.dataTable thead .sorting_desc:after {
+            color: #000000 !important;
+            opacity: 0.6 !important;
+        }
+
+        .dataTables_paginate {
+            padding-top: 1.5rem !important;
+            display: flex !important;
+            justify-content: flex-end !important;
+        }
+
+        .dataTables_paginate .pagination {
+            display: flex !important;
+            gap: 4px !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            list-style: none !important;
+        }
+
+        .dataTables_paginate .pagination .page-item .page-link {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            min-width: 38px !important;
+            height: 38px !important;
+            padding: 0 0.75rem !important;
+            border-radius: 6px !important;
+            border: 1px solid #e2e8f0 !important;
+            background: #ffffff !important;
+            color: #64748b !important;
+            font-size: 0.85rem !important;
+            font-weight: 600 !important;
+            text-decoration: none !important;
+            transition: all 0.2s !important;
+            box-shadow: none !important;
+        }
+
+        .dataTables_paginate .pagination .page-item.active .page-link {
+            background: #4f46e5 !important;
+            color: #ffffff !important;
+            border-color: #4f46e5 !important;
+            box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2) !important;
+        }
+
+        .dataTables_paginate .pagination .page-item:hover:not(.active):not(.disabled) .page-link {
+            background: #f1f5f9 !important;
+            color: #1e293b !important;
+            border-color: #cbd5e1 !important;
+        }
+
+        .dataTables_paginate .pagination .page-item.disabled .page-link {
+            opacity: 0.5 !important;
+            background: #f8fafc !important;
+            color: #94a3b8 !important;
+            cursor: not-allowed !important;
+            border-color: #e2e8f0 !important;
+        }
+
+        /* Support for both DataTables default and Bootstrap 5 class names */
+        .paginate_button {
+            padding: 0.5rem 1rem !important;
+            border-radius: 6px !important;
+            border: 1px solid #e2e8f0 !important;
+            margin-left: 4px !important;
+            cursor: pointer !important;
+            display: inline-block !important;
         }
     </style>
     @yield('styles')

@@ -13,6 +13,8 @@ use App\Models\Service;
 use App\Models\Role;
 use App\Models\Designation;
 use App\Models\Position;
+use App\Models\Setting;
+use App\Models\ClientService;
 use Illuminate\Http\Request;
 
 class MasterController extends Controller
@@ -21,11 +23,12 @@ class MasterController extends Controller
     public function setup(Request $request)
     {
         $type = $request->query('type', 'category');
+        $section = $request->query('section', 'identity');
         $data = [];
 
         switch ($type) {
             case 'global':
-                // Placeholder for global settings
+                $data['settings'] = Setting::pluck('value', 'key')->toArray();
                 break;
             case 'role':
                 $data['roles'] = Role::latest()->get();
@@ -51,13 +54,13 @@ class MasterController extends Controller
                 break;
         }
 
-        return view('admin.masters.setup', compact('type', 'data'));
+        return view('admin.masters.setup', compact('type', 'data', 'section'));
     }
 
     // Clients
     public function clients()
     {
-        $clients = Client::latest()->paginate(10);
+        $clients = Client::with('services.service')->latest()->get();
         $products = Product::where('status', true)->get();
         $projects = Project::where('status', true)->get();
         $services = Service::where('status', true)->get();
@@ -86,18 +89,32 @@ class MasterController extends Controller
             'attachment' => 'nullable|file|max:2048',
         ]);
 
-        $data = $request->except('attachment');
+        $data = $request->except(['attachment', 'services']);
         if ($request->hasFile('attachment')) {
             $data['attachment'] = $request->file('attachment')->store('clients', 'public');
         }
 
-        Client::create($data);
+        $client = Client::create($data);
+
+        if ($request->has('services')) {
+            foreach ($request->services as $service) {
+                if (!empty($service['id'])) {
+                    ClientService::create([
+                        'client_id' => $client->id,
+                        'service_id' => $service['id'],
+                        'start_date' => $service['start_date'],
+                        'end_date' => $service['end_date'],
+                    ]);
+                }
+            }
+        }
+
         return back()->with('success', 'Client added successfully.');
     }
 
     public function editClient(Client $client)
     {
-        return response()->json($client);
+        return response()->json($client->load('services.service'));
     }
 
     public function updateClient(Request $request, Client $client)
@@ -110,9 +127,6 @@ class MasterController extends Controller
             'business_type' => 'required|string|in:product,project,service,both',
             'product_id' => 'nullable|array',
             'project_id' => 'nullable|array',
-            'service_id' => 'nullable|array',
-            'project_start_date' => 'nullable|date',
-            'project_end_date' => 'nullable|date',
             'contact_person1_name' => 'required|string|max:255',
             'contact_person1_phone' => 'required|string|max:20',
             'contact_person2_name' => 'nullable|string|max:255',
@@ -122,12 +136,28 @@ class MasterController extends Controller
             'attachment' => 'nullable|file|max:2048',
         ]);
 
-        $data = $request->except('attachment');
+        $data = $request->except(['attachment', 'services']);
         if ($request->hasFile('attachment')) {
             $data['attachment'] = $request->file('attachment')->store('clients', 'public');
         }
 
         $client->update($data);
+
+        // Update services
+        $client->services()->delete();
+        if ($request->has('services')) {
+            foreach ($request->services as $service) {
+                if (!empty($service['id'])) {
+                    ClientService::create([
+                        'client_id' => $client->id,
+                        'service_id' => $service['id'],
+                        'start_date' => $service['start_date'],
+                        'end_date' => $service['end_date'],
+                    ]);
+                }
+            }
+        }
+
         return back()->with('success', 'Client updated successfully.');
     }
 
@@ -459,5 +489,27 @@ class MasterController extends Controller
     {
         $priority->delete();
         return back()->with('success', 'Ticket Priority deleted successfully.');
+    }
+
+    // Global Settings
+    public function updateSettings(Request $request)
+    {
+        $data = $request->except('_token', 'logo', 'favicon');
+
+        foreach ($data as $key => $value) {
+            Setting::updateOrCreate(['key' => $key], ['value' => $value]);
+        }
+
+        if ($request->hasFile('logo')) {
+            $path = $request->file('logo')->store('branding', 'public');
+            Setting::updateOrCreate(['key' => 'system_logo'], ['value' => $path]);
+        }
+
+        if ($request->hasFile('favicon')) {
+            $path = $request->file('favicon')->store('branding', 'public');
+            Setting::updateOrCreate(['key' => 'system_favicon'], ['value' => $path]);
+        }
+
+        return back()->with('success', 'Settings updated successfully.');
     }
 }

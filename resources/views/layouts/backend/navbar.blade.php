@@ -1,6 +1,17 @@
 <aside id="app-sidebar" style="width: 260px; background: var(--sidebar-bg); color: var(--sidebar-text); display: flex; flex-direction: column; height: 100vh; position: fixed; left: 0; top: 0; bottom: 0; z-index: 1000; transition: transform 0.3s ease-in-out;">
     <div style="padding: 2rem 1.5rem; text-align: center; border-bottom: 1px solid #374151; display: flex; justify-content: space-between; align-items: center;">
-        <h2 style="margin: 0; font-size: 1.5rem; color: #fff; letter-spacing: 1px;">TMS PRO</h2>
+        @php
+            $sys_logo = \App\Models\Setting::get('system_logo');
+            $sys_name = \App\Models\Setting::get('system_name', 'TMS PRO');
+        @endphp
+        @if($sys_logo)
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <img src="{{ asset('storage/' . $sys_logo) }}" style="height: 35px; max-width: 120px; object-fit: contain;">
+                <span style="font-size: 1.1rem; font-weight: 800; color: #fff; letter-spacing: 1px;">{{ $sys_name }}</span>
+            </div>
+        @else
+            <h2 style="margin: 0; font-size: 1.5rem; color: #fff; letter-spacing: 1px;">{{ $sys_name }}</h2>
+        @endif
         <button class="close-sidebar-btn" onclick="document.getElementById('app-sidebar').classList.remove('active'); document.getElementById('mobile-overlay').style.display='none';" style="background: none; border: none; color: #9ca3af; font-size: 1.25rem; cursor: pointer; display: none;">
             <i class="fas fa-times"></i>
         </button>
@@ -18,19 +29,19 @@
             <!-- <div class="nav-label">MANAGEMENT</div> -->
             <div class="nav-label">MANAGEMENT</div>
             <a href="{{ route('admin.users') }}" class="nav-item-link {{ $curr == 'admin.users' ? 'active' : '' }}">
-                <i class="fas fa-users-cog"></i> User Master
+                <i class="fas fa-users-cog"></i> User 
             </a>
             <a href="{{ route('admin.products') }}" class="nav-item-link {{ str_contains($curr, 'admin.products') ? 'active' : '' }}">
-                <i class="fas fa-box-open"></i> Product Master
+                <i class="fas fa-box-open"></i> Product 
             </a>
             <a href="{{ route('admin.clients') }}" class="nav-item-link {{ str_contains($curr, 'admin.clients') ? 'active' : '' }}">
-                <i class="fas fa-user-tie"></i> Client Master
+                <i class="fas fa-user-tie"></i> Client 
             </a>
             <a href="{{ route('admin.projects') }}" class="nav-item-link {{ str_contains($curr, 'admin.projects') ? 'active' : '' }}">
-                <i class="fas fa-project-diagram"></i> Project Master
+                <i class="fas fa-project-diagram"></i> Project
             </a>
             <a href="{{ route('admin.services') }}" class="nav-item-link {{ str_contains($curr, 'admin.services') ? 'active' : '' }}">
-                <i class="fas fa-concierge-bell"></i> Service Master
+                <i class="fas fa-concierge-bell"></i> Service
             </a>
 
             <div class="nav-label">SYSTEM</div>
