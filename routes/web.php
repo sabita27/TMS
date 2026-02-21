@@ -57,6 +57,15 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('/roles/{role}', 'destroy')->name('admin.roles.delete');
         });
 
+        // Permissions
+        Route::controller(\App\Http\Controllers\PermissionController::class)->group(function () {
+            Route::get('/permissions', 'index')->name('admin.permissions');
+            Route::post('/permissions', 'store')->name('admin.permissions.store');
+            Route::get('/permissions/{permission}/edit', 'edit')->name('admin.permissions.edit');
+            Route::put('/permissions/{permission}', 'update')->name('admin.permissions.update');
+            Route::delete('/permissions/{permission}', 'destroy')->name('admin.permissions.delete');
+        });
+
         // Designations
         Route::controller(\App\Http\Controllers\DesignationController::class)->group(function () {
             Route::get('/designations', 'index')->name('admin.designations');

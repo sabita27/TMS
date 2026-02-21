@@ -16,7 +16,7 @@
                     <div style="position: absolute; bottom: 5px; right: 5px; background: #10b981; width: 20px; height: 20px; border-radius: 50%; border: 3px solid #fff;"></div>
                 </div>
                 <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #1e293b;">{{ $user->name }}</h3>
-                <p style="margin: 0.25rem 0 1.5rem 0; color: #64748b; font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">{{ $user->role->name ?? 'User' }}</p>
+                <p style="margin: 0.25rem 0 1.5rem 0; color: #64748b; font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">{{ $user->getRoleNames()->first() ?? 'User' }}</p>
                 
                 <div style="display: flex; flex-direction: column; gap: 0.75rem; text-align: left; padding-top: 1.5rem; border-top: 1px solid #f1f5f9;">
                     <div style="display: flex; align-items: center; gap: 0.75rem; color: #64748b; font-size: 0.9rem;">

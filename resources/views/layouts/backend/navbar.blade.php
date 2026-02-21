@@ -20,72 +20,121 @@
     <nav style="flex-grow: 1; padding: 1.5rem 0; overflow-y: auto;">
         @php $curr = Route::currentRouteName(); @endphp
         
-        @if(optional(Auth::user()->role)->name == 'admin')
-            <div class="nav-label">MAIN</div>
-            <a href="{{ route('admin.dashboard') }}" class="nav-item-link {{ $curr == 'admin.dashboard' ? 'active' : '' }}">
-                <i class="fas fa-th-large"></i> Dashboard
-            </a>
-            
-            <!-- <div class="nav-label">MANAGEMENT</div> -->
+        @can('view dashboard')
+            @if(Auth::user()->hasRole('admin'))
+                <div class="nav-label">MAIN</div>
+                <a href="{{ route('admin.dashboard') }}" class="nav-item-link {{ $curr == 'admin.dashboard' ? 'active' : '' }}">
+                    <i class="fas fa-th-large"></i> Dashboard
+                </a>
+            @endif
+        @endcan
+        
+        @can('manage users')
             <div class="nav-label">MANAGEMENT</div>
             <a href="{{ route('admin.users') }}" class="nav-item-link {{ $curr == 'admin.users' ? 'active' : '' }}">
                 <i class="fas fa-users-cog"></i> User 
             </a>
+        @endcan
+
+        @can('manage products')
             <a href="{{ route('admin.products') }}" class="nav-item-link {{ str_contains($curr, 'admin.products') ? 'active' : '' }}">
                 <i class="fas fa-box-open"></i> Product 
             </a>
+        @endcan
+
+        @can('manage clients')
             <a href="{{ route('admin.clients') }}" class="nav-item-link {{ str_contains($curr, 'admin.clients') ? 'active' : '' }}">
                 <i class="fas fa-user-tie"></i> Client 
             </a>
+        @endcan
+
+        @can('manage projects')
             <a href="{{ route('admin.projects') }}" class="nav-item-link {{ str_contains($curr, 'admin.projects') ? 'active' : '' }}">
                 <i class="fas fa-project-diagram"></i> Project
             </a>
+        @endcan
+
+        @can('manage services')
             <a href="{{ route('admin.services') }}" class="nav-item-link {{ str_contains($curr, 'admin.services') ? 'active' : '' }}">
                 <i class="fas fa-concierge-bell"></i> Service
             </a>
+        @endcan
 
+        @if(Auth::user()->hasRole('admin'))
             <div class="nav-label">SYSTEM</div>
             <a href="{{ route('admin.setup') }}" class="nav-item-link {{ str_contains($curr, 'admin.setup') ? 'active' : '' }}">
                 <i class="fas fa-tools"></i> Setup Hub
             </a>
 
-        @elseif(optional(Auth::user()->role)->name == 'user')
-            <div class="nav-label">MAIN</div>
-            <a href="{{ route('user.dashboard') }}" class="nav-item-link {{ $curr == 'user.dashboard' ? 'active' : '' }}">
-                <i class="fas fa-tachometer-alt"></i> My Dashboard
-            </a>
+            @can('manage roles')
+                <div class="nav-label">ACCESS CONTROL</div>
+                <a href="{{ route('admin.roles') }}" class="nav-item-link {{ str_contains($curr, 'admin.roles') ? 'active' : '' }}">
+                    <i class="fas fa-user-shield"></i> Roles
+                </a>
+            @endcan
+            @can('manage permissions')
+                <a href="{{ route('admin.permissions') }}" class="nav-item-link {{ str_contains($curr, 'admin.permissions') ? 'active' : '' }}">
+                    <i class="fas fa-key"></i> Permissions
+                </a>
+            @endcan
+        @endif
+
+        @can('view dashboard')
+            @if(Auth::user()->hasRole('user'))
+                <div class="nav-label">MAIN</div>
+                <a href="{{ route('user.dashboard') }}" class="nav-item-link {{ $curr == 'user.dashboard' ? 'active' : '' }}">
+                    <i class="fas fa-tachometer-alt"></i> My Dashboard
+                </a>
+            @endif
+        @endcan
+
+        @can('view profile')
             <a href="{{ route('user.profile') }}" class="nav-item-link {{ $curr == 'user.profile' ? 'active' : '' }}">
                 <i class="fas fa-user-circle"></i> Profile Settings
             </a>
-            
+        @endcan
+        
+        @if(Auth::user()->hasRole('user'))
             <div class="nav-label">SUPPORT</div>
-            <a href="{{ route('user.tickets.create') }}" class="nav-item-link {{ $curr == 'user.tickets.create' ? 'active' : '' }}">
-                <i class="fas fa-plus-circle"></i> Raise Ticket
-            </a>
-            <a href="{{ route('user.tickets') }}" class="nav-item-link {{ $curr == 'user.tickets' ? 'active' : '' }}">
-                <i class="fas fa-ticket-alt"></i> My Tickets
-            </a>
+            @can('create tickets')
+                <a href="{{ route('user.tickets.create') }}" class="nav-item-link {{ $curr == 'user.tickets.create' ? 'active' : '' }}">
+                    <i class="fas fa-plus-circle"></i> Raise Ticket
+                </a>
+            @endcan
+            @can('manage tickets')
+                <a href="{{ route('user.tickets') }}" class="nav-item-link {{ $curr == 'user.tickets' ? 'active' : '' }}">
+                    <i class="fas fa-ticket-alt"></i> My Tickets
+                </a>
+            @endcan
             <a href="{{ route('user.products') }}" class="nav-item-link {{ $curr == 'user.products' ? 'active' : '' }}">
                 <i class="fas fa-shopping-bag"></i> Browse Products
             </a>
+        @endif
 
-        @elseif(optional(Auth::user()->role)->name == 'staff')
+        @if(Auth::user()->hasRole('staff'))
             <div class="nav-label">WORK DESK</div>
-            <a href="{{ route('staff.dashboard') }}" class="nav-item-link {{ $curr == 'staff.dashboard' ? 'active' : '' }}">
-                <i class="fas fa-clipboard-list"></i> Assigned Tickets
-            </a>
+            @can('manage tickets')
+                <a href="{{ route('staff.dashboard') }}" class="nav-item-link {{ $curr == 'staff.dashboard' ? 'active' : '' }}">
+                    <i class="fas fa-clipboard-list"></i> Assigned Tickets
+                </a>
+            @endcan
             <a href="{{ route('staff.designation') }}" class="nav-item-link {{ $curr == 'staff.designation' ? 'active' : '' }}">
                 <i class="fas fa-user-id"></i> My Designation
             </a>
+        @endif
 
-        @elseif(optional(Auth::user()->role)->name == 'manager')
+        @if(Auth::user()->hasRole('manager'))
             <div class="nav-label">OPERATIONS</div>
-            <a href="{{ route('manager.dashboard') }}" class="nav-item-link {{ $curr == 'manager.dashboard' ? 'active' : '' }}">
-                <i class="fas fa-chart-line"></i> Dashboard
-            </a>
-            <a href="{{ route('manager.tickets') }}" class="nav-item-link {{ $curr == 'manager.tickets' ? 'active' : '' }}">
-                <i class="fas fa-tasks"></i> All Tickets
-            </a>
+            @can('view dashboard')
+                <a href="{{ route('manager.dashboard') }}" class="nav-item-link {{ $curr == 'manager.dashboard' ? 'active' : '' }}">
+                    <i class="fas fa-chart-line"></i> Dashboard
+                </a>
+            @endcan
+            @can('manage tickets')
+                <a href="{{ route('manager.tickets') }}" class="nav-item-link {{ $curr == 'manager.tickets' ? 'active' : '' }}">
+                    <i class="fas fa-tasks"></i> All Tickets
+                </a>
+            @endcan
         @endif
     </nav>
     

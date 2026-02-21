@@ -19,35 +19,27 @@ class RoleMiddleware
     {
         $user = $request->user();
 
-
         if (!$user) {
             return redirect()->route('login');
         }
 
-        // If user has no role assigned (broken state), log them out to prevent loops
-        if (!$user->role) {
-            \Log::warning('User has no role assigned', ['user_id' => $user->id, 'email' => $user->email]);
-            Auth::logout();
-            return redirect()->route('login')->with('error', 'Your account has no role assigned. Please contact support.');
-        }
-
         // Allow Admin to access all routes
-        if ($user->role->name === 'admin') {
+        if ($user->hasRole('admin')) {
             return $next($request);
         }
 
         // If user has a role but not the required one, show 403
-        if (!in_array($user->role->name, $roles)) {
+        if (!$user->hasAnyRole($roles)) {
             \Log::warning('User role not authorized', [
                 'user_id' => $user->id,
                 'email' => $user->email,
-                'user_role' => $user->role->name,
+                'user_roles' => $user->getRoleNames(),
                 'required_roles' => $roles,
             ]);
             if ($request->expectsJson()) {
                 return response()->json(['message' => 'Unauthorized'], 403);
             }
-            abort(403, 'You do not have permission to access this page. Your role: ' . $user->role->name . ', Required: ' . implode(', ', $roles));
+            abort(403, 'You do not have permission to access this page.');
         }
 
         return $next($request);

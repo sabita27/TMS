@@ -7,10 +7,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Models\Role;
+use Spatie\Permission\Traits\HasRoles;
+
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasRoles;
 
     protected $fillable = [
         'name',
@@ -26,14 +28,14 @@ class User extends Authenticatable
      *
      * @var array
      */
-    protected $with = ['role', 'client_detail'];
+    protected $with = ['legacyRole', 'client_detail'];
 
     /**
      * Get the role associated with the user.
      */
-    public function role()
+    public function legacyRole()
     {
-        return $this->belongsTo(Role::class);
+        return $this->belongsTo(Role::class, 'role_id');
     }
 
     public function staff_detail()

@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Designation;
 use App\Models\Position;
-use App\Models\Role;
+use Spatie\Permission\Models\Role;
 use App\Models\StaffDetail;
 
 class AdminController extends Controller
@@ -25,7 +25,7 @@ class AdminController extends Controller
             'open_tickets' => Ticket::where('status', 'open')->count(),
             'closed_tickets' => Ticket::where('status', 'closed')->count(),
             'categories' => \App\Models\ProductCategory::count(),
-            'agents' => User::whereHas('role', function($q) { $q->where('name', 'staff'); })->count(),
+            'agents' => User::role('staff')->count(),
         ];
 
         // Stats for Charts
@@ -42,7 +42,7 @@ class AdminController extends Controller
             ->groupBy('product_categories.name')
             ->pluck('count', 'name');
 
-        $tickets_by_agent = User::whereHas('role', function($q) { $q->where('name', 'staff'); })
+        $tickets_by_agent = User::role('staff')
             ->withCount('assignedTickets')
             ->pluck('assigned_tickets_count', 'name');
 
@@ -59,8 +59,8 @@ class AdminController extends Controller
 
     public function users()
     {
-        $users = User::with(['role', 'staff_detail.designation', 'staff_detail.position', 'client_detail.client'])->latest()->paginate(10);
-        $roles = \App\Models\Role::all();
+        $users = User::with(['legacyRole', 'staff_detail.designation', 'staff_detail.position', 'client_detail.client'])->latest()->paginate(10);
+        $roles = Role::all();
         $designations = \App\Models\Designation::where('status', true)->get();
         $clients = \App\Models\Client::where('status', true)->get();
         return view('admin.users', compact('users', 'roles', 'designations', 'clients'));
@@ -76,7 +76,7 @@ class AdminController extends Controller
             'password' => 'required|string|min:8',
         ]);
 
-        $role = Role::find($request->role_id);
+        $role = Role::findById($request->role_id);
         $roleName = strtolower($role->name);
         $isStaff = ($roleName == 'staff');
         $isUser = ($roleName == 'user');
@@ -102,6 +102,8 @@ class AdminController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
+        $user->assignRole($roleName);
+
         if ($isStaff) {
             $user->staff_detail()->create([
                 'designation_id' => $request->designation_id,
@@ -120,7 +122,7 @@ class AdminController extends Controller
 
     public function editUser(User $user)
     {
-        $user->load(['staff_detail.designation', 'staff_detail.position', 'client_detail.client']);
+        $user->load(['roles', 'staff_detail.designation', 'staff_detail.position', 'client_detail.client']);
         return response()->json($user);
     }
 
@@ -134,7 +136,7 @@ class AdminController extends Controller
             'status' => 'required|in:0,1',
         ]);
 
-        $role = Role::find($request->role_id);
+        $role = Role::findById($request->role_id);
         $roleName = strtolower($role->name);
         $isStaff = ($roleName == 'staff');
         $isUser = ($roleName == 'user');
@@ -159,6 +161,8 @@ class AdminController extends Controller
             'role_id' => $request->role_id,
             'status' => $request->status,
         ]);
+
+        $user->syncRoles([$roleName]);
 
         if ($request->password) {
             $user->update(['password' => Hash::make($request->password)]);

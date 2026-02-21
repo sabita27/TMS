@@ -45,7 +45,7 @@
                             <td>{{ $user->name }}</td>
                             <td>{{ $user->email }}</td>
                             <td>{{ $user->phone ?? '-' }}</td>
-                            <td><span class="badge badge-info">{{ ucfirst($user->role->name ?? 'None') }}</span></td>
+                            <td><span class="badge badge-info">{{ ucfirst($user->getRoleNames()->first() ?? 'None') }}</span></td>
                             <td>
                                 <span class="badge {{ $user->status ? 'badge-success' : 'badge-danger' }}">
                                     {{ $user->status ? 'Active' : 'Inactive' }}
@@ -415,7 +415,7 @@
                         });
 
                     // Professional Role & Status Badges
-                    const roleName = data.role ? data.role.name : 'None';
+                    const roleName = data.roles && data.roles.length > 0 ? data.roles[0].name : 'None';
                     document.getElementById('view_user_role').innerHTML =
                         `<span style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.4rem 1rem; background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; border-radius: 2rem; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">${roleName}</span>`;
 

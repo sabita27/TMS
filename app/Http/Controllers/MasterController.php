@@ -26,14 +26,17 @@ class MasterController extends Controller
     {
         $type = $request->query('type', 'category');
         $section = $request->query('section', 'identity');
+
+        // Redirect role type to dedicated role management
+        if ($type == 'role') {
+            return redirect()->route('admin.roles');
+        }
+
         $data = [];
 
         switch ($type) {
             case 'global':
                 $data['settings'] = Setting::pluck('value', 'key')->toArray();
-                break;
-            case 'role':
-                $data['roles'] = Role::latest()->get();
                 break;
             case 'designation':
                 $data['designations'] = Designation::latest()->get();

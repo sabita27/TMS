@@ -42,13 +42,7 @@
                         <a href="{{ route('admin.setup', ['type' => 'global', 'section' => 'smtp']) }}" class="submenu-link {{ ($type == 'global' && $section == 'smtp') ? 'active' : '' }}">SMTP Setting</a>
                     </div>
                 </div>
-                <!-- 2. Role -->
-                <a href="{{ route('admin.setup', ['type' => 'role']) }}" class="setup-tab {{ $type == 'role' ? 'active' : '' }}">
-                    <div style="display: flex; align-items: center; gap: 0.75rem;">
-                        <i class="fas fa-user-shield"></i>
-                        <span>Role</span>
-                    </div>
-                </a>
+
                 <!-- 3. Designation -->
                 <a href="{{ route('admin.setup', ['type' => 'designation']) }}" class="setup-tab {{ $type == 'designation' ? 'active' : '' }}">
                     <div style="display: flex; align-items: center; gap: 0.75rem;">

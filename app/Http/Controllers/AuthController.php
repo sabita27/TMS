@@ -58,9 +58,11 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'phone' => $request->phone,
-            'role_id' => $userRole->id, // Default role ID
+            'role_id' => $userRole->id, // Keep legacy role_id for now for compatibility
             'password' => Hash::make($request->password),
         ]);
+
+        $user->assignRole('user');
 
         Auth::login($user);
 
@@ -77,17 +79,14 @@ class AuthController extends Controller
 
     private function redirectUser($user)
     {
-        $role = $user->role ? $user->role->name : 'user';
-
-        switch ($role) {
-            case 'admin':
-                return redirect()->route('admin.dashboard');
-            case 'manager':
-                return redirect()->route('manager.dashboard');
-            case 'staff':
-                return redirect()->route('staff.dashboard');
-            default:
-                return redirect()->route('user.dashboard');
+        if ($user->hasRole('admin')) {
+            return redirect()->route('admin.dashboard');
+        } elseif ($user->hasRole('manager')) {
+            return redirect()->route('manager.dashboard');
+        } elseif ($user->hasRole('staff')) {
+            return redirect()->route('staff.dashboard');
+        } else {
+            return redirect()->route('user.dashboard');
         }
     }
 }

@@ -5,7 +5,7 @@
 
     <main style="flex-grow: 1; display: flex; flex-direction: column; overflow-y: auto; margin-left: 260px; transition: margin 0.3s; width: calc(100% - 260px);">
         @php
-            $isUser = auth()->check() && optional(auth()->user()->role)->name === 'user';
+            $isUser = auth()->check() && auth()->user()->hasRole('user');
             $headerHeight = $isUser ? '100px' : '80px';
             $headerPadding = $isUser ? '0 3rem' : '0 1.5rem 0 3rem';
         @endphp
@@ -20,7 +20,7 @@
             <div style="display: flex; align-items: center; gap: 1rem;">
                 <div style="text-align: right;">
                     <div style="font-weight: 600; font-size: 0.9rem;">{{ Auth::user()->name }}</div>
-                    <div style="font-size: 0.75rem; color: var(--text-muted);">{{ ucfirst(optional(Auth::user()->role)->name ?? 'User') }}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">{{ ucfirst(Auth::user()->getRoleNames()->first() ?? 'User') }}</div>
                 </div>
                 <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&background=4f46e5&color=fff" style="width: 42px; height: 42px; border-radius: 50%; border: 2px solid #eef2ff; box-shadow: 0 0 0 1px #4f46e5;">
             </div>
