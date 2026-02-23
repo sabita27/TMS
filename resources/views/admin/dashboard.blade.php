@@ -271,7 +271,7 @@
         }
     });
 
-    // 3. Mini Radial Gauges (Existing)
+    // 3. Mini Radial Gauges (Existing)...
     const createMiniRadial = (id, color, value) => {
         const ctx = document.getElementById(id).getContext('2d');
         new Chart(ctx, {
