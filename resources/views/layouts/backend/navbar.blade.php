@@ -36,29 +36,37 @@
             </a>
         @endcan
 
-        @can('manage products')
-            <a href="{{ route('admin.products') }}" class="nav-item-link {{ str_contains($curr, 'admin.products') ? 'active' : '' }}">
-                <i class="fas fa-box-open"></i> Product 
-            </a>
-        @endcan
+        @if(!Auth::user()->hasRole('manager'))
+            @can('manage products')
+                <a href="{{ route('admin.products') }}" class="nav-item-link {{ str_contains($curr, 'admin.products') ? 'active' : '' }}">
+                    <i class="fas fa-box-open"></i> Product 
+                </a>
+            @endcan
+        @endif
 
-        @can('manage clients')
-            <a href="{{ route('admin.clients') }}" class="nav-item-link {{ str_contains($curr, 'admin.clients') ? 'active' : '' }}">
-                <i class="fas fa-user-tie"></i> Client 
-            </a>
-        @endcan
+        @if(!Auth::user()->hasRole('manager'))
+            @can('manage clients')
+                <a href="{{ route('admin.clients') }}" class="nav-item-link {{ str_contains($curr, 'admin.clients') ? 'active' : '' }}">
+                    <i class="fas fa-user-tie"></i> Client 
+                </a>
+            @endcan
+        @endif
 
-        @can('manage projects')
-            <a href="{{ route('admin.projects') }}" class="nav-item-link {{ str_contains($curr, 'admin.projects') ? 'active' : '' }}">
-                <i class="fas fa-project-diagram"></i> Project
-            </a>
-        @endcan
+        @if(!Auth::user()->hasRole('manager'))
+            @can('manage projects')
+                <a href="{{ route('admin.projects') }}" class="nav-item-link {{ str_contains($curr, 'admin.projects') ? 'active' : '' }}">
+                    <i class="fas fa-project-diagram"></i> Project
+                </a>
+            @endcan
+        @endif
 
-        @can('manage services')
-            <a href="{{ route('admin.services') }}" class="nav-item-link {{ str_contains($curr, 'admin.services') ? 'active' : '' }}">
-                <i class="fas fa-concierge-bell"></i> Service
-            </a>
-        @endcan
+        @if(!Auth::user()->hasRole('manager'))
+            @can('manage services')
+                <a href="{{ route('admin.services') }}" class="nav-item-link {{ str_contains($curr, 'admin.services') ? 'active' : '' }}">
+                    <i class="fas fa-concierge-bell"></i> Service
+                </a>
+            @endcan
+        @endif
 
         @if(Auth::user()->hasRole('admin'))
             <div class="nav-label">SYSTEM</div>
@@ -88,11 +96,13 @@
             @endif
         @endcan
 
-        @can('view profile')
-            <a href="{{ route('user.profile') }}" class="nav-item-link {{ $curr == 'user.profile' ? 'active' : '' }}">
-                <i class="fas fa-user-circle"></i> Profile Settings
-            </a>
-        @endcan
+        @if(!Auth::user()->hasRole('manager'))
+            @can('view profile')
+                <a href="{{ route('user.profile') }}" class="nav-item-link {{ $curr == 'user.profile' ? 'active' : '' }}">
+                    <i class="fas fa-user-circle"></i> Profile Settings
+                </a>
+            @endcan
+        @endif
         
         @if(Auth::user()->hasRole('user'))
             <div class="nav-label">SUPPORT</div>

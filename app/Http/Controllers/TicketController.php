@@ -66,13 +66,10 @@ class TicketController extends Controller
         return back()->with('success', 'Ticket closed successfully.');
     }
 
-    // Manager View
     public function managerTickets()
     {
         $tickets = Ticket::with(['user', 'product', 'assignedStaff'])->latest()->paginate(10);
-        $staffMembers = User::whereHas('role', function ($query) {
-            $query->where('name', 'staff');
-        })->get();
+        $staffMembers = User::role('staff')->get();
         return view('manager.tickets.index', compact('tickets', 'staffMembers'));
     }
 

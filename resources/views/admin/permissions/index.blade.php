@@ -65,9 +65,12 @@
                 <label class="form-label">Permission Name</label>
                 <input type="text" name="name" class="form-control" placeholder="e.g. manage roles" required>
             </div>
-            <div style="display: flex; gap: 1rem; margin-top: 2rem; border-top: 1px solid #eee; padding-top: 1.5rem;">
-                <button type="submit" class="btn btn-primary" style="flex:1;">Save Permission</button>
-            </div>
+           <div style="display: flex; gap: 1rem; margin-top: 2rem; border-top: 1px solid #eee; padding-top: 1.5rem;">
+                    <button type="submit" class="btn btn-primary"
+                        style="flex:1; display:flex; justify-content:center; align-items:center;">
+                        Save Permission
+                    </button>
+                </div>
         </form>
     </div>
 </div>

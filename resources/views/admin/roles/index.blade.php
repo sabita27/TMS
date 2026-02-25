@@ -92,9 +92,12 @@
                 </div>
             </div>
 
-            <div style="display: flex; gap: 1rem; margin-top: 2rem; border-top: 1px solid #eee; padding-top: 1.5rem;">
-                <button type="submit" class="btn btn-primary" style="flex:1;">Save Role</button>
-            </div>
+             <div style="display: flex; gap: 1rem; margin-top: 2rem; border-top: 1px solid #eee; padding-top: 1.5rem;">
+                    <button type="submit" class="btn btn-primary"
+                        style="flex:1; display:flex; justify-content:center; align-items:center;">
+                        Save Role
+                    </button>
+                </div>
         </form>
     </div>
 </div>

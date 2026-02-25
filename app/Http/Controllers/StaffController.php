@@ -11,12 +11,19 @@ class StaffController extends Controller
 {
     public function index()
     {
-        $assigned_tickets = Ticket::where('assigned_to', Auth::id())
+        $staffId = Auth::id();
+        $assigned_tickets = Ticket::where('assigned_to', $staffId)
             ->with(['user', 'product'])
             ->latest()
             ->paginate(10);
             
-        return view('staff.dashboard', compact('assigned_tickets'));
+        $stats = [
+            'total_assigned' => Ticket::where('assigned_to', $staffId)->count(),
+            'open_tickets' => Ticket::where('assigned_to', $staffId)->whereIn('status', ['open', 'in-progress'])->count(),
+            'resolved_tickets' => Ticket::where('assigned_to', $staffId)->where('status', 'resolved')->count(),
+        ];
+            
+        return view('staff.dashboard', compact('assigned_tickets', 'stats'));
     }
 
     public function designation()

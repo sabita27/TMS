@@ -17,6 +17,22 @@ class AuthController extends Controller
         return view('auth.login');
     }
 
+    public function showManagerLogin()
+    {
+        if (Auth::check()) {
+            return $this->redirectUser(Auth::user());
+        }
+        return view('manager.login');
+    }
+
+    public function showAdminLogin()
+    {
+        if (Auth::check()) {
+            return $this->redirectUser(Auth::user());
+        }
+        return view('admin.login');
+    }
+
     public function login(Request $request)
     {
         $credentials = $request->validate([
