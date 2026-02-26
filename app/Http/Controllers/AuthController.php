@@ -40,8 +40,11 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
+        \Log::info('Login attempt', ['email' => $request->email]);
         if (Auth::attempt($credentials)) {
+            \Log::info('Login successful', ['user_id' => Auth::id(), 'roles' => Auth::user()->getRoleNames()]);
             if (Auth::user()->status == 0) {
+                \Log::warning('User deactivated', ['user_id' => Auth::id()]);
                 Auth::logout();
                 return back()->withErrors(['email' => 'Your account is currently deactivated. Please contact support.']);
             }
@@ -49,6 +52,7 @@ class AuthController extends Controller
             return $this->redirectUser(Auth::user())->with('success', 'Logged in successfully!');
         }
 
+        \Log::warning('Login failed', ['email' => $request->email]);
         return back()->withErrors([
             'email' => 'The provided credentials do not match our records.',
         ])->onlyInput('email');
@@ -87,14 +91,22 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
+        \Log::info('Logout method called', ['user_id' => Auth::id()]);
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+        \Log::info('User logged out successfully');
         return redirect()->route('login');
+    }
+
+    public function getLogout(Request $request)
+    {
+        return $this->logout($request);
     }
 
     private function redirectUser($user)
     {
+        \Log::info('Redirecting user', ['user_id' => $user->id, 'roles' => $user->getRoleNames()]);
         if ($user->hasRole('admin')) {
             return redirect()->route('admin.dashboard');
         } elseif ($user->hasRole('manager')) {
@@ -105,4 +117,5 @@ class AuthController extends Controller
             return redirect()->route('user.dashboard');
         }
     }
+    
 }

@@ -17,6 +17,7 @@ class AdminController extends Controller
 {
     public function index()
     {
+        \Log::info('Admin dashboard hit', ['user_id' => auth()->id()]);
         $stats = [
             'users' => User::count(),
             'products' => Product::count(),

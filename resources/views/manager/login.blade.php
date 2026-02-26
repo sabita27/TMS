@@ -32,9 +32,9 @@
                 
                 <div style="margin-bottom: 1.5rem;">
                     <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Management Email</label>
-                    <div style="position: relative;">
-                        <i class="far fa-envelope" style="position: absolute; left: 1.25rem; top: 1rem; color: #94a3b8;"></i>
-                        <input type="email" name="email" style="width: 100%; padding: 0.875rem 1rem 0.875rem 3rem; border: 1.5px solid #e2e8f0; border-radius: 0.75rem; font-size: 1rem; background: #f8fafc; transition: all 0.2s; outline: none;" placeholder="manager@{{ strtolower(str_replace(' ', '', $sys_name)) }}.com" required autofocus onfocus="this.style.borderColor='#f59e0b'; this.style.background='white'; this.style.boxShadow='0 0 0 4px rgba(245, 158, 11, 0.05)'" onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc';">
+                       <div style="position: relative;">
+                        <i class="far fa-envelope" style="position: absolute; left: 1rem; top: 1rem; color: #94a3b8;"></i>
+                        <input type="email" name="email" style="width: 100%; padding: 0.875rem 1rem 0.875rem 2.75rem; border: 1.5px solid #e2e8f0; border-radius: 0.75rem; font-size: 1rem; background: #f8fafc; transition: all 0.2s; outline: none; box-sizing: border-box;" placeholder="name@company.com" required autofocus onfocus="this.style.borderColor='#6366f1'; this.style.background='white'; this.style.boxShadow='0 0 0 4px rgba(99, 102, 241, 0.05)'" onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc';">
                     </div>
                 </div>
 
@@ -43,9 +43,9 @@
                         <label style="font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.05em;">Access Key</label>
                         <a href="#" style="font-size: 0.75rem; color: #f59e0b; text-decoration: none; font-weight: 700;">Forgot?</a>
                     </div>
-                    <div style="position: relative;">
-                        <i class="fas fa-lock" style="position: absolute; left: 1.25rem; top: 1rem; color: #94a3b8;"></i>
-                        <input type="password" name="password" style="width: 100%; padding: 0.875rem 1rem 0.875rem 3rem; border: 1.5px solid #e2e8f0; border-radius: 0.75rem; font-size: 1rem; background: #f8fafc; transition: all 0.2s; outline: none;" placeholder="••••••••••••" required onfocus="this.style.borderColor='#f59e0b'; this.style.background='white'; this.style.boxShadow='0 0 0 4px rgba(245, 158, 11, 0.05)'" onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc';">
+                     <div style="position: relative;">
+                        <i class="fas fa-lock" style="position: absolute; left: 1rem; top: 1rem; color: #94a3b8;"></i>
+                        <input type="password" name="password" style="width: 100%; padding: 0.875rem 1rem 0.875rem 2.75rem; border: 1.5px solid #e2e8f0; border-radius: 0.75rem; font-size: 1rem; background: #f8fafc; transition: all 0.2s; outline: none; box-sizing: border-box;" placeholder="••••••••" required onfocus="this.style.borderColor='#6366f1'; this.style.background='white'; this.style.boxShadow='0 0 0 4px rgba(99, 102, 241, 0.05)'" onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc';">
                     </div>
                 </div>
 

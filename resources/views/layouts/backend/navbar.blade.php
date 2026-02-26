@@ -7,7 +7,7 @@
         @if($sys_logo)
             <div style="display: flex; align-items: center; gap: 0.5rem;">
                 <img src="{{ asset('storage/' . $sys_logo) }}" style="height: 35px; max-width: 120px; object-fit: contain;">
-                <span style="font-size: 1.1rem; font-weight: 800; color: #fff; letter-spacing: 1px;">{{ $sys_name }}</span>
+                {{-- <span style="font-size: 1.1rem; font-weight: 800; color: #fff; letter-spacing: 1px;">{{ $sys_name }}</span> --}}
             </div>
         @else
             <h2 style="margin: 0; font-size: 1.5rem; color: #fff; letter-spacing: 1px;">{{ $sys_name }}</h2>

@@ -48,10 +48,9 @@
         <h1>🔄 Session Reset Required</h1>
         <p>Click the button below to clear your session and log out completely.</p>
         
-        <form action="/logout" method="POST">
-            <input type="hidden" name="_token" value="<?php echo csrf_token(); ?>">
-            <button type="submit">Force Logout & Clear Session</button>
-        </form>
+        <a href="/logout" style="background: white; color: #667eea; border: none; padding: 1rem 2rem; font-size: 1.1rem; font-weight: bold; border-radius: 0.5rem; text-decoration: none; display: inline-block; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)';" onmouseout="this.style.transform='scale(1)';">
+            Force Logout & Clear Session
+        </a>
         
         <div class="info">
             After logout, you'll be redirected to the login page.<br>

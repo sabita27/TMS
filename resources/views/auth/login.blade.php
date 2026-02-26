@@ -65,24 +65,7 @@
                 New to the platform? <a href="{{ route('register') }}" style="color: #6366f1; text-decoration: none; font-weight: 700;">Create Identity</a>
             </div>
 
-            <!-- Specialized Access Grid -->
-            <div style="margin-top: 3.5rem; border-top: 1px solid #f1f5f9; padding-top: 2.5rem;">
-                <div style="text-align: center; font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1.5rem;">Access Operational Nodes</div>
-                <div style="display: flex; gap: 1rem;">
-                    <a href="{{ route('manager.login') }}" style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; padding: 1rem; background: #fff; border: 1.5px solid #e2e8f0; border-radius: 1rem; text-decoration: none; transition: 0.2s;" onmouseover="this.style.borderColor='#6366f1'; this.style.transform='translateY(-2px)';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.transform='translateY(0)';">
-                        <div style="width: 38px; height: 38px; background: #eef2ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 0.25rem;">
-                            <i class="fas fa-user-shield" style="color: #6366f1;"></i>
-                        </div>
-                        <span style="font-size: 0.75rem; font-weight: 700; color: #334155;">Management</span>
-                    </a>
-                    <a href="{{ route('login') }}" style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; padding: 1rem; background: #fff; border: 1.5px solid #e2e8f0; border-radius: 1rem; text-decoration: none; transition: 0.2s;" onmouseover="this.style.borderColor='#10b981'; this.style.transform='translateY(-2px)';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.transform='translateY(0)';">
-                        <div style="width: 38px; height: 38px; background: #ecfdf5; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 0.25rem;">
-                            <i class="fas fa-user-tie" style="color: #10b981;"></i>
-                        </div>
-                        <span style="font-size: 0.75rem; font-weight: 700; color: #334155;">Staff Node</span>
-                    </a>
-                </div>
-            </div>
+
         </div>
 
         <!-- Footer Visual -->
