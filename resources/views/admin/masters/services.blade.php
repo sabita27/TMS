@@ -235,7 +235,7 @@
             subcategorySelect.innerHTML = '<option value="">Select Sub-Category</option>';
 
             if (categoryId) {
-                fetch(`/get-subcategories/${categoryId}`)
+                fetch(`{{ url('get-subcategories') }}/${categoryId}`)
                     .then(response => response.json())
                     .then(data => {
                         data.forEach(subcategory => {
@@ -265,7 +265,7 @@
         }
 
         function editService(id) {
-            fetch(`/admin/services/${id}/edit`)
+            fetch(`{{ url('admin/services') }}/${id}/edit`)
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById('edit_service_name').value = data.name;
@@ -284,7 +284,7 @@
                         CKEDITOR.instances['edit_service_description'].setData(data.description || '');
                     }
 
-                    document.getElementById('editServiceForm').action = `/admin/services/${id}`;
+                    document.getElementById('editServiceForm').action = `{{ url('admin/services') }}/${id}`;
                     document.getElementById('editServiceModal').style.display = 'block';
                 });
         }

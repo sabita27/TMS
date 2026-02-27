@@ -64,7 +64,7 @@ class AdminController extends Controller
         $roles = Role::all();
         $designations = \App\Models\Designation::where('status', true)->get();
         $clients = \App\Models\Client::where('status', true)->get();
-        return view('admin.users', compact('users', 'roles', 'designations', 'clients'));
+        return view('auth.users', compact('users', 'roles', 'designations', 'clients'));
     }
 
     public function storeUser(Request $request)

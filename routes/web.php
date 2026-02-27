@@ -79,7 +79,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Admin-Only Routes
     Route::middleware(['role:admin'])->prefix('admin')->group(function () {
-        Route::get('/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
+        Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->name('admin.dashboard');
         
         // Users Management
         Route::controller(AdminController::class)->group(function () {
@@ -163,7 +163,7 @@ Route::middleware(['auth'])->group(function () {
 
     // User Routes
     Route::middleware(['role:user'])->prefix('user')->group(function () {
-        Route::get('/dashboard', [UserController::class, 'index'])->name('user.dashboard');
+        Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->name('user.dashboard');
         Route::get('/products', [UserController::class, 'products'])->name('user.products');
         
         Route::get('/tickets', [TicketController::class, 'userTickets'])->name('user.tickets');
@@ -174,14 +174,13 @@ Route::middleware(['auth'])->group(function () {
 
     // Staff Routes
     Route::middleware(['role:staff'])->prefix('staff')->group(function () {
-        Route::get('/dashboard', [StaffController::class, 'index'])->name('staff.dashboard');
-        Route::get('/designation', [StaffController::class, 'designation'])->name('staff.designation');
+        Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->name('staff.dashboard');
         Route::post('/tickets/{ticket}/status', [TicketController::class, 'updateStatus'])->name('staff.tickets.status');
     });
 
     // Manager Routes
     Route::middleware(['role:manager'])->prefix('manager')->group(function () {
-        Route::get('/dashboard', [ManagerController::class, 'index'])->name('manager.dashboard');
+        Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->name('manager.dashboard');
         Route::get('/tickets', [TicketController::class, 'managerTickets'])->name('manager.tickets');
         Route::post('/tickets/{ticket}/assign', [TicketController::class, 'assign'])->name('manager.tickets.assign');
         Route::post('/tickets/{ticket}/forward', [TicketController::class, 'forward'])->name('manager.tickets.forward');

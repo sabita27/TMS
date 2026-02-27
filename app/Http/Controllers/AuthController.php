@@ -22,7 +22,7 @@ class AuthController extends Controller
         if (Auth::check()) {
             return $this->redirectUser(Auth::user());
         }
-        return view('manager.login');
+        return view('auth.login');
     }
 
     public function showAdminLogin()
@@ -30,7 +30,7 @@ class AuthController extends Controller
         if (Auth::check()) {
             return $this->redirectUser(Auth::user());
         }
-        return view('admin.login');
+        return view('auth.login');
     }
 
     public function login(Request $request)

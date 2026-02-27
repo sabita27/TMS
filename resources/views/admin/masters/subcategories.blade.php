@@ -114,12 +114,12 @@
 @section('scripts')
 <script>
     function editSubCategory(id) {
-        fetch(`/admin/subcategories/${id}/edit`)
+        fetch(`{{ url('admin/subcategories') }}/${id}/edit`)
             .then(response => response.json())
             .then(data => {
                 document.getElementById('edit_category_id').value = data.category_id;
                 document.getElementById('edit_sub_name').value = data.name;
-                document.getElementById('editSubCatForm').action = `/admin/subcategories/${id}`;
+                document.getElementById('editSubCatForm').action = `{{ url('admin/subcategories') }}/${id}`;
                 document.getElementById('editSubCatModal').style.display = 'block';
             })
             .catch(error => console.error('Error:', error));

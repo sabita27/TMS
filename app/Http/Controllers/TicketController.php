@@ -70,7 +70,7 @@ class TicketController extends Controller
     {
         $tickets = Ticket::with(['user', 'product', 'assignedStaff'])->latest()->paginate(10);
         $staffMembers = User::role('staff')->get();
-        return view('manager.tickets.index', compact('tickets', 'staffMembers'));
+        return view('auth.tickets', compact('tickets', 'staffMembers'));
     }
 
     public function assign(Request $request, Ticket $ticket)

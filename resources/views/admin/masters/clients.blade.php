@@ -1000,7 +1000,7 @@
         }
 
         function editClient(id) {
-            fetch(`/admin/clients/${id}/edit`)
+            fetch(`{{ url('admin/clients') }}/${id}/edit`)
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById('edit_name').value = data.name;
@@ -1045,15 +1045,15 @@
 
                     const attachPreview = document.getElementById('edit_attachment_preview');
                     attachPreview.innerHTML = data.attachment ?
-                        `Current file: <a href="/storage/${data.attachment}" target="_blank">View</a>` : '';
+                        `Current file: <a href="{{ url('storage') }}/${data.attachment}" target="_blank">View</a>` : '';
 
-                    document.getElementById('editClientForm').action = `/admin/clients/${id}`;
+                    document.getElementById('editClientForm').action = `{{ url('admin/clients') }}/${id}`;
                     document.getElementById('editClientModal').style.display = 'block';
                 });
         }
 
         function viewClient(id) {
-            fetch(`/admin/clients/${id}/edit`)
+            fetch(`{{ url('admin/clients') }}/${id}/edit`)
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById('view_name').innerText = data.name;
@@ -1078,7 +1078,7 @@
                     const attachLink = document.getElementById('view_attachment_link');
                     if (data.attachment) {
                         attachLink.innerHTML =
-                            `<a href="/storage/${data.attachment}" target="_blank" class="btn btn-primary" style="font-size:0.8rem; padding: 0.5rem 1rem;">View Attachment</a>`;
+                            `<a href="{{ url('storage') }}/${data.attachment}" target="_blank" class="btn btn-primary" style="font-size:0.8rem; padding: 0.5rem 1rem;">View Attachment</a>`;
                     } else {
                         attachLink.innerHTML = '';
                     }
@@ -1232,7 +1232,7 @@
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
 
-            fetch(`/admin/client-services/${serviceId}/send-reminder`, {
+            fetch(`{{ url('admin/client-services') }}/${serviceId}/send-reminder`, {
                     method: "POST",
                     headers: {
                         "X-CSRF-TOKEN": "{{ csrf_token() }}",

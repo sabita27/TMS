@@ -102,11 +102,11 @@
 @section('scripts')
 <script>
     function editPermission(id) {
-        fetch(`/admin/permissions/${id}/edit`)
+        fetch(`{{ url('admin/permissions') }}/${id}/edit`)
             .then(response => response.json())
             .then(data => {
                 document.getElementById('edit_permission_name').value = data.name;
-                document.getElementById('editPermissionForm').action = `/admin/permissions/${id}`;
+                document.getElementById('editPermissionForm').action = `{{ url('admin/permissions') }}/${id}`;
                 document.getElementById('editPermissionModal').style.display = 'block';
             });
     }

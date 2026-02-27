@@ -128,9 +128,6 @@
                     <i class="fas fa-clipboard-list"></i> Assigned Tickets
                 </a>
             @endcan
-            <a href="{{ route('staff.designation') }}" class="nav-item-link {{ $curr == 'staff.designation' ? 'active' : '' }}">
-                <i class="fas fa-user-id"></i> My Designation
-            </a>
         @endif
 
         @if(Auth::user()->hasRole('manager'))

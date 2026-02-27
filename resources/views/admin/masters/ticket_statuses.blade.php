@@ -109,6 +109,8 @@
     </div>
 </div>
 
+@endsection
+
 @section('scripts')
 <script>
     // Sync color picker with text input
@@ -122,17 +124,16 @@
     });
 
     function editStatus(id) {
-        fetch(`/admin/ticket-statuses/${id}/edit`)
+        fetch(`{{ url('admin/ticket-statuses') }}/${id}/edit`)
             .then(response => response.json())
             .then(data => {
                 document.getElementById('edit_status_name').value = data.name;
                 document.getElementById('edit_status_color').value = data.color;
                 document.getElementById('edit_status_color_text').value = data.color;
-                document.getElementById('editStatusForm').action = `/admin/ticket-statuses/${id}`;
+                document.getElementById('editStatusForm').action = `{{ url('admin/ticket-statuses') }}/${id}`;
                 document.getElementById('editStatusModal').style.display = 'block';
             })
             .catch(error => console.error('Error:', error));
     }
 </script>
-@endsection
 @endsection

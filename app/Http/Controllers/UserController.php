@@ -24,13 +24,13 @@ class UserController extends Controller
     public function products()
     {
         $products = Product::where('status', 1)->with(['category', 'subCategory'])->paginate(12);
-        return view('user.products.index', compact('products'));
+        return view('auth.products', compact('products'));
     }
 
     public function profile()
     {
         $user = Auth::user();
-        return view('user.profile', compact('user'));
+        return view('auth.profile', compact('user'));
     }
 
     public function updateProfile(Request $request)

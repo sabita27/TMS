@@ -196,7 +196,7 @@
                 return;
             }
 
-            fetch(`/get-subcategories/${categoryId}`)
+            fetch(`{{ url('get-subcategories') }}/${categoryId}`)
                 .then(response => response.json())
                 .then(data => {
                     subCategorySelect.innerHTML = '<option value="">Select Sub Category</option>';
@@ -217,7 +217,7 @@
         }
 
         function editProduct(id) {
-            fetch(`/admin/products/${id}/edit`)
+            fetch(`{{ url('admin/products') }}/${id}/edit`)
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById('edit_name').value = data.name;
@@ -231,7 +231,7 @@
                     // Fetch subcategories and select the current one
                     fetchSubCategories(data.category_id, 'edit', data.sub_category_id);
 
-                    document.getElementById('editProductForm').action = `/admin/products/${id}`;
+                    document.getElementById('editProductForm').action = `{{ url('admin/products') }}/${id}`;
                     document.getElementById('editProductModal').style.display = 'block';
                 });
         }

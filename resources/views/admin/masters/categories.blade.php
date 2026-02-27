@@ -94,11 +94,11 @@
 @section('scripts')
 <script>
     function editCategory(id) {
-        fetch(`/admin/categories/${id}/edit`)
+        fetch(`{{ url('admin/categories') }}/${id}/edit`)
             .then(response => response.json())
             .then(data => {
                 document.getElementById('edit_cat_name').value = data.name;
-                document.getElementById('editCatForm').action = `/admin/categories/${id}`;
+                document.getElementById('editCatForm').action = `{{ url('admin/categories') }}/${id}`;
                 document.getElementById('editCatModal').style.display = 'block';
             })
             .catch(error => console.error('Error:', error));

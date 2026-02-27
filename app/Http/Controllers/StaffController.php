@@ -26,9 +26,5 @@ class StaffController extends Controller
         return view('staff.dashboard', compact('assigned_tickets', 'stats'));
     }
 
-    public function designation()
-    {
-        $designations = Designation::where('status', 1)->get();
-        return view('staff.designation', compact('designations'));
     }
 }

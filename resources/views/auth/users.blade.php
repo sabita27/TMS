@@ -393,6 +393,7 @@
             </form>
         </div>
     </div>
+@endsection
 
 @section('scripts')
     <script>
@@ -401,7 +402,7 @@
         }
 
         function viewUser(id) {
-            fetch(`/admin/users/${id}/edit`)
+            fetch(`{{ url('admin/users') }}/${id}/edit`)
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById('view_user_name').innerText = data.name;
@@ -447,7 +448,7 @@
         }
 
         function editUser(id) {
-            fetch(`/admin/users/${id}/edit`)
+            fetch(`{{ url('admin/users') }}/${id}/edit`)
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById('edit_name').value = data.name;
@@ -463,18 +464,18 @@
                         document.getElementById('edit_client_id').value = data.client_detail.client_id;
                     }
 
-                    if (data.staff_detail) {
+                    if (data.staff_detail && data.staff_detail.designation_id) {
                         document.getElementById('edit_designation_id').value = data.staff_detail.designation_id;
-                        // Fetch positions and set value
                         fetchPositions(data.staff_detail.designation_id, 'edit', data.staff_detail.position_id);
                     }
 
-                    document.getElementById('editUserForm').action = `/admin/users/${id}`;
+                    document.getElementById('editUserForm').action = `{{ url('admin/users') }}/${id}`;
                     document.getElementById('editUserModal').style.display = 'block';
                 });
         }
 
         function toggleFields(roleSelect, type) {
+            if (roleSelect.selectedIndex === -1) return;
             const selectedText = roleSelect.options[roleSelect.selectedIndex].text.trim().toLowerCase();
             const staffFields = document.getElementById(`${type}_staff_fields`);
             const clientFields = document.getElementById(`${type}_client_fields`);
@@ -499,14 +500,14 @@
             const positionSelect = document.getElementById(`${type}_position_id`);
             positionSelect.innerHTML = '<option value="">Loading...</option>';
 
-            if (!designationId) {
+            if (!designationId || designationId === "") {
                 positionSelect.innerHTML = '<option value="">Select Position</option>';
                 return;
             }
 
             console.log(`Fetching positions for designation ${designationId}`);
 
-            fetch(`/get-positions/${designationId}`)
+            fetch(`{{ url('get-positions') }}/${designationId}`)
                 .then(response => {
                     if (!response.ok) {
                         throw new Error('Network response was not ok');
@@ -532,5 +533,4 @@
                 });
         }
     </script>
-@endsection
 @endsection

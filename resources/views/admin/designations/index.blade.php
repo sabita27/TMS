@@ -93,14 +93,16 @@
     </div>
 </div>
 
+@endsection
+
 @section('scripts')
 <script>
     function editDesignation(id) {
-        fetch(`/admin/designations/${id}/edit`)
+        fetch(`{{ url('admin/designations') }}/${id}/edit`)
             .then(response => response.json())
             .then(data => {
                 document.getElementById('edit_designation_name').value = data.name;
-                document.getElementById('editDesignationForm').action = `/admin/designations/${id}`;
+                document.getElementById('editDesignationForm').action = `{{ url('admin/designations') }}/${id}`;
                 document.getElementById('editDesignationModal').style.display = 'block';
             });
     }
@@ -115,5 +117,4 @@
         }
     }
 </script>
-@endsection
 @endsection

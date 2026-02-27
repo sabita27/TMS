@@ -109,6 +109,8 @@
     </div>
 </div>
 
+@endsection
+
 @section('scripts')
 <script>
     // Sync color picker with text input
@@ -122,17 +124,16 @@
     });
 
     function editPriority(id) {
-        fetch(`/admin/ticket-priorities/${id}/edit`)
+        fetch(`{{ url('admin/ticket-priorities') }}/${id}/edit`)
             .then(response => response.json())
             .then(data => {
                 document.getElementById('edit_priority_name').value = data.name;
                 document.getElementById('edit_priority_color').value = data.color;
                 document.getElementById('edit_priority_color_text').value = data.color;
-                document.getElementById('editPriorityForm').action = `/admin/ticket-priorities/${id}`;
+                document.getElementById('editPriorityForm').action = `{{ url('admin/ticket-priorities') }}/${id}`;
                 document.getElementById('editPriorityModal').style.display = 'block';
             })
             .catch(error => console.error('Error:', error));
     }
 </script>
-@endsection
 @endsection

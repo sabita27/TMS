@@ -570,6 +570,9 @@
     </div>
 </div>
 
+@endsection
+
+@section('scripts')
 <script>
     function openModal(id) { document.getElementById(id).style.display = 'flex'; }
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
@@ -577,7 +580,7 @@
     function editRole(id, name) {
         document.getElementById('roleModalTitle').innerText = 'Edit Role';
         document.getElementById('roleName').value = name;
-        document.getElementById('roleForm').action = `/admin/roles/${id}`;
+        document.getElementById('roleForm').action = `{{ url('admin/roles') }}/${id}`;
         document.getElementById('roleMethod').value = 'PUT';
         openModal('roleModal');
     }
@@ -585,7 +588,7 @@
     function editDesignation(id, name) {
         document.getElementById('designationModalTitle').innerText = 'Edit Designation';
         document.getElementById('designationName').value = name;
-        document.getElementById('designationForm').action = `/admin/designations/${id}`;
+        document.getElementById('designationForm').action = `{{ url('admin/designations') }}/${id}`;
         document.getElementById('designationMethod').value = 'PUT';
         openModal('designationModal');
     }
@@ -593,7 +596,7 @@
     function editPosition(id, name) {
         document.getElementById('positionModalTitle').innerText = 'Edit Position';
         document.getElementById('positionName').value = name;
-        document.getElementById('positionForm').action = `/admin/positions/${id}`;
+        document.getElementById('positionForm').action = `{{ url('admin/positions') }}/${id}`;
         document.getElementById('positionMethod').value = 'PUT';
         openModal('positionModal');
     }
@@ -601,7 +604,7 @@
     function editCategory(id, name) {
         document.getElementById('categoryModalTitle').innerText = 'Edit Category';
         document.getElementById('categoryName').value = name;
-        document.getElementById('categoryForm').action = `/admin/categories/${id}`;
+        document.getElementById('categoryForm').action = `{{ url('admin/categories') }}/${id}`;
         document.getElementById('categoryMethod').value = 'PUT';
         openModal('categoryModal');
     }
@@ -610,7 +613,7 @@
         document.getElementById('subcategoryModalTitle').innerText = 'Edit Sub-Category';
         document.getElementById('subcategoryName').value = name;
         document.getElementById('subcategoryParent').value = parentId;
-        document.getElementById('subcategoryForm').action = `/admin/subcategories/${id}`;
+        document.getElementById('subcategoryForm').action = `{{ url('admin/subcategories') }}/${id}`;
         document.getElementById('subcategoryMethod').value = 'PUT';
         openModal('subcategoryModal');
     }
@@ -619,7 +622,7 @@
         document.getElementById('priorityModalTitle').innerText = 'Edit Priority';
         document.getElementById('priorityName').value = name;
         document.getElementById('priorityColor').value = color;
-        document.getElementById('priorityForm').action = `/admin/ticket-priorities/${id}`;
+        document.getElementById('priorityForm').action = `{{ url('admin/ticket-priorities') }}/${id}`;
         document.getElementById('priorityMethod').value = 'PUT';
         openModal('priorityModal');
     }
@@ -628,7 +631,7 @@
         document.getElementById('statusModalTitle').innerText = 'Edit Status';
         document.getElementById('statusName').value = name;
         document.getElementById('statusColor').value = color;
-        document.getElementById('statusForm').action = `/admin/ticket-statuses/${id}`;
+        document.getElementById('statusForm').action = `{{ url('admin/ticket-statuses') }}/${id}`;
         document.getElementById('statusMethod').value = 'PUT';
         openModal('statusModal');
     }

@@ -151,7 +151,7 @@
         // Clear all checkboxes
         document.querySelectorAll('.edit-perm-checkbox').forEach(cb => cb.checked = false);
 
-        fetch(`/admin/roles/${id}/edit`)
+        fetch(`{{ url('admin/roles') }}/${id}/edit`)
             .then(response => response.json())
             .then(data => {
                 document.getElementById('edit_role_name').value = data.name;
@@ -165,7 +165,7 @@
                     });
                 }
 
-                document.getElementById('editRoleForm').action = `/admin/roles/${id}`;
+                document.getElementById('editRoleForm').action = `{{ url('admin/roles') }}/${id}`;
                 document.getElementById('editRoleModal').style.display = 'block';
             });
     }

@@ -462,7 +462,7 @@
             subcategorySelect.innerHTML = '<option value="">Select Sub-Category</option>';
 
             if (categoryId) {
-                fetch(`/get-subcategories/${categoryId}`)
+                fetch(`{{ url('get-subcategories') }}/${categoryId}`)
                     .then(response => response.json())
                     .then(data => {
                         data.forEach(subcategory => {
@@ -496,7 +496,7 @@
         }
 
         function viewProject(id) {
-            fetch(`/admin/projects/${id}/edit`)
+            fetch(`{{ url('admin/projects') }}/${id}/edit`)
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById('view_project_name').innerText = data.name;
@@ -525,7 +525,7 @@
                     const attachLink = document.getElementById('view_attachment_link');
                     if (data.attachment) {
                         attachLink.innerHTML =
-                            `<a href="/storage/${data.attachment}" target="_blank" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.25rem; background: #4f46e5; color: white; border-radius: 0.75rem; font-size: 0.825rem; font-weight: 600; text-decoration: none; transition: 0.2s; box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2);"><i class="fas fa-download"></i> Project Assets</a>`;
+                            `<a href="{{ url('storage') }}/${data.attachment}" target="_blank" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.25rem; background: #4f46e5; color: white; border-radius: 0.75rem; font-size: 0.825rem; font-weight: 600; text-decoration: none; transition: 0.2s; box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2);"><i class="fas fa-download"></i> Project Assets</a>`;
                     } else {
                         attachLink.innerHTML =
                             '<span style="color: #94a3b8; font-size: 0.85rem; font-style: italic;"><i class="fas fa-times-circle"></i> No Attachments</span>';
@@ -536,7 +536,7 @@
         }
 
         function editProject(id) {
-            fetch(`/admin/projects/${id}/edit`)
+            fetch(`{{ url('admin/projects') }}/${id}/edit`)
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById('edit_project_name').value = data.name;
@@ -565,12 +565,12 @@
                     const attachPreview = document.getElementById('edit_attachment_preview');
                     if (data.attachment) {
                         attachPreview.innerHTML =
-                            `Current file: <a href="/storage/${data.attachment}" target="_blank" style="color: blue;">View Attachment</a>`;
+                            `Current file: <a href="{{ url('storage') }}/${data.attachment}" target="_blank" style="color: blue;">View Attachment</a>`;
                     } else {
                         attachPreview.innerHTML = '';
                     }
 
-                    document.getElementById('editProjectForm').action = `/admin/projects/${id}`;
+                    document.getElementById('editProjectForm').action = `{{ url('admin/projects') }}/${id}`;
                     document.getElementById('editProjectModal').style.display = 'block';
                 });
         }
