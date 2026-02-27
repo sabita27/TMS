@@ -23,11 +23,61 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/logout', [AuthController::class, 'getLogout']);
 
 Route::middleware(['auth'])->group(function () {
+    // Shared Profile Routes (Accessible by all roles)
+    Route::controller(UserController::class)->group(function () {
+        Route::get('/profile', 'profile')->name('user.profile');
+        Route::put('/profile', 'updateProfile')->name('user.profile.update');
+        Route::put('/profile/password', 'updatePassword')->name('user.profile.password');
+    });
+
+    // Redirect old profile URL to new one
+    Route::get('/user/profile', function () {
+        return redirect()->route('user.profile');
+    });
+
     // API for dynamic categories (Common for all roles)
     Route::get('/get-subcategories/{category}', [MasterController::class, 'getSubCategories'])->name('api.subcategories');
     Route::get('/get-positions/{designation}', [AdminController::class, 'getPositions'])->name('api.positions');
 
-    // Admin Routes
+    // Routes shared by Admin and Manager
+    Route::middleware(['role:admin|manager'])->prefix('admin')->group(function () {
+        // Clients
+        Route::controller(MasterController::class)->group(function () {
+            Route::get('/clients', 'clients')->name('admin.clients');
+            Route::post('/clients', 'storeClient')->name('admin.clients.store');
+            Route::get('/clients/{client}/edit', 'editClient')->name('admin.clients.edit');
+            Route::put('/clients/{client}', 'updateClient')->name('admin.clients.update');
+            Route::delete('/clients/{client}', 'destroyClient')->name('admin.clients.delete');
+            // Service Reminder Email
+            Route::post('/client-services/{clientService}/send-reminder', 'sendReminder')->name('admin.client_services.send_reminder');
+        });
+
+        // Projects
+        Route::controller(MasterController::class)->group(function () {
+            Route::get('/projects', 'projects')->name('admin.projects');
+            Route::post('/projects', 'storeProject')->name('admin.projects.store');
+            Route::get('/projects/{project}/edit', 'editProject')->name('admin.projects.edit');
+            Route::put('/projects/{project}', 'updateProject')->name('admin.projects.update');
+            Route::delete('/projects/{project}', 'destroyProject')->name('admin.projects.delete');
+        });
+
+        // Services
+        Route::controller(MasterController::class)->group(function () {
+            Route::get('/services', 'services')->name('admin.services');
+            Route::post('/services', 'storeService')->name('admin.services.store');
+            Route::get('/services/{service}/edit', 'editService')->name('admin.services.edit');
+            Route::put('/services/{service}', 'updateService')->name('admin.services.update');
+            Route::delete('/services/{service}', 'destroyService')->name('admin.services.delete');
+        });
+
+        Route::get('/products', [MasterController::class, 'products'])->name('admin.products');
+        Route::post('/products', [MasterController::class, 'storeProduct'])->name('admin.products.store');
+        Route::get('/products/{product}/edit', [MasterController::class, 'editProduct'])->name('admin.products.edit');
+        Route::put('/products/{product}', [MasterController::class, 'updateProduct'])->name('admin.products.update');
+        Route::delete('/products/{product}', [MasterController::class, 'destroyProduct'])->name('admin.products.delete');
+    });
+
+    // Admin-Only Routes
     Route::middleware(['role:admin'])->prefix('admin')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
         
@@ -40,17 +90,6 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('/users/{user}', 'destroyUser')->name('admin.users.delete');
         });
         
-        // Clients
-        Route::controller(MasterController::class)->group(function () {
-            Route::get('/clients', 'clients')->name('admin.clients');
-            Route::post('/clients', 'storeClient')->name('admin.clients.store');
-            Route::get('/clients/{client}/edit', 'editClient')->name('admin.clients.edit');
-            Route::put('/clients/{client}', 'updateClient')->name('admin.clients.update');
-            Route::delete('/clients/{client}', 'destroyClient')->name('admin.clients.delete');
-            // Service Reminder Email
-            Route::post('/client-services/{clientService}/send-reminder', 'sendReminder')->name('admin.client_services.send_reminder');
-        });
-
         // Roles
         Route::controller(\App\Http\Controllers\RoleController::class)->group(function () {
             Route::get('/roles', 'index')->name('admin.roles');
@@ -86,29 +125,6 @@ Route::middleware(['auth'])->group(function () {
             Route::put('/positions/{position}', 'update')->name('admin.positions.update');
             Route::delete('/positions/{position}', 'destroy')->name('admin.positions.delete');
         });
-        // Projects
-        Route::controller(MasterController::class)->group(function () {
-            Route::get('/projects', 'projects')->name('admin.projects');
-            Route::post('/projects', 'storeProject')->name('admin.projects.store');
-            Route::get('/projects/{project}/edit', 'editProject')->name('admin.projects.edit');
-            Route::put('/projects/{project}', 'updateProject')->name('admin.projects.update');
-            Route::delete('/projects/{project}', 'destroyProject')->name('admin.projects.delete');
-        });
-
-        // Services
-        Route::controller(MasterController::class)->group(function () {
-            Route::get('/services', 'services')->name('admin.services');
-            Route::post('/services', 'storeService')->name('admin.services.store');
-            Route::get('/services/{service}/edit', 'editService')->name('admin.services.edit');
-            Route::put('/services/{service}', 'updateService')->name('admin.services.update');
-            Route::delete('/services/{service}', 'destroyService')->name('admin.services.delete');
-        });
-        
-        Route::get('/products', [MasterController::class, 'products'])->name('admin.products');
-        Route::post('/products', [MasterController::class, 'storeProduct'])->name('admin.products.store');
-        Route::get('/products/{product}/edit', [MasterController::class, 'editProduct'])->name('admin.products.edit');
-        Route::put('/products/{product}', [MasterController::class, 'updateProduct'])->name('admin.products.update');
-        Route::delete('/products/{product}', [MasterController::class, 'destroyProduct'])->name('admin.products.delete');
         
         Route::get('/categories', [MasterController::class, 'categories'])->name('admin.categories');
         Route::post('/categories', [MasterController::class, 'storeCategory'])->name('admin.categories.store');
@@ -149,9 +165,6 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['role:user'])->prefix('user')->group(function () {
         Route::get('/dashboard', [UserController::class, 'index'])->name('user.dashboard');
         Route::get('/products', [UserController::class, 'products'])->name('user.products');
-        Route::get('/profile', [UserController::class, 'profile'])->name('user.profile');
-        Route::put('/profile', [UserController::class, 'updateProfile'])->name('user.profile.update');
-        Route::put('/profile/password', [UserController::class, 'updatePassword'])->name('user.profile.password');
         
         Route::get('/tickets', [TicketController::class, 'userTickets'])->name('user.tickets');
         Route::get('/tickets/create', [TicketController::class, 'create'])->name('user.tickets.create');

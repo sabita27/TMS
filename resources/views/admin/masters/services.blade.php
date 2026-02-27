@@ -53,15 +53,17 @@
                                         style="padding: 0.4rem 0.7rem; font-size: 0.75rem;">
                                         <i class="fas fa-edit"></i> Edit
                                     </button>
-                                    <form action="{{ route('admin.services.delete', $service->id) }}" method="POST"
-                                        onsubmit="return confirm('Are you sure you want to delete this service?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger"
-                                            style="padding: 0.4rem 0.7rem; font-size: 0.75rem;">
-                                            <i class="fas fa-trash"></i> Delete
-                                        </button>
-                                    </form>
+                                    @if(Auth::user()->hasRole('admin'))
+                                        <form action="{{ route('admin.services.delete', $service->id) }}" method="POST"
+                                            onsubmit="return confirm('Are you sure you want to delete this service?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-danger"
+                                                style="padding: 0.4rem 0.7rem; font-size: 0.75rem;">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </button>
+                                        </form>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
