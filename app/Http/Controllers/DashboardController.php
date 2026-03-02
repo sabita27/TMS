@@ -76,9 +76,12 @@ class DashboardController extends Controller
 
         // Recent Tickets (Contextual)
         $query = Ticket::with(['user', 'product']);
-        if ($user->hasRole('staff')) {
+        if ($user->hasAnyRole(['admin', 'manager'])) {
+            // No additional filter for high-level management
+        } elseif ($user->hasRole('staff')) {
             $query->where('assigned_to', $user->id);
-        } elseif ($user->hasRole('user')) {
+        } else {
+            // Regular user or custom role: only show their own tickets
             $query->where('user_id', $user->id);
         }
         $recent_tickets = $query->latest()->take(5)->get();
