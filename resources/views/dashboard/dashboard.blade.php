@@ -123,12 +123,15 @@
                     <th style="padding: 1rem; text-align: left; font-size: 0.75rem; font-weight: 800; color: #64748b; text-transform: uppercase;">Status</th>
                     <th style="padding: 1rem; text-align: left; font-size: 0.75rem; font-weight: 800; color: #64748b; text-transform: uppercase;">Priority</th>
                     <th style="padding: 1rem; text-align: left; font-size: 0.75rem; font-weight: 800; color: #64748b; text-transform: uppercase;">Date</th>
+                    <th style="padding: 1rem; text-align: center; font-size: 0.75rem; font-weight: 800; color: #64748b; text-transform: uppercase;">Action</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($recent_tickets as $ticket)
                 <tr style="border-bottom: 1px solid #f1f5f9;">
-                    <td style="padding: 1rem; font-weight: 700; color: #1e293b;">#{{ $ticket->ticket_id }}</td>
+                    <td style="padding: 1rem; font-weight: 700; color: #1e293b;">
+                        <a href="{{ route('ticket.show', $ticket->id) }}" style="color: #3b82f6; text-decoration: none;">#{{ $ticket->ticket_id }}</a>
+                    </td>
                     <td style="padding: 1rem;">{{ $ticket->user->name }}</td>
                     <td style="padding: 1rem;">{{ $ticket->subject }}</td>
                     <td style="padding: 1rem;">
@@ -146,10 +149,22 @@
                         </span>
                     </td>
                     <td style="padding: 1rem; color: #64748b; font-size: 0.85rem;">{{ $ticket->created_at->format('M d, Y') }}</td>
+                    <td style="padding: 1rem; text-align: center;">
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem; align-items: center;">
+                            <a href="{{ route('ticket.show', $ticket->id) }}" style="color: #64748b; font-weight: 700; text-decoration: none; font-size: 0.7rem; display: flex; align-items: center; justify-content: center; gap: 0.25rem;">
+                                <i class="fas fa-eye"></i> Details
+                            </a>
+                            @if(Auth::user()->hasAnyRole(['admin', 'manager']))
+                                <a href="{{ route('manager.tickets') }}" style="color: #3b82f6; font-weight: 700; text-decoration: none; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; gap: 0.35rem;">
+                                    <i class="fas fa-tasks"></i> All Tickets
+                                </a>
+                            @endif
+                        </div>
+                    </td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" style="text-align: center; padding: 2rem; color: #6b7280;">No tickets found.</td>
+                    <td colspan="7" style="text-align: center; padding: 2rem; color: #6b7280;">No tickets found.</td>
                 </tr>
                 @endforelse
             </tbody>

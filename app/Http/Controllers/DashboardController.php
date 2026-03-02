@@ -34,21 +34,27 @@ class DashboardController extends Controller
             $stats['products'] = Product::count();
             $stats['clients'] = Client::count();
             $stats['tickets'] = Ticket::count();
-            $stats['open_tickets'] = Ticket::where('status', 'open')->count();
-            $stats['closed_tickets'] = Ticket::where('status', 'closed')->count();
+            $stats['open_tickets'] = Ticket::whereNotIn('status', ['resolved', 'closed'])->count();
+            $stats['closed_tickets'] = Ticket::whereIn('status', ['resolved', 'closed'])->count();
             $stats['agents'] = User::role('staff')->count();
         } 
         // Fetch Limited Stats for Staff (Assigned to them)
         elseif ($user->hasRole('staff')) {
-            $stats['tickets'] = Ticket::where('assigned_to', $user->id)->count();
-            $stats['open_tickets'] = Ticket::where('assigned_to', $user->id)->whereIn('status', ['open', 'in-progress'])->count();
-            $stats['closed_tickets'] = Ticket::where('assigned_to', $user->id)->where('status', 'resolved')->count();
+            $staffId = $user->id;
+            $stats['tickets']         = Ticket::where('assigned_to', $staffId)->count(); // total assigned
+            $stats['total_assigned']  = $stats['tickets'];
+            $stats['open_tickets']    = Ticket::where('assigned_to', $staffId)
+                                              ->whereNotIn('status', ['resolved', 'closed', 'Resolved', 'Closed'])
+                                              ->count();
+            $stats['closed_tickets']  = Ticket::where('assigned_to', $staffId)
+                                              ->whereIn('status', ['resolved', 'closed', 'Resolved', 'Closed'])
+                                              ->count();
         }
         // Fetch Limited Stats for Regular User (Their own tickets)
         else {
             $stats['tickets'] = Ticket::where('user_id', $user->id)->count();
-            $stats['open_tickets'] = Ticket::where('user_id', $user->id)->where('status', 'open')->count();
-            $stats['closed_tickets'] = Ticket::where('user_id', $user->id)->where('status', 'resolved')->count();
+            $stats['open_tickets'] = Ticket::where('user_id', $user->id)->whereNotIn('status', ['resolved', 'closed'])->count();
+            $stats['closed_tickets'] = Ticket::where('user_id', $user->id)->whereIn('status', ['resolved', 'closed'])->count();
         }
 
         // Charts Data (Shared or Contextual)

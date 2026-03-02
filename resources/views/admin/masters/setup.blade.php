@@ -259,7 +259,7 @@
                                         @endif
                                         
                                         <div style="margin-top: 1.5rem; display: flex; justify-content: flex-end;">
-                                            <button type="submit" class="btn btn-primary" style="background: #10b981; border: none; padding: 0.75rem 2rem; border-radius: 0.5rem; font-weight: 700; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2); transition: transform 0.2s;">
+                                            <button type="submit" class="btn btn-primary" style="background: #3b82f6; border: none; padding: 0.75rem 2rem; border-radius: 0.5rem; font-weight: 700; box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2); transition: transform 0.2s;">
                                                 <i class="fas fa-save" style="margin-right: 0.5rem;"></i> Update {{ ucfirst($section) }}
                                             </button>
                                         </div>
@@ -765,10 +765,10 @@
         transition: all 0.2s;
         box-sizing: border-box;
     }
-    .form-control:focus { outline: none; border-color: #10b981; box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1); }
+    .form-control:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); }
     .modal-actions { display: flex; gap: 1rem; margin-top: 2rem; }
     .btn-cancel { flex: 1; padding: 0.75rem; border-radius: 0.75rem; border: 1px solid #e2e8f0; background: #f8fafc; color: #64748b; font-weight: 700; cursor: pointer; }
-    .btn-save { flex: 1; padding: 0.75rem; border-radius: 0.75rem; border: none; background: #10b981; color: white; font-weight: 700; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2); }
+    .btn-save { flex: 1; padding: 0.75rem; border-radius: 0.75rem; border: none; background: #3b82f6; color: white; font-weight: 700; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2); }
 </style>
 
 <script>

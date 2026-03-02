@@ -387,8 +387,11 @@
                     <input type="password" name="password" class="form-control"
                         placeholder="Leave blank to keep current">
                 </div>
-                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
-                    <button type="submit" class="btn btn-primary" style="flex:1;">Update User</button>
+                 <div style="display: flex; gap: 1rem; margin-top: 2rem; border-top: 1px solid #eee; padding-top: 1.5rem;">
+                    <button type="submit" class="btn btn-primary"
+                        style="flex:1; display:flex; justify-content:center; align-items:center;">
+                        Update User
+                    </button>
                 </div>
             </form>
         </div>

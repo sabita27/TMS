@@ -12,9 +12,16 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
-            'role' => \App\Http\Middleware\RoleMiddleware::class,
-            'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+            // Legacy & Spatie built-in
+            'role'               => \App\Http\Middleware\RoleMiddleware::class,
+            'permission'         => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
+
+            // Role-specific module middleware
+            'admin'   => \App\Http\Middleware\AdminMiddleware::class,
+            'manager' => \App\Http\Middleware\ManagerMiddleware::class,
+            'staff'   => \App\Http\Middleware\StaffMiddleware::class,
+            'user'    => \App\Http\Middleware\UserMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

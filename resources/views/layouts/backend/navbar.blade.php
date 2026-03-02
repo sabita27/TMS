@@ -20,23 +20,29 @@
     <nav style="flex-grow: 1; padding: 1.5rem 0; overflow-y: auto;">
         @php $curr = Route::currentRouteName(); @endphp
         
-        @can('view dashboard')
-            @if(Auth::user()->hasAnyRole(['admin', 'manager']))
-                <div class="nav-label">MAIN</div>
-                @if(Auth::user()->hasRole('admin'))
-                    <a href="{{ route('admin.dashboard') }}" class="nav-item-link {{ $curr == 'admin.dashboard' ? 'active' : '' }}">
-                        <i class="fas fa-th-large"></i> Dashboard
-                    </a>
-                @else
-                    <a href="{{ route('manager.dashboard') }}" class="nav-item-link {{ $curr == 'manager.dashboard' ? 'active' : '' }}">
-                        <i class="fas fa-th-large"></i> Dashboard
-                    </a>
-                @endif
-            @endif
-        @endcan
+        {{-- Main Dashboard for All Roles --}}
+        @php
+            $showMain = Auth::check();
+            $rolePrefix = strtolower(Auth::user()->getRoleNames()->first() ?? 'user');
+            $dashboardRoute = Route::has("$rolePrefix.dashboard") ? "$rolePrefix.dashboard" : 'user.dashboard';
+        @endphp
+
+        @if($showMain)
+            <div class="nav-label">MAIN</div>
+            <a href="{{ route($dashboardRoute) }}" class="nav-item-link {{ $curr == $dashboardRoute ? 'active' : '' }}">
+                <i class="fas fa-th-large"></i> Dashboard
+            </a>
+        @endif
         
-        {{-- Management Section for Admin & Manager --}}
-        @if(Auth::user()->hasAnyRole(['admin', 'manager']))
+        {{-- Management Section - Permission Based --}}
+        @php
+            $hasManagement = Auth::user()->can('manage users') || 
+                              Auth::user()->can('manage products') || 
+                              Auth::user()->can('manage clients') || 
+                              Auth::user()->can('manage projects') || 
+                              Auth::user()->can('manage services');
+        @endphp
+        @if($hasManagement)
             <div class="nav-label">MANAGEMENT</div>
             
             @can('manage users')
@@ -75,9 +81,17 @@
             <a href="{{ route('admin.setup') }}" class="nav-item-link {{ str_contains($curr, 'admin.setup') ? 'active' : '' }}">
                 <i class="fas fa-tools"></i> Setup Hub
             </a>
+        @endif
 
+        {{-- Access Control Section --}}
+        @php
+            $hasAccessControl = Auth::user()->can('manage roles') || 
+                                Auth::user()->can('manage permissions') || 
+                                Auth::user()->can('view profile');
+        @endphp
+        @if($hasAccessControl)
+            <div class="nav-label">ACCESS CONTROL</div>
             @can('manage roles')
-                <div class="nav-label">ACCESS CONTROL</div>
                 <a href="{{ route('admin.roles') }}" class="nav-item-link {{ str_contains($curr, 'admin.roles') ? 'active' : '' }}">
                     <i class="fas fa-user-shield"></i> Roles
                 </a>
@@ -87,56 +101,61 @@
                     <i class="fas fa-key"></i> Permissions
                 </a>
             @endcan
+            @can('view profile')
+                <a href="{{ route('user.profile') }}" class="nav-item-link {{ $curr == 'user.profile' ? 'active' : '' }}">
+                    <i class="fas fa-user-circle"></i> Profile Settings
+                </a>
+            @endcan
         @endif
 
-        @can('view dashboard')
-            @if(Auth::user()->hasRole('user'))
-                <div class="nav-label">MAIN</div>
-                <a href="{{ route('user.dashboard') }}" class="nav-item-link {{ $curr == 'user.dashboard' ? 'active' : '' }}">
-                    <i class="fas fa-tachometer-alt"></i> My Dashboard
-                </a>
-            @endif
-        @endcan
-
-        @can('view profile')
-            <a href="{{ route('user.profile') }}" class="nav-item-link {{ $curr == 'user.profile' ? 'active' : '' }}">
-                <i class="fas fa-user-circle"></i> Profile Settings
-            </a>
-        @endcan
         
-        @if(Auth::user()->hasRole('user'))
-            <div class="nav-label">SUPPORT</div>
+        {{-- Unified Support & Operations Section --}}
+        @php
+            $isStaff   = Auth::user()->hasRole('staff');
+            $isManager = Auth::user()->hasAnyRole(['admin', 'manager']);
+            $hasTickets = Auth::user()->can('create tickets') || Auth::user()->can('manage tickets') || $isStaff;
+            $hasProducts = Auth::check();
+        @endphp
+
+        @if($hasTickets || $hasProducts)
+            <div class="nav-label">
+                @if($isStaff || $isManager || Auth::user()->can('manage tickets'))
+                    OPERATIONS
+                @else
+                    SUPPORT
+                @endif
+            </div>
+
             @can('create tickets')
                 <a href="{{ route('user.tickets.create') }}" class="nav-item-link {{ $curr == 'user.tickets.create' ? 'active' : '' }}">
                     <i class="fas fa-plus-circle"></i> Raise Ticket
                 </a>
             @endcan
-            @can('manage tickets')
+
+            {{-- Regular user: My Tickets --}}
+            @if(Auth::user()->hasRole('user') && Auth::user()->can('manage tickets'))
                 <a href="{{ route('user.tickets') }}" class="nav-item-link {{ $curr == 'user.tickets' ? 'active' : '' }}">
                     <i class="fas fa-ticket-alt"></i> My Tickets
                 </a>
-            @endcan
-            <a href="{{ route('user.products') }}" class="nav-item-link {{ $curr == 'user.products' ? 'active' : '' }}">
-                <i class="fas fa-shopping-bag"></i> Browse Products
-            </a>
-        @endif
+            @endif
 
-        @if(Auth::user()->hasRole('staff'))
-            <div class="nav-label">WORK DESK</div>
-            @can('manage tickets')
-                <a href="{{ route('staff.dashboard') }}" class="nav-item-link {{ $curr == 'staff.dashboard' ? 'active' : '' }}">
+            {{-- Staff: Assigned Tickets (shown by ROLE, not by manage tickets permission) --}}
+            @if($isStaff)
+                <a href="{{ route('staff.assigned_tickets') }}" class="nav-item-link {{ $curr == 'staff.assigned_tickets' ? 'active' : '' }}">
                     <i class="fas fa-clipboard-list"></i> Assigned Tickets
                 </a>
-            @endcan
-        @endif
+            @endif
 
-        @if(Auth::user()->hasRole('manager'))
-            <div class="nav-label">OPERATIONS</div>
-            @can('manage tickets')
+            {{-- Admin / Manager: All Tickets --}}
+            @if($isManager)
                 <a href="{{ route('manager.tickets') }}" class="nav-item-link {{ $curr == 'manager.tickets' ? 'active' : '' }}">
                     <i class="fas fa-tasks"></i> All Tickets
                 </a>
-            @endcan
+            @endif
+
+            <a href="{{ route('user.products') }}" class="nav-item-link {{ $curr == 'user.products' ? 'active' : '' }}">
+                <i class="fas fa-shopping-bag"></i> Browse Products
+            </a>
         @endif
     </nav>
     

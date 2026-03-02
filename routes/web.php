@@ -29,6 +29,9 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/profile', 'updateProfile')->name('user.profile.update');
         Route::put('/profile/password', 'updatePassword')->name('user.profile.password');
     });
+    
+    // Shared Ticket Views
+    Route::get('/tickets/{ticket}', [TicketController::class, 'show'])->name('ticket.show');
 
     // Redirect old profile URL to new one
     Route::get('/user/profile', function () {
@@ -39,10 +42,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/get-subcategories/{category}', [MasterController::class, 'getSubCategories'])->name('api.subcategories');
     Route::get('/get-positions/{designation}', [AdminController::class, 'getPositions'])->name('api.positions');
 
-    // Routes shared by Admin and Manager
-    Route::middleware(['role:admin|manager'])->prefix('admin')->group(function () {
+    // Routes shared by Admin, Manager, and custom roles with permissions
+    Route::middleware(['auth'])->prefix('admin')->group(function () {
         // Clients
-        Route::controller(MasterController::class)->group(function () {
+        Route::controller(MasterController::class)->middleware(['permission:manage clients'])->group(function () {
             Route::get('/clients', 'clients')->name('admin.clients');
             Route::post('/clients', 'storeClient')->name('admin.clients.store');
             Route::get('/clients/{client}/edit', 'editClient')->name('admin.clients.edit');
@@ -53,7 +56,7 @@ Route::middleware(['auth'])->group(function () {
         });
 
         // Projects
-        Route::controller(MasterController::class)->group(function () {
+        Route::controller(MasterController::class)->middleware(['permission:manage projects'])->group(function () {
             Route::get('/projects', 'projects')->name('admin.projects');
             Route::post('/projects', 'storeProject')->name('admin.projects.store');
             Route::get('/projects/{project}/edit', 'editProject')->name('admin.projects.edit');
@@ -62,7 +65,7 @@ Route::middleware(['auth'])->group(function () {
         });
 
         // Services
-        Route::controller(MasterController::class)->group(function () {
+        Route::controller(MasterController::class)->middleware(['permission:manage services'])->group(function () {
             Route::get('/services', 'services')->name('admin.services');
             Route::post('/services', 'storeService')->name('admin.services.store');
             Route::get('/services/{service}/edit', 'editService')->name('admin.services.edit');
@@ -70,19 +73,21 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('/services/{service}', 'destroyService')->name('admin.services.delete');
         });
 
-        Route::get('/products', [MasterController::class, 'products'])->name('admin.products');
-        Route::post('/products', [MasterController::class, 'storeProduct'])->name('admin.products.store');
-        Route::get('/products/{product}/edit', [MasterController::class, 'editProduct'])->name('admin.products.edit');
-        Route::put('/products/{product}', [MasterController::class, 'updateProduct'])->name('admin.products.update');
-        Route::delete('/products/{product}', [MasterController::class, 'destroyProduct'])->name('admin.products.delete');
+        Route::middleware(['permission:manage products'])->group(function () {
+            Route::get('/products', [MasterController::class, 'products'])->name('admin.products');
+            Route::post('/products', [MasterController::class, 'storeProduct'])->name('admin.products.store');
+            Route::get('/products/{product}/edit', [MasterController::class, 'editProduct'])->name('admin.products.edit');
+            Route::put('/products/{product}', [MasterController::class, 'updateProduct'])->name('admin.products.update');
+            Route::delete('/products/{product}', [MasterController::class, 'destroyProduct'])->name('admin.products.delete');
+        });
     });
 
-    // Admin-Only Routes
-    Route::middleware(['role:admin'])->prefix('admin')->group(function () {
-        Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->name('admin.dashboard');
+    // Admin-Level Routes (Management by Permission)
+    Route::middleware(['auth'])->prefix('admin')->group(function () {
+        Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->middleware(['role_or_permission:admin|manager|staff|view dashboard'])->name('admin.dashboard');
         
         // Users Management
-        Route::controller(AdminController::class)->group(function () {
+        Route::controller(AdminController::class)->middleware(['permission:manage users'])->group(function () {
             Route::get('/users', 'users')->name('admin.users');
             Route::post('/users', 'storeUser')->name('admin.users.store');
             Route::get('/users/{user}/edit', 'editUser')->name('admin.users.edit');
@@ -91,7 +96,7 @@ Route::middleware(['auth'])->group(function () {
         });
         
         // Roles
-        Route::controller(\App\Http\Controllers\RoleController::class)->group(function () {
+        Route::controller(\App\Http\Controllers\RoleController::class)->middleware(['permission:manage roles'])->group(function () {
             Route::get('/roles', 'index')->name('admin.roles');
             Route::post('/roles', 'store')->name('admin.roles.store');
             Route::get('/roles/{role}/edit', 'edit')->name('admin.roles.edit');
@@ -100,7 +105,7 @@ Route::middleware(['auth'])->group(function () {
         });
 
         // Permissions
-        Route::controller(\App\Http\Controllers\PermissionController::class)->group(function () {
+        Route::controller(\App\Http\Controllers\PermissionController::class)->middleware(['permission:manage permissions'])->group(function () {
             Route::get('/permissions', 'index')->name('admin.permissions');
             Route::post('/permissions', 'store')->name('admin.permissions.store');
             Route::get('/permissions/{permission}/edit', 'edit')->name('admin.permissions.edit');
@@ -109,7 +114,7 @@ Route::middleware(['auth'])->group(function () {
         });
 
         // Designations
-        Route::controller(\App\Http\Controllers\DesignationController::class)->group(function () {
+        Route::controller(\App\Http\Controllers\DesignationController::class)->middleware(['permission:manage designations'])->group(function () {
             Route::get('/designations', 'index')->name('admin.designations');
             Route::post('/designations', 'store')->name('admin.designations.store');
             Route::get('/designations/{designation}/edit', 'edit')->name('admin.designations.edit');
@@ -118,7 +123,7 @@ Route::middleware(['auth'])->group(function () {
         });
 
         // Positions
-        Route::controller(\App\Http\Controllers\PositionController::class)->group(function () {
+        Route::controller(\App\Http\Controllers\PositionController::class)->middleware(['permission:manage positions'])->group(function () {
             Route::get('/positions', 'index')->name('admin.positions');
             Route::post('/positions', 'store')->name('admin.positions.store');
             Route::get('/positions/{position}/edit', 'edit')->name('admin.positions.edit');
@@ -126,20 +131,22 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('/positions/{position}', 'destroy')->name('admin.positions.delete');
         });
         
-        Route::get('/categories', [MasterController::class, 'categories'])->name('admin.categories');
-        Route::post('/categories', [MasterController::class, 'storeCategory'])->name('admin.categories.store');
-        Route::get('/categories/{category}/edit', [MasterController::class, 'editCategory'])->name('admin.categories.edit');
-        Route::put('/categories/{category}', [MasterController::class, 'updateCategory'])->name('admin.categories.update');
-        Route::delete('/categories/{category}', [MasterController::class, 'destroyCategory'])->name('admin.categories.delete');
-        
-        Route::get('/subcategories', [MasterController::class, 'subCategories'])->name('admin.subcategories');
-        Route::post('/subcategories', [MasterController::class, 'storeSubCategory'])->name('admin.subcategories.store');
-        Route::get('/subcategories/{subcategory}/edit', [MasterController::class, 'editSubCategory'])->name('admin.subcategories.edit');
-        Route::put('/subcategories/{subcategory}', [MasterController::class, 'updateSubCategory'])->name('admin.subcategories.update');
-        Route::delete('/subcategories/{subcategory}', [MasterController::class, 'destroySubCategory'])->name('admin.subcategories.delete');
+        Route::middleware(['permission:manage categories'])->group(function () {
+            Route::get('/categories', [MasterController::class, 'categories'])->name('admin.categories');
+            Route::post('/categories', [MasterController::class, 'storeCategory'])->name('admin.categories.store');
+            Route::get('/categories/{category}/edit', [MasterController::class, 'editCategory'])->name('admin.categories.edit');
+            Route::put('/categories/{category}', [MasterController::class, 'updateCategory'])->name('admin.categories.update');
+            Route::delete('/categories/{category}', [MasterController::class, 'destroyCategory'])->name('admin.categories.delete');
+            
+            Route::get('/subcategories', [MasterController::class, 'subCategories'])->name('admin.subcategories');
+            Route::post('/subcategories', [MasterController::class, 'storeSubCategory'])->name('admin.subcategories.store');
+            Route::get('/subcategories/{subcategory}/edit', [MasterController::class, 'editSubCategory'])->name('admin.subcategories.edit');
+            Route::put('/subcategories/{subcategory}', [MasterController::class, 'updateSubCategory'])->name('admin.subcategories.update');
+            Route::delete('/subcategories/{subcategory}', [MasterController::class, 'destroySubCategory'])->name('admin.subcategories.delete');
+        });
 
         // Ticket Statuses
-        Route::controller(MasterController::class)->group(function () {
+        Route::controller(MasterController::class)->middleware(['permission:manage categories'])->group(function () {
             Route::get('/ticket-statuses', 'ticketStatuses')->name('admin.ticket_statuses');
             Route::post('/ticket-statuses', 'storeTicketStatus')->name('admin.ticket_statuses.store');
             Route::get('/ticket-statuses/{status}/edit', 'editTicketStatus')->name('admin.ticket_statuses.edit');
@@ -148,7 +155,7 @@ Route::middleware(['auth'])->group(function () {
         });
 
         // Ticket Priorities
-        Route::controller(MasterController::class)->group(function () {
+        Route::controller(MasterController::class)->middleware(['permission:manage categories'])->group(function () {
             Route::get('/ticket-priorities', 'ticketPriorities')->name('admin.ticket_priorities');
             Route::post('/ticket-priorities', 'storeTicketPriority')->name('admin.ticket_priorities.store');
             Route::get('/ticket-priorities/{priority}/edit', 'editTicketPriority')->name('admin.ticket_priorities.edit');
@@ -156,13 +163,15 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('/ticket-priorities/{priority}', 'destroyTicketPriority')->name('admin.ticket_priorities.delete');
         });
 
-        // Unified Setup
-        Route::get('/setup', [MasterController::class, 'setup'])->name('admin.setup');
-        Route::post('/setup/settings', [MasterController::class, 'updateSettings'])->name('admin.setup.settings');
+        // Unified Setup (Admin only typically, or manage roles)
+        Route::middleware(['role_or_permission:admin|manage roles'])->group(function () {
+            Route::get('/setup', [MasterController::class, 'setup'])->name('admin.setup');
+            Route::post('/setup/settings', [MasterController::class, 'updateSettings'])->name('admin.setup.settings');
+        });
     });
 
-    // User Routes
-    Route::middleware(['role:user'])->prefix('user')->group(function () {
+    // User Routes (and catch-all for new roles)
+    Route::middleware(['auth'])->prefix('user')->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->name('user.dashboard');
         Route::get('/products', [UserController::class, 'products'])->name('user.products');
         
@@ -172,17 +181,19 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/tickets/{ticket}/close', [TicketController::class, 'close'])->name('user.tickets.close');
     });
 
-    // Staff Routes
-    Route::middleware(['role:staff'])->prefix('staff')->group(function () {
+    // Staff Routes (accessible by anyone with the 'staff' role)
+    Route::middleware(['auth', 'role_or_permission:staff|edit tickets'])->prefix('staff')->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->name('staff.dashboard');
+        Route::get('/tickets', [TicketController::class, 'staffAssignedTickets'])->name('staff.assigned_tickets');
         Route::post('/tickets/{ticket}/status', [TicketController::class, 'updateStatus'])->name('staff.tickets.status');
+        Route::post('/tickets/{ticket}/solve', [TicketController::class, 'solve'])->name('staff.tickets.solve');
     });
 
-    // Manager Routes
-    Route::middleware(['role:manager'])->prefix('manager')->group(function () {
-        Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->name('manager.dashboard');
-        Route::get('/tickets', [TicketController::class, 'managerTickets'])->name('manager.tickets');
-        Route::post('/tickets/{ticket}/assign', [TicketController::class, 'assign'])->name('manager.tickets.assign');
-        Route::post('/tickets/{ticket}/forward', [TicketController::class, 'forward'])->name('manager.tickets.forward');
+    // Manager Routes (Permission: Manage Tickets or Manager Role)
+    Route::middleware(['auth'])->prefix('manager')->group(function () {
+        Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->middleware(['role_or_permission:manager|manage tickets'])->name('manager.dashboard');
+        Route::get('/tickets', [TicketController::class, 'managerTickets'])->middleware(['role_or_permission:manager|manage tickets'])->name('manager.tickets');
+        Route::post('/tickets/{ticket}/assign', [TicketController::class, 'assign'])->middleware(['role_or_permission:manager|manage tickets'])->name('manager.tickets.assign');
+        Route::post('/tickets/{ticket}/forward', [TicketController::class, 'forward'])->middleware(['role_or_permission:manager|manage tickets'])->name('manager.tickets.forward');
     });
 });

@@ -6,6 +6,7 @@ use App\Models\Ticket;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\ProductSubCategory;
+use App\Models\TicketStatus;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -13,6 +14,17 @@ use Illuminate\Support\Str;
 
 class TicketController extends Controller
 {
+    // Staff: All Assigned Tickets
+    public function staffAssignedTickets()
+    {
+        $tickets = Ticket::where('assigned_to', Auth::id())
+            ->with(['user', 'product', 'category'])
+            ->latest()
+            ->paginate(15);
+        $ticketStatuses = TicketStatus::where('status', 'active')->get();
+        return view('staff.assigned_tickets', compact('tickets', 'ticketStatuses'));
+    }
+
     // User Tickets
     public function userTickets()
     {
@@ -32,11 +44,11 @@ class TicketController extends Controller
         $request->validate([
             'product_id' => 'nullable|exists:products,id',
             'category_id' => 'required|exists:product_categories,id',
-            'sub_category_id' => 'required|exists:product_sub_categories,id',
+            'sub_category_id' => 'nullable|exists:product_sub_categories,id',
             'subject' => 'required|string|max:255',
             'description' => 'required|string',
             'priority' => 'required|in:low,medium,high',
-            'attachment' => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx,zip|max:5120', // Max 5MB
+            'attachment' => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx,zip|max:20480', // Max 20MB
         ]);
 
         $data = $request->all();
@@ -68,7 +80,7 @@ class TicketController extends Controller
 
     public function managerTickets()
     {
-        $tickets = Ticket::with(['user', 'product', 'assignedStaff'])->latest()->paginate(10);
+        $tickets = Ticket::with(['user', 'product', 'assignedStaff', 'category'])->latest()->paginate(15);
         $staffMembers = User::role('staff')->get();
         return view('auth.tickets', compact('tickets', 'staffMembers'));
     }
@@ -96,11 +108,69 @@ class TicketController extends Controller
     // Staff View
     public function updateStatus(Request $request, Ticket $ticket)
     {
-        $request->validate(['status' => 'required|in:open,in-progress,resolved,closed']);
+        $request->validate(['status' => 'required|string']);
         $ticket->update(['status' => $request->status]);
-        if ($request->status == 'closed') {
+        
+        // Check if the new status is 'closed' or 'resolved'
+        if (in_array(strtolower($request->status), ['closed', 'resolved'])) {
             $ticket->update(['closed_at' => now()]);
         }
-        return back()->with('success', 'Ticket status updated.');
+        return back()->with('success', 'Ticket status updated to ' . $request->status);
+    }
+
+    public function solve(Ticket $ticket)
+    {
+        // Simple authorization check
+        $user = Auth::user();
+        if (!$user->hasAnyRole(['staff', 'admin', 'manager']) || ($user->hasRole('staff') && $ticket->assigned_to !== $user->id)) {
+            abort(403);
+        }
+
+        // Look for 'Resolved' status in the database, fallback to 'resolved' string
+        $resolvedStatus = TicketStatus::where('name', 'LIKE', 'Resolved%')->first();
+        $newStatusName = $resolvedStatus ? $resolvedStatus->name : 'Resolved';
+
+        $ticket->update([
+            'status' => $newStatusName,
+            'closed_at' => now()
+        ]);
+
+        return back()->with('success', 'Ticket marked as Solved!');
+    }
+
+    // View Ticket Details
+    public function show(Ticket $ticket)
+    {
+        // Simple authorization check
+        $user = Auth::user();
+        
+        // Admins and Managers can always see any ticket
+        if (!$user->hasAnyRole(['admin', 'manager'])) {
+            // Standard User ownership check
+            if ($user->hasRole('user') && $ticket->user_id !== $user->id) {
+                abort(403);
+            }
+            // Staff assignment check
+            if ($user->hasRole('staff') && $ticket->assigned_to !== $user->id) {
+                abort(403);
+            }
+        }
+        
+        $ticket->load(['user', 'product', 'category', 'subCategory', 'assignedStaff']);
+        $staffMembers = User::role('staff')->get();
+        $ticketStatuses = TicketStatus::where('status', 'active')->get();
+        
+        // If no statuses in DB, use default set
+        if($ticketStatuses->isEmpty()) {
+            $ticketStatuses = collect([
+                (object)['name' => 'Open', 'color' => '#ef4444'],
+                (object)['name' => 'In-Progress', 'color' => '#f59e0b'],
+                (object)['name' => 'Resolved', 'color' => '#10b981'],
+                (object)['name' => 'Closed', 'color' => '#64748b'],
+                (object)['name' => 'On Hold', 'color' => '#8b5cf6'],
+            ]);
+        }
+
+        return view('auth.ticket_show', compact('ticket', 'staffMembers', 'ticketStatuses'));
     }
 }
