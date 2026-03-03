@@ -27,7 +27,7 @@
     @endif --}}
 
         <div class="table-container">
-            <table>
+            <table id="userTable">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -78,9 +78,8 @@
                 </tbody>
             </table>
         </div>
-        <div style="margin-top: 1rem;">
-            {{ $users->links() }}
         </div>
+    </div>
     </div>
 
     <!-- Add User Modal -->
@@ -535,5 +534,20 @@
                     positionSelect.innerHTML = '<option value="">Error loading positions</option>';
                 });
         }
+
+        $(document).ready(function() {
+            $('#userTable').DataTable({
+                "pageLength": 10,
+                "order": [],
+                "dom": '<"top"Bf>rt<"bottom"ip><"clear">',
+                "buttons": [
+                    'copy', 'csv', 'excel', 'pdf', 'print'
+                ],
+                "language": {
+                    "search": "_INPUT_",
+                    "searchPlaceholder": "Search users..."
+                }
+            });
+        });
     </script>
 @endsection

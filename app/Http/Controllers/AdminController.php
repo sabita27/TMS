@@ -60,7 +60,7 @@ class AdminController extends Controller
 
     public function users()
     {
-        $users = User::with(['legacyRole', 'staff_detail.designation', 'staff_detail.position', 'client_detail.client'])->latest()->paginate(10);
+        $users = User::with(['legacyRole', 'staff_detail.designation', 'staff_detail.position', 'client_detail.client'])->latest()->get();
         $roles = Role::all();
         $designations = \App\Models\Designation::where('status', true)->get();
         $clients = \App\Models\Client::where('status', true)->get();
