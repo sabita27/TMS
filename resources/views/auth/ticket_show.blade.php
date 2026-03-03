@@ -2,12 +2,20 @@
 
 @section('content')
 @php
-    $backRoute = route('manager.tickets');
+    $prevUrl = url()->previous();
+    $currentUrl = url()->current();
+    
+    // Default role-based routes
+    $defaultBack = route('manager.tickets');
     if (Auth::user()->hasRole('user')) {
-        $backRoute = route('user.tickets');
+        $defaultBack = route('user.tickets');
     } elseif (Auth::user()->hasRole('staff')) {
-        $backRoute = route('staff.assigned_tickets');
+        $defaultBack = route('staff.assigned_tickets');
     }
+
+    // If previous URL is from our site and NOT this same page, use it.
+    // This allows returning to Dashboard if they came from there.
+    $backRoute = ($prevUrl != $currentUrl && str_contains($prevUrl, url('/'))) ? $prevUrl : $defaultBack;
 @endphp
 
 <div style="margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between;">

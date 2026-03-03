@@ -3,9 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -40,28 +43,28 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
-        \Log::info('Login attempt', ['email' => $request->email]);
+        Log::info('Login attempt', ['email' => $request->email]);
         
         $user = User::where('email', $request->email)->first();
         if ($user) {
-            \Log::info('User found', ['email' => $user->email, 'status' => $user->status]);
-            $passwordMatch = \Hash::check($request->password, $user->password);
-            \Log::info('Password match check', ['match' => $passwordMatch]);
+            Log::info('User found', ['email' => $user->email, 'status' => $user->status]);
+            $passwordMatch = Hash::check($request->password, $user->password);
+            Log::info('Password match check', ['match' => $passwordMatch]);
             
             if (Auth::attempt($credentials)) {
-                \Log::info('Login successful via Auth::attempt', ['user_id' => Auth::id(), 'roles' => Auth::user()->getRoleNames()]);
+                Log::info('Login successful via Auth::attempt', ['user_id' => Auth::id(), 'roles' => Auth::user()->getRoleNames()]);
                 if (Auth::user()->status == 0) {
-                    \Log::warning('User deactivated', ['user_id' => Auth::id()]);
+                    Log::warning('User deactivated', ['user_id' => Auth::id()]);
                     Auth::logout();
                     return back()->withErrors(['email' => 'Your account is currently deactivated. Please contact support.']);
                 }
                 $request->session()->regenerate();
                 return $this->redirectUser(Auth::user())->with('success', 'Logged in successfully!');
             } else {
-                \Log::warning('Auth::attempt failed despite manual match check being ' . ($passwordMatch ? 'TRUE' : 'FALSE'), ['email' => $request->email]);
+                Log::warning('Auth::attempt failed despite manual match check being ' . ($passwordMatch ? 'TRUE' : 'FALSE'), ['email' => $request->email]);
             }
         } else {
-            \Log::warning('User not found in login attempt', ['email' => $request->email]);
+            Log::warning('User not found in login attempt', ['email' => $request->email]);
         }
 
         return back()->withErrors([
@@ -83,13 +86,13 @@ class AuthController extends Controller
             'password' => 'required|string|min:8|confirmed',
         ]);
 
-        $userRole = \App\Models\Role::where('name', 'user')->first();
+        $userRole = Role::where('name', 'user')->first();
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'phone' => $request->phone,
-            'role_id' => $userRole->id, // Keep legacy role_id for now for compatibility
+            'role_id' => $userRole->id ?? null, // Safe check if role exists
             'password' => Hash::make($request->password),
         ]);
 
@@ -102,11 +105,11 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        \Log::info('Logout method called', ['user_id' => Auth::id()]);
+        Log::info('Logout method called', ['user_id' => Auth::id()]);
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        \Log::info('User logged out successfully');
+        Log::info('User logged out successfully');
         return redirect()->route('login');
     }
 
@@ -117,12 +120,12 @@ class AuthController extends Controller
 
     private function redirectUser($user)
     {
-        \Log::info('Redirecting user', ['user_id' => $user->id, 'roles' => $user->getRoleNames()]);
+        Log::info('Redirecting user', ['user_id' => $user->id, 'roles' => $user->getRoleNames()]);
 
         // If user can view dashboard, send them to the appropriate one
         if ($user->can('view dashboard')) {
             $role = strtolower($user->getRoleNames()->first());
-            if ($role && \Route::has("$role.dashboard")) {
+            if ($role && Route::has("$role.dashboard")) {
                 return redirect()->route("$role.dashboard");
             }
 
