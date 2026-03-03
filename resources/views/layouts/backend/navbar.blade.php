@@ -27,7 +27,7 @@
             $dashboardRoute = Route::has("$rolePrefix.dashboard") ? "$rolePrefix.dashboard" : 'user.dashboard';
         @endphp
 
-        @if($showMain)
+        @if($showMain && Auth::user()->can('view dashboard'))
             <div class="nav-label">MAIN</div>
             <a href="{{ route($dashboardRoute) }}" class="nav-item-link {{ $curr == $dashboardRoute ? 'active' : '' }}">
                 <i class="fas fa-th-large"></i> Dashboard
@@ -132,8 +132,8 @@
                 </a>
             @endcan
 
-            {{-- Regular user: My Tickets --}}
-            @if(Auth::user()->hasRole('user') && Auth::user()->can('manage tickets'))
+            {{-- My Tickets: Any role with manage tickets (excluding staff/manager who have their own views) --}}
+            @if(Auth::user()->can('manage tickets') && !$isStaff && !$isManager)
                 <a href="{{ route('user.tickets') }}" class="nav-item-link {{ $curr == 'user.tickets' ? 'active' : '' }}">
                     <i class="fas fa-ticket-alt"></i> My Tickets
                 </a>

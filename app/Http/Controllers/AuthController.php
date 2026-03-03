@@ -119,23 +119,31 @@ class AuthController extends Controller
     {
         \Log::info('Redirecting user', ['user_id' => $user->id, 'roles' => $user->getRoleNames()]);
 
-        // Attempt to redirect to a role-specific dashboard if the route exists
-        $role = strtolower($user->getRoleNames()->first());
-        if ($role && \Route::has("$role.dashboard")) {
-            return redirect()->route("$role.dashboard");
+        // If user can view dashboard, send them to the appropriate one
+        if ($user->can('view dashboard')) {
+            $role = strtolower($user->getRoleNames()->first());
+            if ($role && \Route::has("$role.dashboard")) {
+                return redirect()->route("$role.dashboard");
+            }
+
+            if ($user->hasRole('admin')) {
+                return redirect()->route('admin.dashboard');
+            } elseif ($user->hasRole('manager')) {
+                return redirect()->route('manager.dashboard');
+            } elseif ($user->hasRole('staff')) {
+                return redirect()->route('staff.dashboard');
+            }
+            
+            return redirect()->route('user.dashboard');
         }
 
-        // Fallback or explicit mapping for established roles
-        if ($user->hasRole('admin')) {
-            return redirect()->route('admin.dashboard');
-        } elseif ($user->hasRole('manager')) {
-            return redirect()->route('manager.dashboard');
-        } elseif ($user->hasRole('staff')) {
-            return redirect()->route('staff.dashboard');
+        // If they can't view dashboard but can manage tickets, send them to ticket list
+        if ($user->can('manage tickets')) {
+            return redirect()->route('user.tickets');
         }
-        
-        // Final fallback for 'user' role or any new custom roles
-        return redirect()->route('user.dashboard');
+
+        // Final fallback: profile page
+        return redirect()->route('user.profile');
     }
     
 }
