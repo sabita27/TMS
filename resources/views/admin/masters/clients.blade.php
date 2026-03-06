@@ -208,7 +208,7 @@
                         <input type="text" name="phone" class="form-control" placeholder="Enter Office Phone Number"
                             required>
                     </div>
-                    <div class="form-group">i
+                    <div class="form-group">
                         <label class="form-label">Country <span style="color: red;">*</span></label>
                         <select name="country" id="add_country" class="form-control" required>
                             <option value="">Select Country</option>

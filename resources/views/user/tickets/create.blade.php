@@ -86,7 +86,7 @@
             </div>
 
             <div style="display: flex; gap: 1rem;">
-                <button type="submit" class="btn btn-primary" style="padding: 1rem 2rem; border-radius: 0.75rem; font-weight: 800; flex: 1; height: auto;">
+                <button type="submit" class="btn btn-primary" style="padding: 1rem 2rem; border-radius: 0.75rem; font-weight: 800; flex: 1; height: auto; align-items:center; display: flex; justify-content: center;">
                     Submit Ticket
                 </button>
                 <a href="{{ route('user.tickets') }}" class="btn" style="padding: 1rem 2rem; border-radius: 0.75rem; font-weight: 700; background: #f1f5f9; color: #475569; display: flex; align-items: center; justify-content: center; text-decoration: none;">

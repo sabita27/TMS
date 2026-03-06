@@ -95,7 +95,7 @@
              <div style="display: flex; gap: 1rem; margin-top: 2rem; border-top: 1px solid #eee; padding-top: 1.5rem;">
                     <button type="submit" class="btn btn-primary"
                         style="flex:1; display:flex; justify-content:center; align-items:center;">
-                        Save Role
+                        Save Client
                     </button>
                 </div>
         </form>
@@ -138,8 +138,11 @@
             </div>
 
             <div style="display: flex; gap: 1rem; margin-top: 2rem; border-top: 1px solid #eee; padding-top: 1.5rem;">
-                <button type="submit" class="btn btn-primary" style="flex:1;">Update Role</button>
-            </div>
+                    <button type="submit" class="btn btn-primary"
+                        style="flex:1; display:flex; justify-content:center; align-items:center;">
+                        Update Role
+                    </button>
+                </div>
         </form>
     </div>
 </div>
