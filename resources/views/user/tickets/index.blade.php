@@ -1,8 +1,61 @@
 @extends('layouts.backend.master')
 
+@section('styles')
+<style>
+    .dashboard-card-header {
+        padding: 2rem; 
+        background: white; 
+        border-bottom: 1px solid #f1f5f9; 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center;
+    }
+    
+    .ticket-table-container {
+        padding: 1rem 2rem 2rem 2rem;
+    }
+
+    @media (max-width: 1024px) {
+        .dashboard-card-header {
+            flex-direction: column;
+            align-items: flex-start !important;
+            gap: 1.25rem;
+            padding: 1.25rem !important;
+        }
+        .dashboard-card-header a.btn {
+            width: 100%;
+            justify-content: center;
+        }
+        .ticket-table-container {
+            padding: 1rem !important;
+            overflow-x: auto !important;
+        }
+        .ticket-table-container table {
+            min-width: 800px !important;
+        }
+        /* Right-align Laravel pagination on mobile */
+        .pagination-container {
+            display: flex !important;
+            justify-content: flex-end !important;
+            padding: 1rem !important;
+            width: 100% !important;
+        }
+        .pagination-container nav {
+            width: 100% !important;
+            display: flex !important;
+            justify-content: flex-end !important;
+        }
+        .pagination-container ul {
+            margin: 0 !important;
+            justify-content: flex-end !important;
+        }
+    }
+</style>
+@endsection
+
 @section('content')
 <div class="card" style="border-radius: 1.5rem; border: none; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); background: white;">
-    <div class="card-header" style="padding: 2rem; background: white; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
+    <div class="card-header dashboard-card-header">
         <div>
             <h3 style="margin: 0; font-size: 1.5rem; font-weight: 800; color: #0f172a;">My Support Tickets</h3>
             <p style="margin: 0.25rem 0 0 0; color: #64748b; font-size: 0.875rem;">View and manage your support requests.</p>
@@ -12,7 +65,7 @@
         </a>
     </div>
 
-    <div class="table-container" style="padding: 1rem 2rem 2rem 2rem;">
+    <div class="table-container ticket-table-container">
         <table style="width: 100%; border-collapse: separate; border-spacing: 0;">
             <thead>
                 <tr style="background: #f8fafc;">
@@ -96,7 +149,7 @@
     </div>
 
     @if($tickets->hasPages())
-    <div style="padding: 1.5rem 2rem; border-top: 1px solid #f1f5f9;">
+    <div class="pagination-container" style="padding: 1.5rem 2rem; border-top: 1px solid #f1f5f9;">
         {{ $tickets->links() }}
     </div>
     @endif

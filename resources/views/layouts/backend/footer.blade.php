@@ -1,4 +1,4 @@
-    <footer style="margin-top: 2rem; padding: 1.5rem 2rem; border-top: 1px solid #e2e8f0; background: #fff; transition: margin 0.3s; text-align: center;">
+    <footer class="footer-main">
         <p style="margin: 0; font-size: 0.85rem; color: #64748b; font-weight: 500;">{{ \App\Models\Setting::get('system_footer', '© 2026 TMS Professional') }}</p>
     </footer>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

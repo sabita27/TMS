@@ -1,8 +1,10 @@
 @extends('layouts.backend.master')
 
+@section('page_title', 'Manage ' . ucfirst($type == 'subcategory' ? 'Sub-Category' : ($type == 'category' ? 'Product Category' : ($type == 'status' ? 'Ticket Status' : ($type == 'priority' ? 'Ticket Priority' : $type)))))
+
 @section('content')
 <div class="setup-container" style="margin-bottom: 2rem;">
-    <div style="margin-bottom: 2rem;">
+    <div class="setup-header-section" style="margin-bottom: 2rem;">
         @php
             $displayType = $type;
             if($type == 'global') {
@@ -15,18 +17,20 @@
             elseif($type == 'status') $displayType = 'Ticket Status';
             else $displayType = ucfirst($type);
         @endphp
-        <h1 style="font-size: 1.75rem; font-weight: 800; color: #0f172a; margin: 0; letter-spacing: -0.01em;">Manage {{ $displayType }}</h1>
-        <nav style="display: flex; align-items: center; gap: 0.5rem; color: #64748b; font-size: 0.9rem; margin-top: 0.3rem;">
-            <a href="{{ route('admin.dashboard') }}" style="color: #6366f1; text-decoration: none; font-weight: 500;">Home</a>
-            <i class="fas fa-chevron-right" style="font-size: 0.7rem; opacity: 0.5;"></i>
-            <span>{{ $displayType }}</span>
-        </nav>
+        <div class="setup-title-group">
+            <h1 style="font-size: 1.75rem; font-weight: 800; color: #0f172a; margin: 0; letter-spacing: -0.01em;">Manage {{ $displayType }}</h1>
+            <nav class="setup-breadcrumb">
+                <a href="{{ route('admin.dashboard') }}">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <span>{{ $displayType }}</span>
+            </nav>
+        </div>
     </div>
 
-    <div style="display: grid; grid-template-columns: 280px 1fr; gap: 2rem; align-items: stretch; min-height: 600px;">
+    <div class="setup-grid" style="display: grid; grid-template-columns: 280px 1fr; gap: 2rem; align-items: stretch; min-height: 600px;">
         <!-- Internal Sidebar -->
         <div style="background: white; border-radius: 1.25rem; padding: 1.5rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.04); border: 1px solid #f1f5f9; height: 100%;">
-            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <div class="setup-sidebar-nav" style="display: flex; flex-direction: column; gap: 0.5rem;">
                 <!-- 1. Global Setting Dropdown -->
                 <div style="margin-bottom: 0.25rem;">
                     <a href="javascript:void(0)" onclick="toggleGlobalMenu()" class="setup-tab {{ $type == 'global' ? 'active' : '' }}" style="display: flex; justify-content: space-between; align-items: center;">
@@ -89,9 +93,9 @@
         </div>
 
         <!-- Content Area (Table Design) -->
-        <div style="background: white; border-radius: 1.25rem; padding: 2rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.04); border: 1px solid #f1f5f9; min-height: 500px; height: 100%;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding: 0 1.5rem;">
-                <h2 style="margin: 0; font-size: 1.5rem; font-weight: 700; color: #1e293b;">
+        <div class="setup-content-area">
+            <div class="setup-content-header">
+                <h2>
                     @if($type == 'global') Global Settings @elseif($type == 'role') Roles @elseif($type == 'designation') Designations @elseif($type == 'position') Positions @elseif($type == 'category') Product Categories @elseif($type == 'subcategory') Sub-Categories @elseif($type == 'priority') Ticket Priorities @else Ticket Statuses @endif
                 </h2>
                 
@@ -131,7 +135,7 @@
             </div>
 
             @if($type != 'global')
-            <div style="overflow-x: auto;">
+            <div class="">
                 <table id="setupTable" style="width: 100%; border-collapse: separate; border-spacing: 0;">
                     <thead>
                         <tr style="background: #f8fafc;">
@@ -159,7 +163,7 @@
                                                 <h4 style="margin: 0 0 2rem; padding-bottom: 1rem; border-bottom: 1px solid #f1f5f9; font-size: 1.1rem; color: #1e293b; display: flex; align-items: center; gap: 0.75rem;">
                                                     <i class="fas fa-fingerprint" style="color: #6366f1; background: #eef2ff; padding: 0.5rem; border-radius: 0.5rem;"></i> Identity Profile
                                                 </h4>
-                                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                                                <div class="form-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
                                                     <div class="form-group">
                                                         <label class="form-label">System Title</label>
                                                         <input type="text" name="system_name" class="form-control" value="{{ $data['settings']['system_name'] ?? 'TMS PRO' }}" placeholder="e.g. Enterprise TMS">
@@ -180,7 +184,7 @@
                                                 <h4 style="margin: 0 0 2rem; padding-bottom: 1rem; border-bottom: 1px solid #f1f5f9; font-size: 1.1rem; color: #1e293b; display: flex; align-items: center; gap: 0.75rem;">
                                                     <i class="fas fa-palette" style="color: #6366f1; background: #eef2ff; padding: 0.5rem; border-radius: 0.5rem;"></i> Visual Branding
                                                 </h4>
-                                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                                                <div class="form-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
                                                     <div style="text-align: center; border: 2px dashed #e2e8f0; padding: 2.5rem; border-radius: 1rem; background: #f8fafc;">
                                                         <label style="cursor: pointer;">
                                                             @if(isset($data['settings']['system_logo']))
@@ -222,7 +226,7 @@
                                                     </div>
                                                 </div>
 
-                                                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;">
+                                                <div class="form-grid-3" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;">
                                                     <div class="form-group">
                                                         <label class="form-label">Mail Host</label>
                                                         <input type="text" name="mail_host" class="form-control" value="{{ $data['settings']['mail_host'] ?? '' }}" placeholder="smtp.gmail.com">
@@ -638,6 +642,132 @@
 </script>
 
 <style>
+    @media (max-width: 1024px) {
+        .setup-grid {
+            grid-template-columns: 1fr !important;
+            gap: 1rem !important;
+        }
+        .setup-sidebar-nav {
+            overflow-x: auto;
+            display: flex !important;
+            flex-direction: row !important;
+            gap: 0.5rem !important;
+            padding: 0.25rem 0.25rem 0.75rem 0.25rem !important;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .setup-sidebar-nav::-webkit-scrollbar { display: none; }
+        
+        .setup-header-section {
+            margin-bottom: 1.5rem !important;
+        }
+        .setup-title-group h1 {
+            font-size: 1.5rem !important;
+        }
+        .setup-breadcrumb {
+            font-size: 0.8rem !important;
+        }
+        
+        .setup-tab {
+            white-space: nowrap;
+            padding: 0.6rem 1.2rem !important;
+            font-size: 0.85rem !important;
+            border-radius: 2rem !important;
+            border: 1px solid #e2e8f0 !important;
+            flex-shrink: 0;
+            justify-content: center !important;
+        }
+        .setup-tab i {
+            display: none;
+        }
+        .setup-tab.active {
+            border-color: #6366f1 !important;
+            background: #6366f1 !important;
+            color: white !important;
+            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.2) !important;
+        }
+        
+        #global-submenu {
+            position: fixed;
+            left: 1.25rem;
+            right: 1.25rem;
+            bottom: 1.25rem;
+            top: auto;
+            background: white;
+            box-shadow: 0 -10px 25px rgba(0,0,0,0.1);
+            border: 1px solid #f1f5f9;
+            border-radius: 1.25rem;
+            z-index: 1000;
+            padding: 1rem !important;
+            flex-direction: column !important;
+            gap: 0.5rem !important;
+        }
+        .submenu-link {
+            padding: 0.75rem 1rem !important;
+            border-radius: 0.75rem !important;
+            font-size: 0.9rem !important;
+        }
+        
+        .form-grid-3, .form-grid-2 {
+            grid-template-columns: 1fr !important;
+            gap: 1rem !important;
+        }
+        .setup-content-area {
+            padding: 1.25rem !important;
+            border-radius: 1.25rem !important;
+        }
+        .setup-content-header {
+            flex-direction: column !important;
+            gap: 1.25rem !important;
+            align-items: flex-start !important; /* Left-aligned */
+            padding: 0 !important;
+            margin-bottom: 2rem !important;
+        }
+        .setup-content-header h2 {
+            font-size: 1.25rem !important;
+            margin: 0 !important;
+            text-align: left !important;
+        }
+        .setup-content-header .btn {
+            width: max-content !important;
+            padding: 0.6rem 2rem !important;
+            margin-left: 0 !important;
+        }
+        .setup-table-container {
+            margin: 0 -1.25rem;
+            width: calc(100% + 2.5rem);
+        }
+    }
+
+    .setup-content-area {
+        background: white; 
+        border-radius: 1.25rem; 
+        padding: 2rem; 
+        box-shadow: 0 10px 15px -3px rgba(0,0,0,0.04); 
+        border: 1px solid #f1f5f9; 
+        min-height: 500px; 
+        height: 100%;
+    }
+
+    .setup-content-header {
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        margin-bottom: 2rem; 
+        padding: 0 1.5rem;
+    }
+
+    .setup-content-header h2 {
+        margin: 0; 
+        font-size: 1.5rem; 
+        font-weight: 700; 
+        color: #1e293b;
+    }
+
+    .setup-table-container {
+        overflow-x: auto;
+    }
+
     .setup-tab {
         display: flex;
         justify-content: space-between;
@@ -742,7 +872,7 @@
     }
     .modal-content {
         background: white;
-        width: 100%;
+        width: 90%;
         max-width: 450px;
         padding: 2rem;
         border-radius: 1.5rem;
@@ -795,7 +925,7 @@
             $('#setupTable').DataTable({
                 "pageLength": 10,
                 "order": [],
-                "dom": '<"top"Bf>rt<"bottom"ip><"clear">',
+                "dom": '<"top"Bf><"table-container"rt><"bottom"ip><"clear">',
                 "buttons": [
                     'copy', 'csv', 'excel', 'pdf', 'print'
                 ],

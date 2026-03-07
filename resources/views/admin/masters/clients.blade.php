@@ -20,7 +20,7 @@
             </div>
         @endif
 
-        <div
+        <div class="filter-section"
             style="display: flex; gap: 1rem; margin-bottom: 1.5rem; background: #f8fafc; padding: 1.25rem; border-radius: 0.75rem; border: 1px solid #e2e8f0; align-items: flex-end;">
             <div style="flex: 1;">
                 <label
@@ -50,7 +50,7 @@
             </button>
         </div>
 
-        <div class="table-container">
+        <div>
             <table id="clientTable">
                 <thead>
                     <tr>
@@ -652,6 +652,32 @@
 @section('styles')
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <style>
+        @media (max-width: 768px) {
+            .card-header { 
+                flex-direction: column; 
+                align-items: flex-start !important; 
+                gap: 1.25rem; 
+                padding: 1.5rem !important; 
+            }
+            .filter-section {
+                flex-direction: column !important;
+                align-items: stretch !important;
+            }
+            .filter-section > div {
+                flex: none !important;
+            }
+            .filter-section button {
+                width: 100% !important;
+            }
+            .table-container { 
+                padding: 0 !important; 
+                overflow-x: auto !important;
+            }
+            table.dataTable { 
+                min-width: 1000px !important; /* Clients table is wide */
+            }
+        }
+
         .form-label {
             color: #334155;
             font-weight: 600;
@@ -709,6 +735,23 @@
             background: #0f172a;
             border-color: #0f172a;
             color: #fff;
+        }
+
+        @media (max-width: 1024px) {
+            .filter-section {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 1.25rem !important;
+                padding: 1.5rem !important;
+            }
+            .filter-section > div {
+                width: 100% !important;
+            }
+            .filter-section button {
+                width: 100% !important;
+                justify-content: center;
+                margin-top: 0.5rem;
+            }
         }
     </style>
 @endsection
@@ -774,7 +817,7 @@
             const table = $('#clientTable').DataTable({
                 "pageLength": 10,
                 "order": [],
-                "dom": '<"top"Bf>rt<"bottom"ip><"clear">',
+                "dom": '<"top"Bf><"table-container"rt><"bottom"ip><"clear">',
                 "buttons": [
                     'copy', 'csv', 'excel', 'pdf', 'print'
                 ],

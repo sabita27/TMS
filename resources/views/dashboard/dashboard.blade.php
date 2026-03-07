@@ -1,5 +1,42 @@
 @extends('layouts.backend.master')
 
+@section('styles')
+<style>
+    @media (max-width: 1024px) {
+        .stats-grid {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+        }
+        .analytical-grid {
+            grid-template-columns: 1fr !important;
+        }
+    }
+    @media (max-width: 640px) {
+        .dashboard-header {
+            text-align: center;
+            margin-bottom: 1.5rem !important;
+        }
+        .dashboard-header h1 {
+            font-size: 1.25rem !important;
+        }
+    }
+    @media (max-width: 480px) {
+        .stats-grid > div {
+            padding: 1rem !important;
+            gap: 1rem !important;
+            border-radius: 1rem !important;
+        }
+        .stats-grid div[style*="width: 56px"] {
+            width: 44px !important;
+            height: 44px !important;
+            font-size: 1.15rem !important;
+        }
+        .stats-grid h2 {
+            font-size: 1.35rem !important;
+        }
+    }
+</style>
+@endsection
+
 @section('content')
 <div class="dashboard-header" style="margin-bottom: 2rem;">
     <h1 style="font-size: 1.5rem; font-weight: 700; color: #111827;">
@@ -15,7 +52,7 @@
     </p>
 </div>
 
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">
+<div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">
     <!-- Dynamic Stat Cards based on Permissions/Roles -->
     @if(Auth::user()->hasAnyRole(['admin', 'manager']))
     <div style="background: linear-gradient(135deg, #e0e7ff 0%, #ffffff 100%); padding: 1.5rem; border-radius: 1.25rem; border: 1px solid #c7d2fe; display: flex; align-items: center; gap: 1.25rem; transition: transform 0.3s; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
@@ -62,7 +99,7 @@
 
 @if(Auth::user()->hasAnyRole(['admin', 'manager']))
 <!-- Analytical Section for Management Roles -->
-<div style="display: grid; grid-template-columns: 1.6fr 1fr; gap: 1.5rem; margin-bottom: 2rem; align-items: stretch;">
+<div class="analytical-grid" style="display: grid; grid-template-columns: 1.6fr 1fr; gap: 1.5rem; margin-bottom: 2rem; align-items: stretch;">
     <div class="card" style="padding: 1.75rem; border: none; border-radius: 1.5rem; background: white; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; display: flex; flex-direction: column;">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem;">
             <div>

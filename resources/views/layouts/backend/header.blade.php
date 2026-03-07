@@ -42,10 +42,31 @@
         .form-group { margin-bottom: 1rem; }
         .form-label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: var(--text-muted); }
         .form-control { width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box; }
-        .table-container { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; padding: 0.75rem 1rem; background-color: #f9fafb; color: var(--text-muted); font-size: 0.875rem; border-bottom: 1px solid #e5e7eb; }
-        td { padding: 1rem; border-bottom: 1px solid #f3f4f6; font-size: 0.875rem; }
+        .table-container { 
+            overflow-x: auto !important; 
+            width: 100%; 
+            position: relative;
+            -webkit-overflow-scrolling: touch;
+        }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            min-width: 600px; /* Force minimum width to trigger scroll on narrow screens */
+        }
+        th { 
+            text-align: left; 
+            padding: 0.75rem 1rem; 
+            background-color: #f9fafb; 
+            color: var(--text-muted); 
+            font-size: 0.875rem; 
+            border-bottom: 1px solid #e5e7eb; 
+            white-space: nowrap; /* Keep headers on one line to force expansion */
+        }
+        td { 
+            padding: 1rem; 
+            border-bottom: 1px solid #f3f4f6; 
+            font-size: 0.875rem; 
+        }
         .badge { padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
         .badge-success { background-color: #d1fae5; color: #065f46; }
         .badge-danger { background-color: #fee2e2; color: #991b1b; }
@@ -54,15 +75,109 @@
 
         /* Responsive Breakpoints */
         @media (max-width: 1024px) {
-            body { flex-direction: column; height: auto; overflow: auto; }
-            aside { width: 100% !important; height: auto !important; position: static !important; }
-            main { padding: 1rem !important; }
-            .sidebar-toggle { display: block !important; }
+            body { 
+                display: block !important;
+                height: auto !important;
+                overflow-y: auto !important;
+                overflow-x: hidden !important;
+            }
+            .sidebar-main { 
+                position: fixed !important;
+            }
+            .main-wrapper { 
+                padding: 0 !important;
+                margin-left: 0 !important;
+                width: 100% !important;
+                min-width: 100% !important;
+                display: block !important;
+            }
+            .card {
+                padding: 1rem !important;
+            }
         }
 
         @media (max-width: 768px) {
-            .card-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
-            .btn { width: 100%; justify-content: center; }
+            .card-header { 
+                flex-direction: column; 
+                align-items: flex-start; 
+                gap: 1rem; 
+            }
+            .card-header .btn { 
+                width: 100%; 
+                justify-content: center; 
+            }
+            .dataTables_wrapper .top {
+                flex-direction: column !important;
+                gap: 1.25rem !important;
+                align-items: flex-start !important;
+                padding: 0 !important;
+            }
+            .dataTables_wrapper .dt-buttons {
+                width: 100% !important;
+                justify-content: flex-start !important;
+                display: flex !important;
+                flex-wrap: wrap !important;
+                gap: 0.5rem !important;
+            }
+            .dataTables_wrapper .dt-buttons .btn {
+                width: auto !important;
+                min-width: 80px !important;
+                max-width: 120px !important;
+                padding: 0.5rem 1rem !important;
+                font-size: 0.75rem !important;
+                flex: none !important;
+            }
+            .dataTables_filter {
+                width: 100% !important;
+            }
+            .dataTables_filter input {
+                width: 100% !important;
+                margin: 0 !important;
+            }
+            /* FORCE wrapper to stay within screen width */
+            .dataTables_wrapper {
+                width: 100% !important;
+                max-width: 100vw !important;
+                overflow-x: hidden !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            .dataTables_wrapper .bottom {
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: flex-end !important;
+                text-align: right !important;
+                width: 100% !important;
+                padding: 1.5rem 0 !important;
+                gap: 0.5rem !important;
+            }
+            
+            .dataTables_info, 
+            .dataTables_wrapper .dataTables_info {
+                width: 100% !important;
+                text-align: right !important;
+                font-size: 0.8rem !important;
+                color: #64748b !important;
+                margin: 0 0 0.5rem 0 !important;
+                display: block !important;
+            }
+            
+            .dataTables_paginate,
+            .dataTables_wrapper .dataTables_paginate {
+                display: flex !important;
+                width: 100% !important;
+                justify-content: flex-end !important;
+            }
+
+            .pagination, 
+            .dataTables_wrapper .pagination,
+            .dataTables_wrapper .dataTables_paginate .pagination {
+                margin: 0 !important;
+                display: flex !important;
+                justify-content: flex-end !important;
+                flex-direction: row !important;
+                gap: 0.25rem !important;
+            }
         }
 
         /* Custom DataTables Styling (Refined Professional Theme) */
@@ -203,10 +318,10 @@
             padding-top: 1.5rem !important;
             display: flex !important;
             flex-direction: row !important;
-            flex-wrap: nowrap !important;
+            flex-wrap: wrap !important;
             justify-content: flex-end !important;
             align-items: center !important;
-            gap: 0.25rem !important;
+            gap: 0.5rem !important;
         }
         .dataTables_paginate .pagination {
             display: flex !important;

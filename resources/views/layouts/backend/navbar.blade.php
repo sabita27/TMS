@@ -1,4 +1,4 @@
-<aside id="app-sidebar" style="width: 260px; background: var(--sidebar-bg); color: var(--sidebar-text); display: flex; flex-direction: column; height: 100vh; position: fixed; left: 0; top: 0; bottom: 0; z-index: 1000; transition: transform 0.3s ease-in-out;">
+<aside id="app-sidebar" class="sidebar-main" style="background: var(--sidebar-bg); color: var(--sidebar-text); display: flex; flex-direction: column; position: fixed; left: 0; top: 0; bottom: 0; transition: transform 0.3s ease-in-out;">
     <div style="padding: 2rem 1.5rem; text-align: center; border-bottom: 1px solid #374151; display: flex; justify-content: space-between; align-items: center;">
         @php
             $sys_logo = \App\Models\Setting::get('system_logo');
@@ -12,7 +12,7 @@
         @else
             <h2 style="margin: 0; font-size: 1.5rem; color: #fff; letter-spacing: 1px;">{{ $sys_name }}</h2>
         @endif
-        <button class="close-sidebar-btn" onclick="document.getElementById('app-sidebar').classList.remove('active'); document.getElementById('mobile-overlay').style.display='none';" style="background: none; border: none; color: #9ca3af; font-size: 1.25rem; cursor: pointer; display: none;">
+        <button class="close-sidebar-btn" onclick="document.getElementById('app-sidebar').classList.remove('active'); document.getElementById('mobile-overlay').style.display='none';" style="background: #374151; border: none; color: #fff; width: 32px; height: 32px; border-radius: 6px; font-size: 1rem; cursor: pointer; display: none; align-items: center; justify-content: center;">
             <i class="fas fa-times"></i>
         </button>
     </div>
@@ -159,7 +159,7 @@
 </aside>
 
 <!-- Mobile Overlay -->
-<div id="mobile-overlay" onclick="document.getElementById('app-sidebar').classList.remove('active'); this.style.display='none';" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 900; display: none;"></div>
+<div id="mobile-overlay" class="sidebar-overlay" onclick="document.getElementById('app-sidebar').classList.remove('active'); this.style.display='none';" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none;"></div>
 
 <style>
     .nav-label { font-size: 0.7rem; font-weight: 700; color: #4b5563; padding: 1.25rem 1.5rem 0.5rem; text-transform: uppercase; letter-spacing: 0.1em; }
@@ -170,29 +170,37 @@
     .logout-btn { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #f87171; width: 100%; text-align: left; padding: 0.75rem 1rem; cursor: pointer; border-radius: 0.5rem; font-weight: 600; display: flex; align-items: center; gap: 0.75rem; transition: 0.2s; }
     .logout-btn:hover { background: #ef4444; color: white; }
 
+    .sidebar-main {
+        width: 260px;
+        z-index: 1000;
+        height: 100vh;
+    }
+    
+    .sidebar-overlay {
+        z-index: 900;
+    }
+
     @media (max-width: 1024px) {
-        #app-sidebar { 
+        .sidebar-main { 
+            display: flex !important;
             transform: translateX(-100%); 
             width: 280px !important; 
-            box-shadow: 4px 0 10px rgba(0,0,0,0.1); 
-            
-            /* Position sidebar below the sticky header */
-            top: 70px; 
-            height: calc(100vh - 70px);
-            z-index: 99; /* Below header (z-index 100) */
-            box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+            z-index: 1010 !important; /* Above header */
+            transition: transform 0.3s ease;
         }
-        #app-sidebar.active { transform: translateX(0); }
-        #app-sidebar.active + #mobile-overlay { display: block !important; }
-        
-        #mobile-overlay {
-            top: 70px; /* Overlay starts below header */
-            height: calc(100vh - 70px);
-            /* z-index: 98; Below sidebar */
+        .sidebar-main.active { 
+            transform: translateX(0); 
         }
         
-        .close-sidebar-btn { display: none !important; }
-    </style>
+        .sidebar-overlay {
+            z-index: 1005 !important; /* Between sidebar and header */
+        }
+        
+        .close-sidebar-btn { 
+            display: flex !important; 
+        }
+    }
+</style>
     
     <script>
         function toggleSettingsMenu(event) {

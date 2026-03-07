@@ -5,11 +5,11 @@
 @section('header_padding', '0 2.5rem')
 
 @section('content')
-<div style="max-width: 1000px; margin: 0 auto;">
-    <div style="display: grid; grid-template-columns: 320px 1fr; gap: 2rem;">
+<div class="profile-container">
+    <div class="profile-grid">
         <!-- Left: Profile Info Card -->
         <div style="display: flex; flex-direction: column; gap: 2rem;">
-            <div class="card" style="text-align: center; padding: 3rem 2rem; border-radius: 1.5rem;">
+            <div class="card profile-info-card">
                 <div style="position: relative; display: inline-block; margin-bottom: 1.5rem;">
                     <img src="https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&background=4f46e5&color=fff&size=128" 
                          style="width: 120px; height: 120px; border-radius: 50%; border: 4px solid #fff; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">
@@ -20,7 +20,7 @@
                 
                 <div style="display: flex; flex-direction: column; gap: 0.75rem; text-align: left; padding-top: 1.5rem; border-top: 1px solid #f1f5f9;">
                     <div style="display: flex; align-items: center; gap: 0.75rem; color: #64748b; font-size: 0.9rem;">
-                        <i class="fas fa-envelope" style="width: 16px;"></i> {{ $user->email }}
+                        <i class="fas fa-envelope" style="width: 16px;"></i> <span style="word-break: break-all;">{{ $user->email }}</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 0.75rem; color: #64748b; font-size: 0.9rem;">
                         <i class="fas fa-phone" style="width: 16px;"></i> {{ $user->phone ?? 'Not provided' }}
@@ -49,7 +49,7 @@
                     @csrf
                     @method('PUT')
                     
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                    <div class="profile-info-grid">
                         <div class="form-group">
                             <label class="form-label" style="font-weight: 700;">Full Name</label>
                             <input type="text" name="name" value="{{ $user->name }}" class="form-control" required style="height: 50px; border-radius: 0.75rem;">
@@ -86,7 +86,7 @@
                         <input type="password" name="current_password" class="form-control" required style="height: 50px; border-radius: 0.75rem;" placeholder="••••••••">
                     </div>
 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+                    <div class="profile-info-grid">
                         <div class="form-group">
                             <label class="form-label" style="font-weight: 700;">New Password</label>
                             <input type="password" name="password" class="form-control" required style="height: 50px; border-radius: 0.75rem;" placeholder="••••••••">
@@ -105,4 +105,50 @@
         </div>
     </div>
 </div>
+@endsection
+
+@section('styles')
+<style>
+    .profile-container {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+    .profile-grid {
+        display: grid;
+        grid-template-columns: 320px 1fr;
+        gap: 2rem;
+    }
+    .profile-info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .profile-info-card {
+        text-align: center;
+        padding: 3rem 2rem;
+        border-radius: 1.5rem;
+    }
+
+    @media (max-width: 1024px) {
+        .profile-container {
+            max-width: 100% !important;
+            padding: 0 !important;
+        }
+        .profile-grid {
+            grid-template-columns: 1fr !important;
+            gap: 1.5rem !important;
+        }
+        .profile-info-grid {
+            grid-template-columns: 1fr !important;
+            gap: 1rem !important;
+        }
+        .profile-info-card {
+            padding: 2rem 1rem !important;
+        }
+        .card {
+            padding: 1.5rem !important;
+        }
+    }
+</style>
 @endsection

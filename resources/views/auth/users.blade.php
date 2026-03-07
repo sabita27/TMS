@@ -26,7 +26,7 @@
         </div>
     @endif --}}
 
-        <div class="table-container">
+        <div class="">
             <table id="userTable">
                 <thead>
                     <tr>
@@ -82,11 +82,9 @@
     </div>
     </div>
 
-    <!-- Add User Modal -->
     <div id="addUserModal"
         style="display:none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); overflow-y: auto;">
-        <div
-            style="background: white; width: 400px; margin: 2rem auto; padding: 2rem; border-radius: 0.5rem; position: relative;">
+        <div class="modal-container">
             <div
                 style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid #eee; padding-bottom: 1rem;">
                 <h3 style="margin: 0;">Add New User</h3>
@@ -166,11 +164,9 @@
         </div>
     </div>
 
-    <!-- View User Modal -->
     <div id="viewUserModal"
         style="display:none; position: fixed; z-index: 1100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); overflow-y: auto;">
-        <div
-            style="background: white; width: 650px; margin: 5rem auto; border-radius: 1.25rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); overflow: hidden; animation: modalSlideUp 0.3s ease-out;">
+        <div class="modal-view-container">
             <!-- Header -->
             <div
                 style="padding: 1.5rem 2rem; background: linear-gradient(135deg, #1e293b, #334155); color: white; display: flex; justify-content: space-between; align-items: center;">
@@ -192,7 +188,7 @@
 
             <!-- Body -->
             <div style="padding: 2rem;">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <div class="view-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
                     <!-- Full Name -->
                     <div style="grid-column: span 2; border-bottom: 1px solid #f1f5f9; padding-bottom: 1rem;">
                         <label
@@ -246,7 +242,7 @@
                     <!-- Dynamic Fields: Staff -->
                     <div id="view_staff_section"
                         style="grid-column: span 2; display: none; background: #f0fdf4; padding: 1.25rem; border-radius: 1rem; border: 1px solid #dcfce7;">
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="staff-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                             <div style="display: flex; align-items: center; gap: 0.75rem;">
                                 <div
                                     style="width: 32px; height: 32px; background: #16a34a; color: white; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center;">
@@ -289,6 +285,26 @@
     </div>
 
     <style>
+        .modal-container {
+            background: white; 
+            width: 90%; 
+            max-width: 450px; 
+            margin: 2rem auto; 
+            padding: 2rem; 
+            border-radius: 0.5rem; 
+            position: relative;
+        }
+        .modal-view-container {
+            background: white; 
+            width: 90%; 
+            max-width: 650px; 
+            margin: 5rem auto; 
+            border-radius: 1.25rem; 
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); 
+            overflow: hidden; 
+            animation: modalSlideUp 0.3s ease-out;
+        }
+
         @keyframes modalSlideUp {
             from {
                 opacity: 0;
@@ -300,13 +316,38 @@
                 transform: translateY(0);
             }
         }
+
+        @media (max-width: 768px) {
+            .card-header {
+                flex-direction: column;
+                align-items: flex-start !important;
+                gap: 1rem;
+            }
+            .card-header .btn {
+                width: 100%;
+            }
+            .modal-view-container {
+                margin: 2rem auto;
+            }
+            .table-container {
+                overflow-x: auto !important;
+                -webkit-overflow-scrolling: touch;
+            }
+            .table-container table {
+                min-width: 900px !important;
+            }
+            #viewUserModal .view-grid {
+                grid-template-columns: 1fr !important;
+            }
+            #viewUserModal .staff-grid {
+                grid-template-columns: 1fr !important;
+            }
+        }
     </style>
 
-    <!-- Edit User Modal -->
     <div id="editUserModal"
         style="display:none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); overflow-y: auto;">
-        <div
-            style="background: white; width: 400px; margin: 2rem auto; padding: 2rem; border-radius: 0.5rem; position: relative;">
+        <div class="modal-container">
             <div
                 style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid #eee; padding-bottom: 1rem;">
                 <h3 style="margin: 0;">Edit User</h3>
@@ -539,7 +580,7 @@
             $('#userTable').DataTable({
                 "pageLength": 10,
                 "order": [],
-                "dom": '<"top"Bf>rt<"bottom"ip><"clear">',
+                "dom": '<"top"Bf><"table-container"rt><"bottom"ip><"clear">',
                 "buttons": [
                     'copy', 'csv', 'excel', 'pdf', 'print'
                 ],
