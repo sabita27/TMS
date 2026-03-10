@@ -12,7 +12,7 @@
         <table>
             <thead>
                 <tr>
-                    <th>ID</th>
+                    <th>S.No</th>
                     <th>Name</th>
                     <th>Permissions</th>
                     <th>Created At</th>
@@ -22,7 +22,7 @@
             <tbody>
                 @foreach($roles as $role)
                 <tr>
-                    <td>{{ $role->id }}</td>
+                    <td>{{ ($roles->currentPage() - 1) * $roles->perPage() + $loop->iteration }}</td>
                     <td><span class="badge badge-info">{{ $role->name }}</span></td>
                     <td>
                         <div style="display: flex; flex-wrap: wrap; gap: 0.25rem; max-width: 400px;">

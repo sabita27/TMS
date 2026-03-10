@@ -12,7 +12,7 @@
         <table>
             <thead>
                 <tr>
-                    <th>ID</th>
+                    <th>S.No</th>
                     <th>Name</th>
                     <th>Guard</th>
                     <th>Created At</th>
@@ -22,7 +22,7 @@
             <tbody>
                 @foreach($permissions as $permission)
                 <tr>
-                    <td>{{ $permission->id }}</td>
+                    <td>{{ ($permissions->currentPage() - 1) * $permissions->perPage() + $loop->iteration }}</td>
                     <td><span class="badge" style="background: #fdf4ff; color: #a21caf;">{{ $permission->name }}</span></td>
                     <td><span class="badge badge-info">{{ $permission->guard_name }}</span></td>
                     <td>{{ $permission->created_at->format('M d, Y') }}</td>

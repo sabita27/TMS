@@ -13,6 +13,8 @@ class Ticket extends Model
         'ticket_id',
         'user_id',
         'product_id',
+        'project_id',
+        'service_id',
         'category_id',
         'sub_category_id',
         'subject',
@@ -47,6 +49,16 @@ class Ticket extends Model
     public function subCategory()
     {
         return $this->belongsTo(ProductSubCategory::class, 'sub_category_id');
+    }
+
+    public function project()
+    {
+        return $this->belongsTo(Project::class, 'project_id');
+    }
+
+    public function service()
+    {
+        return $this->belongsTo(Service::class, 'service_id');
     }
 
     public function assignedStaff()

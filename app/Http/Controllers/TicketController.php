@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Ticket;
 use App\Models\Product;
-use App\Models\ProductCategory;
-use App\Models\ProductSubCategory;
+use App\Models\Project;
+use App\Models\Service;
 use App\Models\TicketStatus;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -18,7 +18,7 @@ class TicketController extends Controller
     public function staffAssignedTickets()
     {
         $tickets = Ticket::where('assigned_to', Auth::id())
-            ->with(['user', 'product', 'category'])
+            ->with(['user', 'product', 'project', 'service'])
             ->latest()
             ->paginate(15);
         $ticketStatuses = TicketStatus::where('status', 'active')->get();
@@ -28,23 +28,42 @@ class TicketController extends Controller
     // User Tickets
     public function userTickets()
     {
-        $tickets = Ticket::where('user_id', Auth::id())->with(['product', 'assignedStaff'])->latest()->paginate(10);
+        $tickets = Ticket::where('user_id', Auth::id())->with(['product', 'project', 'service', 'assignedStaff'])->latest()->paginate(10);
         return view('user.tickets.index', compact('tickets'));
     }
 
     public function create()
     {
-        $products = Product::where('status', 1)->get();
-        $categories = ProductCategory::where('status', 1)->get();
-        return view('user.tickets.create', compact('products', 'categories'));
+        $user = Auth::user();
+        $client = $user->client_detail ? $user->client_detail->client : null;
+
+        if ($client) {
+            // Products mapped to client
+            $productIds = is_array($client->product_id) ? $client->product_id : [];
+            $products = Product::whereIn('id', $productIds)->where('status', 1)->get();
+            
+            // Projects mapped to client
+            $projectIds = is_array($client->project_id) ? $client->project_id : [];
+            $projects = Project::whereIn('id', $projectIds)->get();
+            
+            // Services mapped to client
+            $services = $client->services()->with('service')->get()->pluck('service')->filter();
+        } else {
+            // Fallback for staff/admin if they access the create page
+            $products = Product::where('status', 1)->get();
+            $projects = Project::all();
+            $services = Service::all();
+        }
+
+        return view('user.tickets.create', compact('products', 'projects', 'services'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
             'product_id' => 'nullable|exists:products,id',
-            'category_id' => 'required|exists:product_categories,id',
-            'sub_category_id' => 'nullable|exists:product_sub_categories,id',
+            'project_id' => 'nullable|exists:projects,id',
+            'service_id' => 'nullable|exists:services,id',
             'subject' => 'required|string|max:255',
             'description' => 'required|string',
             'priority' => 'required|in:low,medium,high',
@@ -80,7 +99,7 @@ class TicketController extends Controller
 
     public function managerTickets()
     {
-        $tickets = Ticket::with(['user', 'product', 'assignedStaff', 'category'])->latest()->paginate(15);
+        $tickets = Ticket::with(['user', 'product', 'project', 'service', 'assignedStaff'])->latest()->paginate(15);
         $staffMembers = User::role('staff')->get();
         return view('auth.tickets', compact('tickets', 'staffMembers'));
     }
@@ -156,7 +175,7 @@ class TicketController extends Controller
             }
         }
         
-        $ticket->load(['user', 'product', 'category', 'subCategory', 'assignedStaff']);
+        $ticket->load(['user', 'product', 'project', 'service', 'assignedStaff']);
         $staffMembers = User::role('staff')->get();
         $ticketStatuses = TicketStatus::where('status', 'active')->get();
         

@@ -12,7 +12,7 @@
         <table>
             <thead>
                 <tr>
-                    <th>ID</th>
+                    <th>S.No</th>
                     <th>Designation</th>
                     <th>Position</th>
                     <th>Created At</th>
@@ -22,7 +22,7 @@
             <tbody>
                 @foreach($positions as $position)
                 <tr>
-                    <td>{{ $position->id }}</td>
+                    <td>{{ ($positions->currentPage() - 1) * $positions->perPage() + $loop->iteration }}</td>
                     <td><span class="badge badge-info">{{ $position->designation->name ?? 'N/A' }}</span></td>
                     <td><span class="badge badge-secondary" style="background: #e2e8f0; color: #475569;">{{ $position->name }}</span></td>
                     <td>{{ $position->created_at->format('M d, Y') }}</td>

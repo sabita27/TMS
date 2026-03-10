@@ -38,23 +38,22 @@
 @endsection
 
 @section('content')
-<div class="dashboard-header" style="margin-bottom: 2rem;">
     <h1 style="font-size: 1.5rem; font-weight: 700; color: #111827;">
-        @if(Auth::user()->hasRole('admin')) Admin Dashboard
-        @elseif(Auth::user()->hasRole('manager')) Manager Dashboard
-        @elseif(Auth::user()->hasRole('staff')) Staff Dashboard
+        @can('manage users') Admin Dashboard
+        @elseif(Auth::user()->can('manage tickets')) Manager Dashboard
+        @elseif(Auth::user()->can('edit tickets')) Staff Dashboard
         @else User Dashboard @endif
     </h1>
     <p style="color: #6b7280; font-size: 0.875rem;">
-        @if(Auth::user()->hasRole('admin')) Welcome back, Admin! Here's what's happening today.
-        @elseif(Auth::user()->hasRole('manager')) Global assessment of support operations and team equilibrium.
+        @can('manage users') Welcome back, Admin! Here's what's happening today.
+        @elseif(Auth::user()->can('manage tickets')) Global assessment of support operations and team equilibrium.
         @else Welcome back, {{ Auth::user()->name }}! Here's what's happening today. @endif
     </p>
 </div>
 
 <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">
-    <!-- Dynamic Stat Cards based on Permissions/Roles -->
-    @if(Auth::user()->hasAnyRole(['admin', 'manager']))
+    <!-- Dynamic Stat Cards based on Permissions -->
+    @if(Auth::user()->can('manage tickets'))
     <div style="background: linear-gradient(135deg, #e0e7ff 0%, #ffffff 100%); padding: 1.5rem; border-radius: 1.25rem; border: 1px solid #c7d2fe; display: flex; align-items: center; gap: 1.25rem; transition: transform 0.3s; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
         <div style="background: #6366f1; width: 56px; height: 56px; border-radius: 1rem; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);">
             <i class="fas fa-users"></i>
@@ -81,7 +80,7 @@
             <i class="fas fa-ticket-alt"></i>
         </div>
         <div>
-            <p style="color: #b45309; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">{{ Auth::user()->hasRole('staff') ? 'Assigned' : 'Tickets' }}</p>
+            <p style="color: #b45309; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">{{ Auth::user()->can('edit tickets') && !Auth::user()->can('manage tickets') ? 'Assigned' : 'Tickets' }}</p>
             <h2 style="font-size: 1.75rem; font-weight: 800; color: #78350f; margin: 0.25rem 0 0 0;">{{ $stats['tickets'] ?? 0 }}</h2>
         </div>
     </div>
@@ -97,7 +96,7 @@
     </div>
 </div>
 
-@if(Auth::user()->hasAnyRole(['admin', 'manager']))
+@if(Auth::user()->can('manage tickets'))
 <!-- Analytical Section for Management Roles -->
 <div class="analytical-grid" style="display: grid; grid-template-columns: 1.6fr 1fr; gap: 1.5rem; margin-bottom: 2rem; align-items: stretch;">
     <div class="card" style="padding: 1.75rem; border: none; border-radius: 1.5rem; background: white; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; display: flex; flex-direction: column;">
@@ -125,19 +124,19 @@
                 <canvas id="kpiResolvedChart" style="max-height: 60px;"></canvas>
                 <h4 style="margin: 0.5rem 0 0 0; font-size: 1.25rem;">{{ $stats['closed_tickets'] ?? 0 }}</h4>
             </div>
-            @if(Auth::user()->hasAnyRole(['admin', 'manager']))
+            @if(Auth::user()->can('manage tickets'))
             <div style="background: #fff9e6; padding: 1rem; border-radius: 1.25rem; text-align: center;">
                 <span style="font-size: 0.7rem; font-weight: 700; color: #854d0e; display: block; margin-bottom: 0.5rem;">High Priority</span>
                 <canvas id="kpiPriorityChart" style="max-height: 60px;"></canvas>
                 <h4 style="margin: 0.5rem 0 0 0; font-size: 1.25rem;">{{ $tickets_by_priority['high'] ?? 0 }}</h4>
             </div>
             @endif
-            @if(Auth::user()->hasRole('admin'))
+            @can('manage users')
             <div style="background: #fff0f0; padding: 1rem; border-radius: 1.25rem; text-align: center;">
                 <span style="font-size: 0.7rem; font-weight: 700; color: #9f1239; display: block; margin-bottom: 0.5rem;">System Agents</span>
                 <h4 style="margin: 0.5rem 0 0 0; font-size: 1.25rem; padding-top: 15px;">{{ $stats['agents'] ?? 0 }}</h4>
             </div>
-            @endif
+            @endcan
         </div>
     </div>
 </div>
@@ -147,7 +146,7 @@
     <div style="padding: 1.5rem; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
         <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: #1e293b;">Recent Tickets</h3>
         @php 
-            $route = Auth::user()->hasRole('admin') ? 'admin.dashboard' : (Auth::user()->hasRole('manager') ? 'manager.tickets' : (Auth::user()->hasRole('staff') ? 'staff.dashboard' : 'user.dashboard'));
+            $route = Auth::user()->can('manage users') ? 'admin.dashboard' : (Auth::user()->can('manage tickets') ? 'manager.tickets' : (Auth::user()->can('edit tickets') ? 'staff.dashboard' : 'user.dashboard'));
         @endphp
     </div>
     <div style="overflow-x: auto;">
@@ -191,7 +190,7 @@
                             <a href="{{ route('ticket.show', $ticket->id) }}" style="color: #64748b; font-weight: 700; text-decoration: none; font-size: 0.7rem; display: flex; align-items: center; justify-content: center; gap: 0.25rem;">
                                 <i class="fas fa-eye"></i> Details
                             </a>
-                            @if(Auth::user()->hasAnyRole(['admin', 'manager']))
+                            @if(Auth::user()->can('manage tickets'))
                                 <a href="{{ route('manager.tickets') }}" style="color: #3b82f6; font-weight: 700; text-decoration: none; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; gap: 0.35rem;">
                                     <i class="fas fa-tasks"></i> All Tickets
                                 </a>
@@ -209,7 +208,7 @@
     </div>
 </div>
 
-@if(Auth::user()->hasAnyRole(['admin', 'manager']))
+@if(Auth::user()->can('manage tickets'))
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     const activityCtx = document.getElementById('mainActivityChart').getContext('2d');

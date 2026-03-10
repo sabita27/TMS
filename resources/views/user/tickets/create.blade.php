@@ -33,7 +33,7 @@
                 <div class="form-group">
                     <label class="form-label" style="font-weight: 700; color: #334155; margin-bottom: 0.5rem; display: block;">Product</label>
                     <select name="product_id" class="form-control" style="height: 50px; border-radius: 0.75rem;">
-                        <option value="">Select Product (Optional)</option>
+                        <option value="">Select Product</option>
                         @foreach($products as $product)
                             <option value="{{ $product->id }}">{{ $product->name }}</option>
                         @endforeach
@@ -41,19 +41,22 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" style="font-weight: 700; color: #334155; margin-bottom: 0.5rem; display: block;">Category <span style="color:red;">*</span></label>
-                    <select name="category_id" id="category_id" class="form-control" required style="height: 50px; border-radius: 0.75rem;" onchange="loadSubcategories(this.value)">
-                        <option value="">Select Category</option>
-                        @foreach($categories as $category)
-                            <option value="{{ $category->id }}">{{ $category->name }}</option>
+                    <label class="form-label" style="font-weight: 700; color: #334155; margin-bottom: 0.5rem; display: block;">Project</label>
+                    <select name="project_id" class="form-control" style="height: 50px; border-radius: 0.75rem;">
+                        <option value="">Select Project</option>
+                        @foreach($projects as $project)
+                            <option value="{{ $project->id }}">{{ $project->name }}</option>
                         @endforeach
                     </select>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" style="font-weight: 700; color: #334155; margin-bottom: 0.5rem; display: block;">Sub-Category <span style="color:red;">*</span></label>
-                    <select name="sub_category_id" id="sub_category_id" class="form-control" required style="height: 50px; border-radius: 0.75rem;">
-                        <option value="">Select Category First</option>
+                    <label class="form-label" style="font-weight: 700; color: #334155; margin-bottom: 0.5rem; display: block;">Service</label>
+                    <select name="service_id" class="form-control" style="height: 50px; border-radius: 0.75rem;">
+                        <option value="">Select Service</option>
+                        @foreach($services as $service)
+                            <option value="{{ $service->id }}">{{ $service->name }}</option>
+                        @endforeach
                     </select>
                 </div>
 
@@ -97,33 +100,7 @@
     </div>
 </div>
 
-<script>
-    function loadSubcategories(categoryId) {
-        const subSelect = document.getElementById('sub_category_id');
-        subSelect.innerHTML = '<option value="">Loading...</option>';
-        
-        if (!categoryId) {
-            subSelect.innerHTML = '<option value="">Select Category First</option>';
-            return;
-        }
 
-        fetch(`{{ url('get-subcategories') }}/${categoryId}`)
-            .then(response => response.json())
-            .then(data => {
-                subSelect.innerHTML = '<option value="">Select Sub-Category</option>';
-                data.forEach(sub => {
-                    const option = document.createElement('option');
-                    option.value = sub.id;
-                    option.textContent = sub.name;
-                    subSelect.appendChild(option);
-                });
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                subSelect.innerHTML = '<option value="">Error loading</option>';
-            });
-    }
-</script>
 @endsection
 
 @section('scripts')

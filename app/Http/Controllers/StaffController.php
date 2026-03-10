@@ -26,5 +26,5 @@ class StaffController extends Controller
         return view('staff.dashboard', compact('assigned_tickets', 'stats'));
     }
 
-    }
 }
+

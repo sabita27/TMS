@@ -34,6 +34,7 @@
                         <th>Email</th>
                         <th>Phone</th>
                         <th>Role</th>
+                        <th>Client</th>
                         <th>Status</th>
                         <th>Joined</th>
                         <th>Action</th>
@@ -46,6 +47,7 @@
                             <td>{{ $user->email }}</td>
                             <td>{{ $user->phone ?? '-' }}</td>
                             <td><span class="badge badge-info">{{ ucfirst($user->getRoleNames()->first() ?? 'None') }}</span></td>
+                            <td>{{ $user->client_detail->client->name ?? '-' }}</td>
                             <td>
                                 <span class="badge {{ $user->status ? 'badge-success' : 'badge-danger' }}">
                                     {{ $user->status ? 'Active' : 'Inactive' }}
@@ -83,7 +85,7 @@
     </div>
 
     <div id="addUserModal"
-        style="display:none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); overflow-y: auto;">
+        style="display:none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); overflow-y: auto;">
         <div class="modal-container">
             <div
                 style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid #eee; padding-bottom: 1rem;">
@@ -165,7 +167,7 @@
     </div>
 
     <div id="viewUserModal"
-        style="display:none; position: fixed; z-index: 1100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); overflow-y: auto;">
+        style="display:none; position: fixed; z-index: 2200; left: 0; top: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); overflow-y: auto;">
         <div class="modal-view-container">
             <!-- Header -->
             <div
@@ -289,7 +291,7 @@
             background: white; 
             width: 90%; 
             max-width: 450px; 
-            margin: 2rem auto; 
+            margin: 5rem auto; 
             padding: 2rem; 
             border-radius: 0.5rem; 
             position: relative;
@@ -346,7 +348,7 @@
     </style>
 
     <div id="editUserModal"
-        style="display:none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); overflow-y: auto;">
+        style="display:none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); overflow-y: auto;">
         <div class="modal-container">
             <div
                 style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid #eee; padding-bottom: 1rem;">
@@ -474,11 +476,12 @@
                     clientSec.style.display = 'none';
                     staffSec.style.display = 'none';
 
-                    if (roleName.toLowerCase() === 'user' && data.client_detail) {
+                    if (data.client_detail && data.client_detail.client) {
                         clientSec.style.display = 'block';
-                        document.getElementById('view_user_client').innerText = data.client_detail.client ? data
-                            .client_detail.client.name : 'N/A';
-                    } else if (roleName.toLowerCase() === 'staff' && data.staff_detail) {
+                        document.getElementById('view_user_client').innerText = data.client_detail.client.name;
+                    }
+
+                    if (data.staff_detail) {
                         staffSec.style.display = 'block';
                         document.getElementById('view_user_designation').innerText = data.staff_detail.designation ?
                             data.staff_detail.designation.name : 'N/A';
@@ -522,21 +525,18 @@
             const selectedText = roleSelect.options[roleSelect.selectedIndex].text.trim().toLowerCase();
             const staffFields = document.getElementById(`${type}_staff_fields`);
             const clientFields = document.getElementById(`${type}_client_fields`);
-            // Reset both
-            staffFields.style.display = 'none';
-            clientFields.style.display = 'none';
-            document.getElementById(`${type}_designation_id`).required = false;
-            document.getElementById(`${type}_position_id`).required = false;
-            document.getElementById(`${type}_client_id`).required = false;
+            
+            // Staff fields only for Staff
+            staffFields.style.display = (selectedText === 'staff') ? 'block' : 'none';
+            document.getElementById(`${type}_designation_id`).required = (selectedText === 'staff');
+            document.getElementById(`${type}_position_id`).required = (selectedText === 'staff');
 
-            if (selectedText === 'staff') {
-                staffFields.style.display = 'block';
-                document.getElementById(`${type}_designation_id`).required = true;
-                document.getElementById(`${type}_position_id`).required = true;
-            } else if (selectedText === 'user') {
-                clientFields.style.display = 'block';
-                document.getElementById(`${type}_client_id`).required = true;
-            }
+            // Hide client fields for Admin, Manager, and Staff
+            const hideClientFor = ['admin', 'manager', 'staff'];
+            clientFields.style.display = (hideClientFor.includes(selectedText)) ? 'none' : 'block';
+            
+            // Required only for 'user' role
+            document.getElementById(`${type}_client_id`).required = (selectedText === 'user');
         }
 
         function fetchPositions(designationId, type, selectedPositionId = null) {

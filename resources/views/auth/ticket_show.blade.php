@@ -1,175 +1,334 @@
 @extends('layouts.backend.master')
 
+@section('styles')
+<style>
+    .ticket-view-card {
+        max-width: 1100px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 1.75rem;
+        border: none;
+        box-shadow: 0 20px 25px -5px rgba(0,0,0,0.05), 0 10px 10px -5px rgba(0,0,0,0.04);
+        overflow: hidden;
+        animation: slideUp 0.5s ease-out;
+    }
+
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .meta-label {
+        font-size: 0.65rem;
+        font-weight: 800;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .meta-value {
+        font-weight: 700;
+        color: #1e293b;
+        font-size: 0.95rem;
+    }
+
+    .status-badge {
+        padding: 0.6rem 1.5rem;
+        border-radius: 2rem;
+        font-size: 0.75rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+    }
+
+    .description-box {
+        background: #fcfdfe;
+        padding: 2.5rem;
+        border-radius: 1.5rem;
+        border: 1px solid #eef2f6;
+        color: #334155;
+        line-height: 1.8;
+        font-size: 1.05rem;
+        position: relative;
+    }
+
+    .description-box::after {
+        content: '"';
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        font-family: serif;
+        font-size: 4rem;
+        color: #e2e8f0;
+        line-height: 1;
+        opacity: 0.5;
+    }
+
+    .meta-sidebar {
+        background: #f8fafc;
+        border-left: 1px solid #f1f5f9;
+        padding: 2.5rem;
+    }
+
+    .action-panel {
+        background: white;
+        border-radius: 1.25rem;
+        padding: 1.5rem;
+        border: 1px solid #e2e8f0;
+        margin-bottom: 1.5rem;
+        transition: 0.3s;
+    }
+
+    .action-panel:hover {
+        border-color: #3b82f6;
+        box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.1);
+    }
+
+    .custom-btn {
+        width: 100%;
+        padding: 0.875rem;
+        border-radius: 0.875rem;
+        font-weight: 700;
+        transition: 0.3s;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    @media (max-width: 992px) {
+        .ticket-view-grid {
+            grid-template-columns: 1fr !important;
+        }
+        .meta-sidebar {
+            border-left: none;
+            border-top: 1px solid #f1f5f9;
+        }
+    }
+</style>
+@endsection
+
 @section('content')
 @php
     $prevUrl = url()->previous();
     $currentUrl = url()->current();
-    
-    // Default role-based routes
     $defaultBack = route('manager.tickets');
     if (Auth::user()->hasRole('user')) {
         $defaultBack = route('user.tickets');
     } elseif (Auth::user()->hasRole('staff')) {
         $defaultBack = route('staff.assigned_tickets');
     }
-
-    // If previous URL is from our site and NOT this same page, use it.
-    // This allows returning to Dashboard if they came from there.
     $backRoute = ($prevUrl != $currentUrl && str_contains($prevUrl, url('/'))) ? $prevUrl : $defaultBack;
 @endphp
 
-<div style="margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between;">
-    <a href="{{ $backRoute }}" style="display: flex; align-items: center; gap: 0.5rem; color: #64748b; text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: 0.2s;" onmouseover="this.style.color='#3b82f6';" onmouseout="this.style.color='#64748b';">
-        <i class="fas fa-arrow-left"></i> Back to List
+<div style="margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between;">
+    <a href="{{ $backRoute }}" class="btn-back" style="display: inline-flex; align-items: center; gap: 0.6rem; color: #64748b; text-decoration: none; font-weight: 700; font-size: 0.95rem; background: white; padding: 0.6rem 1.25rem; border-radius: 1rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); transition: 0.3s;">
+        <i class="fas fa-chevron-left" style="font-size: 0.8rem;"></i> Back to Tickets
     </a>
+    
+    <div style="display: flex; gap: 1rem;">
+        @if(Auth::user()->hasRole('user') && strtolower($ticket->status) != 'closed')
+            <form action="{{ route('user.tickets.close', $ticket->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to resolve this ticket?')">
+                @csrf
+                <button type="submit" style="background: #ef4444; color: white; border: none; padding: 0.6rem 1.25rem; border-radius: 1rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-lock"></i> Close Ticket
+                </button>
+            </form>
+        @endif
+    </div>
 </div>
 
-<div class="card" style="max-width: 1000px; margin: 0 auto; border-radius: 1.5rem; border: none; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); overflow: hidden;">
-    <div class="card-header" style="background: white; padding: 2rem; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
-        <div style="display: flex; align-items: center; gap: 1rem;">
-            <div style="width: 48px; height: 48px; background: #eff6ff; border-radius: 1rem; display: flex; align-items: center; justify-content: center; color: #3b82f6;">
-                <i class="fas fa-ticket-alt fa-lg"></i>
+<div class="ticket-view-card">
+    {{-- Header Section --}}
+    <div style="background: linear-gradient(to right, #ffffff, #f9fafb); padding: 2.5rem; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 2rem;">
+        <div style="display: flex; gap: 1.5rem;">
+            <div style="width: 64px; height: 64px; background: #3b82f6; border-radius: 1.5rem; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.75rem; box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3);">
+                <i class="fas fa-ticket-alt"></i>
             </div>
             <div>
-                <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #1e293b;">#{{ $ticket->ticket_id }}</h3>
-                <p style="margin: 0; color: #64748b; font-size: 0.85rem;">Raised by {{ $ticket->user->name }} • {{ $ticket->created_at->diffForHumans() }}</p>
+                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                    <h3 style="margin: 0; font-size: 1.5rem; font-weight: 800; color: #0f172a;">#{{ $ticket->ticket_id }}</h3>
+                    @php
+                        $currentStatusName = strtolower($ticket->status);
+                        $statusColor = '#3b82f6'; 
+                        if(isset($ticketStatuses)) {
+                            foreach($ticketStatuses as $stat) {
+                                if(strtolower($stat->name) == $currentStatusName) {
+                                    $statusColor = $stat->color;
+                                    break;
+                                }
+                            }
+                        }
+                    @endphp
+                    <span class="status-badge" style="background: {{ $statusColor }}15; color: {{ $statusColor }}; border: 1.5px solid {{ $statusColor }}30;">
+                        <span style="width: 8px; height: 8px; background: {{ $statusColor }}; border-radius: 50%; display: inline-block;"></span>
+                        {{ strtoupper($ticket->status) }}
+                    </span>
+                </div>
+                <p style="margin: 0; color: #64748b; font-size: 0.95rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-user-circle"></i> {{ $ticket->user->name }} 
+                    <span style="color: #cbd5e1;">•</span> 
+                    <i class="far fa-clock"></i> {{ $ticket->created_at->diffForHumans() }}
+                </p>
             </div>
         </div>
-        <div style="display: flex; align-items: center; gap: 1.5rem;">
+        
+        <div style="text-align: right;">
+            <span class="meta-label">Current Priority</span>
             @php
-                $currentStatusName = strtolower($ticket->status);
-                $statusColor = '#3b82f6'; // Default blue
-                if(isset($ticketStatuses)) {
-                    foreach($ticketStatuses as $stat) {
-                        if(strtolower($stat->name) == $currentStatusName) {
-                            $statusColor = $stat->color;
-                            break;
-                        }
-                    }
-                }
+                $p = [
+                    'high' => ['bg' => '#fee2e2', 'text' => '#991b1b', 'icon' => 'fa-fire'],
+                    'medium' => ['bg' => '#fef3c7', 'text' => '#92400e', 'icon' => 'fa-bolt'],
+                    'low' => ['bg' => '#e0e7ff', 'text' => '#3730a3', 'icon' => 'fa-leaf']
+                ];
+                $pc = $p[strtolower($ticket->priority)] ?? ['bg' => '#f1f5f9', 'text' => '#475569', 'icon' => 'fa-info-circle'];
             @endphp
-            <span style="padding: 0.5rem 1.25rem; border-radius: 2rem; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; background: {{ $statusColor }}15; color: {{ $statusColor }}; border: 1.5px solid {{ $statusColor }}30;">
-                <i class="fas fa-circle" style="font-size: 0.5rem; margin-right: 0.4rem; vertical-align: middle;"></i> {{ $ticket->status }}
-            </span>
-            <a href="{{ $backRoute }}" title="Close" style="color: #94a3b8; font-size: 1.25rem; transition: 0.2s; text-decoration: none;" onmouseover="this.style.color='#ef4444';" onmouseout="this.style.color='#94a3b8';">
-                <i class="fas fa-times"></i>
-            </a>
+            <div style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: {{ $pc['bg'] }}; color: {{ $pc['text'] }}; border-radius: 0.75rem; font-weight: 800; font-size: 0.85rem;">
+                <i class="fas {{ $pc['icon'] }}"></i> {{ strtoupper($ticket->priority) }}
+            </div>
         </div>
     </div>
 
-    <div class="card-body" style="padding: 2.5rem;">
-        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 3rem;">
-            {{-- Left Side: Ticket Content --}}
-            <div>
-                <div style="margin-bottom: 2.5rem;">
-                    <label style="display: block; font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem;">Subject</label>
-                    <h2 style="margin: 0; font-size: 1.75rem; font-weight: 800; color: #0f172a; line-height: 1.3;">{{ $ticket->subject }}</h2>
-                </div>
-
-                <div style="margin-bottom: 2.5rem;">
-                    <label style="display: block; font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem;">Detailed Issue</label>
-                    <div style="background: #f8fafc; padding: 2rem; border-radius: 1.25rem; color: #334155; line-height: 1.8; border: 1px solid #f1f5f9; font-size: 1rem;">
-                        {!! $ticket->description !!}
-                    </div>
-                </div>
-
-                @if($ticket->attachment)
-                <div style="margin-bottom: 1rem;">
-                    <label style="display: block; font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem;">Supporting File</label>
-                    <a href="{{ asset('storage/' . $ticket->attachment) }}" target="_blank" style="display: inline-flex; align-items: center; gap: 0.75rem; padding: 1rem 1.5rem; background: white; border: 2px solid #e2e8f0; border-radius: 1rem; color: #1e293b; text-decoration: none; font-weight: 700; font-size: 0.9rem; transition: 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.color='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.color='#1e293b'; this.style.background='white';">
-                        <i class="fas fa-paperclip" style="font-size: 1.1rem;"></i> View Attachment
-                    </a>
-                </div>
-                @endif
+    {{-- Main Grid --}}
+    <div class="ticket-view-grid" style="display: grid; grid-template-columns: 1fr 340px;">
+        {{-- Content Area --}}
+        <div style="padding: 3rem;">
+            <div style="margin-bottom: 3.5rem;">
+                <span class="meta-label">Ticket Subject</span>
+                <h2 style="margin: 0; font-size: 2rem; font-weight: 900; color: #0f172a; line-height: 1.2;">{{ $ticket->subject }}</h2>
             </div>
 
-            {{-- Right Side: Meta Data & Actions --}}
+            <div style="margin-bottom: 3rem;">
+                <span class="meta-label">Detailed Description</span>
+                <div class="description-box">
+                    {!! $ticket->description !!}
+                </div>
+            </div>
+
+            @if($ticket->attachment)
             <div>
-                <div style="background: #f8fafc; border-radius: 1.5rem; border: 1px solid #f1f5f9; padding: 2rem; margin-bottom: 2rem;">
-                    <h4 style="margin: 0 0 1.5rem 0; font-size: 0.95rem; font-weight: 800; color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
-                        <i class="fas fa-info-circle" style="color: #64748b;"></i> Metadata
-                    </h4>
-                    
-                    <div style="margin-bottom: 1.5rem;">
-                        <span style="display: block; font-size: 0.65rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 0.35rem;">Assigned Staff</span>
-                        <div style="display: flex; align-items: center; gap: 0.6rem;">
-                            <div style="width: 32px; height: 32px; background: #e0e7ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #4338ca; font-size: 0.8rem; font-weight: 700;">
-                                {{ strtoupper(substr($ticket->assignedStaff->name ?? '?', 0, 1)) }}
-                            </div>
-                            <span style="font-weight: 700; color: #334155;">{{ $ticket->assignedStaff->name ?? 'Unassigned' }}</span>
+                <span class="meta-label">Attached Document</span>
+                <div style="background: #f1f5f9; padding: 1.5rem; border-radius: 1.25rem; display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <div style="width: 40px; height: 40px; background: white; border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; color: #64748b; font-size: 1.1rem; border: 1px solid #e2e8f0;">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                        <div>
+                            <p style="margin: 0; font-weight: 700; color: #334155; font-size: 0.9rem;">Supporting Media/File</p>
+                            <p style="margin: 0; font-size: 0.75rem; color: #94a3b8;">{{ strtoupper(pathinfo($ticket->attachment, PATHINFO_EXTENSION)) }} Document</p>
                         </div>
                     </div>
+                    <a href="{{ asset('storage/' . $ticket->attachment) }}" target="_blank" style="background: white; color: #3b82f6; border: 1.5px solid #dbeafe; padding: 0.6rem 1.25rem; border-radius: 0.75rem; font-weight: 700; font-size: 0.85rem; text-decoration: none; transition: 0.3s;" onmouseover="this.style.background='#3b82f6'; this.style.color='white';" onmouseout="this.style.background='white'; this.style.color='#3b82f6';">
+                        <i class="fas fa-download"></i> Download
+                    </a>
+                </div>
+            </div>
+            @endif
+        </div>
 
-                    <div style="margin-bottom: 1.5rem;">
-                        <span style="display: block; font-size: 0.65rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 0.35rem;">Category & Product</span>
-                        <span style="font-weight: 700; color: #334155; display: block;">{{ $ticket->product->name ?? 'General' }}</span>
-                        <span style="font-size: 0.8rem; color: #64748b;">{{ $ticket->category->name ?? 'Uncategorized' }}</span>
-                    </div>
+        {{-- Sidebar Area --}}
+        <div class="meta-sidebar">
+            <h4 style="margin: 0 0 2rem 0; font-size: 1.1rem; font-weight: 900; color: #1e293b; display: flex; align-items: center; gap: 0.75rem;">
+                <i class="fas fa-swatchbook" style="color: #3b82f6;"></i> Ticket Assets
+            </h4>
 
-                    <div style="margin-bottom: 1.5rem;">
-                        <span style="display: block; font-size: 0.65rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 0.35rem;">Priority Level</span>
-                        @php
-                            $p = [
-                                'high' => ['bg' => '#fee2e2', 'text' => '#991b1b'],
-                                'medium' => ['bg' => '#fef3c7', 'text' => '#92400e'],
-                                'low' => ['bg' => '#e0e7ff', 'text' => '#3730a3']
-                            ];
-                            $pc = $p[strtolower($ticket->priority)] ?? ['bg' => '#f1f5f9', 'text' => '#475569'];
-                        @endphp
-                        <span style="display: inline-flex; align-items: center; padding: 0.4rem 0.85rem; border-radius: 0.75rem; font-size: 0.75rem; font-weight: 800; background: {{ $pc['bg'] }}; color: {{ $pc['text'] }};">
-                            <i class="fas fa-bolt" style="margin-right: 0.4rem;"></i> {{ strtoupper($ticket->priority) }}
-                        </span>
+            <div style="display: grid; gap: 2rem;">
+                <div>
+                    <span class="meta-label">Service Owner</span>
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <div style="width: 40px; height: 40px; background: #cbd5e1; border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800;">
+                            {{ strtoupper(substr($ticket->assignedStaff->name ?? '?', 0, 1)) }}
+                        </div>
+                        <div>
+                            <p style="margin: 0; font-weight: 700; color: #334155;">{{ $ticket->assignedStaff->name ?? 'Unassigned' }}</p>
+                            <p style="margin: 0; font-size: 0.75rem; color: #94a3b8;">Support Engineer</p>
+                        </div>
                     </div>
                 </div>
 
-                {{-- Solution Button for Staff --}}
-                @if(Auth::user()->hasRole('staff') && $ticket->assigned_to == Auth::id() && strtolower($ticket->status) != 'resolved' && strtolower($ticket->status) != 'closed')
-                <div style="margin-bottom: 2rem;">
+                <div>
+                    <span class="meta-label">Product Context</span>
+                    <p class="meta-value" style="margin-bottom: 0.25rem;">{{ $ticket->product->name ?? 'None' }}</p>
+                    <p style="margin: 0; font-size: 0.8rem; color: #64748b;">System Module</p>
+                </div>
+
+                <div>
+                    <span class="meta-label">Project & Service</span>
+                    <div style="background: white; border-radius: 1rem; padding: 1.25rem; border: 1px solid #eef2f6;">
+                        <p style="margin: 0 0 0.5rem 0; font-weight: 800; color: #0f172a; font-size: 0.95rem;">
+                            <i class="fas fa-project-diagram" style="color: #6366f1; margin-right: 0.4rem; font-size: 0.8rem;"></i>
+                            {{ $ticket->project->name ?? 'Global' }}
+                        </p>
+                        <p style="margin: 0; font-weight: 600; color: #64748b; font-size: 0.85rem;">
+                            <i class="fas fa-concierge-bell" style="color: #f59e0b; margin-right: 0.4rem; font-size: 0.8rem;"></i>
+                            {{ $ticket->service->name ?? 'General Support' }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Contextual Actions for Admin/Staff --}}
+            @if(Auth::user()->hasAnyRole(['admin', 'manager', 'staff']))
+            <div style="margin-top: 3.5rem;">
+                <h4 style="margin: 0 0 1.5rem 0; font-size: 0.9rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em;">Console Management</h4>
+                
+                {{-- Staff Solve Button --}}
+                @if(Auth::user()->hasRole('staff') && $ticket->assigned_to == Auth::id() && !in_array(strtolower($ticket->status), ['resolved', 'closed']))
+                <div class="action-panel" style="background: #ecfdf5; border-color: #10b98130;">
                     <form action="{{ route('staff.tickets.solve', $ticket->id) }}" method="POST">
                         @csrf
-                        <button type="submit" style="width: 100%; height: 60px; background: #10b981; color: white; border: none; border-radius: 1.25rem; font-size: 1.1rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.75rem; box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3); transition: 0.3s;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 15px 20px -3px rgba(16, 185, 129, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 15px -3px rgba(16, 185, 129, 0.3)';">
-                            <i class="fas fa-check-double"></i> Mark as Solved
+                        <button type="submit" class="custom-btn" style="background: #10b981; color: white; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);">
+                            <i class="fas fa-check-circle"></i> Resolve Ticket
                         </button>
                     </form>
                 </div>
                 @endif
 
-                {{-- Action Panels --}}
+                {{-- Management Assignment --}}
                 @if(Auth::user()->hasAnyRole(['admin', 'manager']))
-                <div style="background: white; border-radius: 1.5rem; border: 2px solid #f1f5f9; padding: 1.75rem; margin-bottom: 2rem;">
-                    <h4 style="margin: 0 0 1.25rem 0; font-size: 0.95rem; font-weight: 800; color: #1e293b;">Re-assign Ticket</h4>
+                <div class="action-panel">
+                    <span class="meta-label" style="margin-bottom: 1rem;">Transfer Assignment</span>
                     <form action="{{ route('manager.tickets.assign', $ticket->id) }}" method="POST">
                         @csrf
-                        <select name="assigned_to" class="form-control" style="width: 100%; margin-bottom: 1.25rem; border-radius: 0.75rem; height: 48px; border: 1.5px solid #e2e8f0; font-weight: 600;">
-                            <option value="">Select Staff Member</option>
+                        <select name="assigned_to" style="width: 100%; height: 45px; border-radius: 0.75rem; border: 1.5px solid #e2e8f0; margin-bottom: 1rem; padding: 0 1rem; font-weight: 600; font-size: 0.85rem; background: #f8fafc;">
+                            <option value="">Select Resource</option>
                             @foreach($staffMembers as $staff)
                                 <option value="{{ $staff->id }}" {{ $ticket->assigned_to == $staff->id ? 'selected' : '' }}>{{ $staff->name }}</option>
                             @endforeach
                         </select>
-                        <button type="submit" style="width: 100%; background: #3b82f6; color: white; border: none; padding: 1rem; border-radius: 0.75rem; font-weight: 800; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='#2563eb';" onmouseout="this.style.background='#3b82f6';">
-                             Update Assignment
+                        <button type="submit" class="custom-btn" style="background: #3b82f6; color: white;">
+                             Update Link
                         </button>
                     </form>
                 </div>
                 @endif
 
-                @if(Auth::user()->hasAnyRole(['staff', 'admin', 'manager']))
-                <div style="background: white; border-radius: 1.5rem; border: 2px solid #f1f5f9; padding: 1.75rem;">
-                    <h4 style="margin: 0 0 1.25rem 0; font-size: 0.95rem; font-weight: 800; color: #1e293b;">Force Update Status</h4>
+                {{-- Admin Status Force --}}
+                <div class="action-panel">
+                    <span class="meta-label" style="margin-bottom: 1rem;">Manual Status override</span>
                     <form action="{{ route('staff.tickets.status', $ticket->id) }}" method="POST">
                         @csrf
-                        <select name="status" class="form-control" style="width: 100%; margin-bottom: 1.25rem; border-radius: 0.75rem; height: 48px; border: 1.5px solid #e2e8f0; font-weight: 600;">
-                            @foreach($ticketStatuses as $stat)
-                                <option value="{{ $stat->name }}" {{ strtolower($ticket->status) == strtolower($stat->name) ? 'selected' : '' }}>{{ $stat->name }}</option>
-                            @endforeach
+                        <select name="status" style="width: 100%; height: 45px; border-radius: 0.75rem; border: 1.5px solid #e2e8f0; margin-bottom: 1rem; padding: 0 1rem; font-weight: 600; font-size: 0.85rem; background: #f8fafc;">
+                            @if(isset($ticketStatuses))
+                                @foreach($ticketStatuses as $stat)
+                                    <option value="{{ $stat->name }}" {{ strtolower($ticket->status) == strtolower($stat->name) ? 'selected' : '' }}>{{ $stat->name }}</option>
+                                @endforeach
+                            @endif
                         </select>
-                        <button type="submit" style="width: 100%; background: #64748b; color: white; border: none; padding: 1rem; border-radius: 0.75rem; font-weight: 800; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='#475569';" onmouseout="this.style.background='#64748b';">
-                            Push Status Update
+                        <button type="submit" class="custom-btn" style="background: #64748b; color: white;">
+                             Force Update
                         </button>
                     </form>
                 </div>
-                @endif
             </div>
+            @endif
         </div>
     </div>
 </div>

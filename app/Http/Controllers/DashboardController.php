@@ -28,18 +28,18 @@ class DashboardController extends Controller
             'agents' => 0,
         ];
 
-        // Fetch Global Stats if permitted (Admin/Manager usually)
-        if ($user->hasAnyRole(['admin', 'manager'])) {
+        // Fetch Global Stats if permitted
+        if ($user->can('manage tickets')) {
             $stats['users'] = User::count();
             $stats['products'] = Product::count();
             $stats['clients'] = Client::count();
             $stats['tickets'] = Ticket::count();
-            $stats['open_tickets'] = Ticket::whereNotIn('status', ['resolved', 'closed'])->count();
-            $stats['closed_tickets'] = Ticket::whereIn('status', ['resolved', 'closed'])->count();
+            $stats['open_tickets'] = Ticket::whereNotIn('status', ['resolved', 'closed', 'Resolved', 'Closed'])->count();
+            $stats['closed_tickets'] = Ticket::whereIn('status', ['resolved', 'closed', 'Resolved', 'Closed'])->count();
             $stats['agents'] = User::role('staff')->count();
         } 
         // Fetch Limited Stats for Staff (Assigned to them)
-        elseif ($user->hasRole('staff')) {
+        elseif ($user->can('edit tickets')) {
             $staffId = $user->id;
             $stats['tickets']         = Ticket::where('assigned_to', $staffId)->count(); // total assigned
             $stats['total_assigned']  = $stats['tickets'];
@@ -53,8 +53,8 @@ class DashboardController extends Controller
         // Fetch Limited Stats for Regular User (Their own tickets)
         else {
             $stats['tickets'] = Ticket::where('user_id', $user->id)->count();
-            $stats['open_tickets'] = Ticket::where('user_id', $user->id)->whereNotIn('status', ['resolved', 'closed'])->count();
-            $stats['closed_tickets'] = Ticket::where('user_id', $user->id)->whereIn('status', ['resolved', 'closed'])->count();
+            $stats['open_tickets'] = Ticket::where('user_id', $user->id)->whereNotIn('status', ['resolved', 'closed', 'Resolved', 'Closed'])->count();
+            $stats['closed_tickets'] = Ticket::where('user_id', $user->id)->whereIn('status', ['resolved', 'closed', 'Resolved', 'Closed'])->count();
         }
 
         // Charts Data (Shared or Contextual)
@@ -64,10 +64,10 @@ class DashboardController extends Controller
         $tickets_by_agent = collect();
         $tickets_this_year = collect();
 
-        if ($user->hasAnyRole(['admin', 'manager'])) {
+        if ($user->can('manage tickets')) {
             $tickets_by_status = Ticket::select('status', DB::raw('count(*) as count'))->groupBy('status')->pluck('count', 'status');
             $tickets_by_priority = Ticket::select('priority', DB::raw('count(*) as count'))->groupBy('priority')->pluck('count', 'priority');
-            $tickets_by_category = Ticket::join('product_categories', 'tickets.category_id', '=', 'product_categories.id')
+            $tickets_by_category = Ticket::whereNotNull('category_id')->join('product_categories', 'tickets.category_id', '=', 'product_categories.id')
                 ->select('product_categories.name', DB::raw('count(*) as count'))->groupBy('product_categories.name')->pluck('count', 'name');
             $tickets_by_agent = User::role('staff')->withCount('assignedTickets')->pluck('assigned_tickets_count', 'name');
             $tickets_this_year = Ticket::whereYear('created_at', date('Y'))
@@ -76,9 +76,9 @@ class DashboardController extends Controller
 
         // Recent Tickets (Contextual)
         $query = Ticket::with(['user', 'product']);
-        if ($user->hasAnyRole(['admin', 'manager'])) {
+        if ($user->can('manage tickets')) {
             // No additional filter for high-level management
-        } elseif ($user->hasRole('staff')) {
+        } elseif ($user->can('edit tickets')) {
             $query->where('assigned_to', $user->id);
         } else {
             // Regular user or custom role: only show their own tickets

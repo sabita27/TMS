@@ -12,7 +12,7 @@
         <table>
             <thead>
                 <tr>
-                    <th>ID</th>
+                    <th>S.No</th>
                     <th>Name</th>
                     <th>Created At</th>
                     <th>Action</th>
@@ -21,7 +21,7 @@
             <tbody>
                 @foreach($designations as $designation)
                 <tr>
-                    <td>{{ $designation->id }}</td>
+                    <td>{{ ($designations->currentPage() - 1) * $designations->perPage() + $loop->iteration }}</td>
                     <td><span class="badge badge-info">{{ $designation->name }}</span></td>
                     <td>{{ $designation->created_at->format('M d, Y') }}</td>
                     <td>

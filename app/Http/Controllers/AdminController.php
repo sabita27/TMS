@@ -48,10 +48,10 @@ class AdminController extends Controller
             ->pluck('assigned_tickets_count', 'name');
 
         $tickets_this_year = Ticket::whereYear('created_at', date('Y'))
-            ->select(\DB::raw('MONTH(created_at) as month'), \DB::raw('count(*) as count'))
+            ->select(\DB::raw('MONTH(created_at) as month'), \DB::raw('count(*) as month_count'))
             ->groupBy('month')
             ->orderBy('month')
-            ->pluck('count', 'month');
+            ->pluck('month_count', 'month');
         
         $recent_tickets = Ticket::with(['user', 'product'])->latest()->take(5)->get();
 
@@ -80,7 +80,7 @@ class AdminController extends Controller
         $role = Role::findById($request->role_id);
         $roleName = strtolower($role->name);
         $isStaff = ($roleName == 'staff');
-        $isUser = ($roleName == 'user');
+        $isInternal = in_array($roleName, ['admin', 'manager', 'staff']);
 
         if ($isStaff) {
             $request->validate([
@@ -89,10 +89,12 @@ class AdminController extends Controller
             ]);
         }
 
-        if ($isUser) {
-            $request->validate([
-                'client_id' => 'required|exists:clients,id',
-            ]);
+        if (!$isInternal) {
+            if ($roleName == 'user') {
+                $request->validate(['client_id' => 'required|exists:clients,id']);
+            } else {
+                $request->validate(['client_id' => 'nullable|exists:clients,id']);
+            }
         }
 
         $user = User::create([
@@ -112,7 +114,7 @@ class AdminController extends Controller
             ]);
         }
 
-        if ($isUser) {
+        if ($request->client_id && !$isInternal) {
             $user->client_detail()->create([
                 'client_id' => $request->client_id,
             ]);
@@ -140,7 +142,7 @@ class AdminController extends Controller
         $role = Role::findById($request->role_id);
         $roleName = strtolower($role->name);
         $isStaff = ($roleName == 'staff');
-        $isUser = ($roleName == 'user');
+        $isInternal = in_array($roleName, ['admin', 'manager', 'staff']);
 
         if ($isStaff) {
             $request->validate([
@@ -149,10 +151,12 @@ class AdminController extends Controller
             ]);
         }
 
-        if ($isUser) {
-            $request->validate([
-                'client_id' => 'required|exists:clients,id',
-            ]);
+        if (!$isInternal) {
+            if ($roleName == 'user') {
+                $request->validate(['client_id' => 'required|exists:clients,id']);
+            } else {
+                $request->validate(['client_id' => 'nullable|exists:clients,id']);
+            }
         }
 
         $user->update([
@@ -177,17 +181,16 @@ class AdminController extends Controller
                     'position_id' => $request->position_id,
                 ]
             );
-            $user->client_detail()->delete();
-        } elseif ($isUser) {
-            $user->client_detail()->updateOrCreate(
-                ['user_id' => $user->id],
-                [
-                    'client_id' => $request->client_id,
-                ]
-            );
-            $user->staff_detail()->delete();
         } else {
             $user->staff_detail()->delete();
+        }
+
+        if ($request->client_id && !$isInternal) {
+            $user->client_detail()->updateOrCreate(
+                ['user_id' => $user->id],
+                ['client_id' => $request->client_id]
+            );
+        } else {
             $user->client_detail()->delete();
         }
 

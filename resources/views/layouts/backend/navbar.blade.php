@@ -135,12 +135,12 @@
                 </a>
             @endcan
 
-            {{-- Regular User level: My Tickets (Only if they can manage their own tickets but aren't high-level managers) --}}
-            @if(!$canManageAll && !$canEditAssigned && $canCreate)
+            {{-- My Tickets - Permission Based --}}
+            @can('view my tickets')
                 <a href="{{ route('user.tickets') }}" class="nav-item-link {{ $curr == 'user.tickets' ? 'active' : '' }}">
                     <i class="fas fa-ticket-alt"></i> My Tickets
                 </a>
-            @endif
+            @endcan
 
             <a href="{{ route('user.products') }}" class="nav-item-link {{ $curr == 'user.products' ? 'active' : '' }}">
                 <i class="fas fa-shopping-bag"></i> Browse Products
