@@ -123,16 +123,6 @@
                             <a href="{{ route('ticket.show', $ticket->id) }}" style="color: #3b82f6; font-weight: 700; text-decoration: none; font-size: 0.75rem; padding: 0.4rem 0.75rem; border: 1px solid #dbeafe; border-radius: 0.5rem; background: #eff6ff;">
                                 <i class="fas fa-eye"></i> Details 
                             </a>
-                            @if($ticket->status !== 'closed')
-                                <form action="{{ route('user.tickets.close', $ticket->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to close this ticket?')" style="margin: 0;">
-                                    @csrf
-                                    <button type="submit" class="btn btn-outline-danger" style="padding: 0.4rem 0.75rem; font-size: 0.75rem; border-radius: 0.5rem; font-weight: 600; display: flex; align-items: center; gap: 0.35rem; color: #ef4444; border: 1px solid #fee2e2; background: #fff; cursor: pointer;">
-                                        <i class="fas fa-times-circle"></i> Close
-                                    </button>
-                                </form>
-                            @else
-                                <span style="font-size: 0.7rem; color: #94a3b8; font-style: italic;">Closed {{ $ticket->closed_at->format('M d') }}</span>
-                            @endif
                         </div>
                     </td>
                 </tr>

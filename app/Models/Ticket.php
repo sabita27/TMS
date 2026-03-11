@@ -70,4 +70,9 @@ class Ticket extends Model
     {
         return $this->belongsTo(User::class, 'forwarded_to');
     }
+
+    public function replies()
+    {
+        return $this->hasMany(TicketReply::class);
+    }
 }

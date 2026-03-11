@@ -32,6 +32,13 @@ Route::middleware(['auth'])->group(function () {
     
     // Shared Ticket Views
     Route::get('/tickets/{ticket}', [TicketController::class, 'show'])->name('ticket.show');
+    Route::post('/tickets/{ticket}/reply', [TicketController::class, 'reply'])->name('ticket.reply');
+
+    // Notifications
+    Route::post('/notifications/mark-all-read', function () {
+        auth()->user()->unreadNotifications->markAsRead();
+        return back();
+    })->name('notifications.markAllRead');
 
     // Redirect old profile URL to new one
     Route::get('/user/profile', function () {

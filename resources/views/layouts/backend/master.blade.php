@@ -17,14 +17,77 @@
                 </button>
                 <div class="page-title-text">@yield('page_title', 'Dashboard')</div>
             </div>
-            <div style="display: flex; align-items: center; gap: 0.75rem;">
-                <div class="header-user-text" style="text-align: right;">
-                    <div style="font-weight: 600; font-size: 0.85rem; line-height: 1.2;">{{ Auth::user()->name }}</div>
-                    <div style="font-size: 0.7rem; color: var(--text-muted);">{{ ucfirst(Auth::user()->getRoleNames()->first() ?? 'User') }}</div>
+            <div style="display: flex; align-items: center; gap: 1.5rem;">
+                {{-- Notifications Bell --}}
+                <div style="position: relative; cursor: pointer;" onclick="document.getElementById('notification-dropdown').classList.toggle('show')">
+                    <i class="fas fa-bell" style="font-size: 1.25rem; color: #64748b; transition: 0.2s;" onmouseover="this.style.color='#3b82f6'" onmouseout="this.style.color='#64748b'"></i>
+                    @if(Auth::user()->unreadNotifications->count() > 0)
+                        <span style="position: absolute; top: -6px; right: -6px; background: #ef4444; color: white; font-size: 0.6rem; font-weight: 800; padding: 0.15rem 0.35rem; border-radius: 1rem; border: 2px solid white;">
+                            {{ Auth::user()->unreadNotifications->count() }}
+                        </span>
+                    @endif
+                    
+                    {{-- Dropdown --}}
+                    <div id="notification-dropdown" class="notification-dropdown" style="display: none; position: absolute; top: 150%; right: -10px; width: 320px; background: white; border-radius: 1rem; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; z-index: 50;">
+                        <div style="padding: 1rem 1.25rem; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
+                            <h4 style="margin: 0; font-size: 0.95rem; font-weight: 800; color: #0f172a;">Notifications</h4>
+                            @if(Auth::user()->unreadNotifications->count() > 0)
+                                <form action="{{ route('notifications.markAllRead') }}" method="POST" style="margin: 0;">
+                                    @csrf
+                                    <button type="submit" style="background: none; border: none; color: #3b82f6; font-size: 0.75rem; font-weight: 700; cursor: pointer; padding: 0;">Mark all read</button>
+                                </form>
+                            @endif
+                        </div>
+                        <div style="max-height: 350px; overflow-y: auto;">
+                            @forelse(Auth::user()->unreadNotifications as $notification)
+                                <a href="{{ route('ticket.show', $notification->data['ticket_id']) }}" style="display: block; padding: 1rem 1.25rem; border-bottom: 1px solid #f8fafc; text-decoration: none; transition: 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
+                                    <div style="display: flex; gap: 0.75rem;">
+                                        <div style="width: 36px; height: 36px; border-radius: 50%; background: #eff6ff; color: #3b82f6; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.85rem;">
+                                            <i class="fas fa-comment-dots"></i>
+                                        </div>
+                                        <div>
+                                            <p style="margin: 0 0 0.25rem 0; font-size: 0.85rem; color: #1e293b; font-weight: 700;">
+                                                New reply in #{{ $notification->data['ticket_number'] }}
+                                            </p>
+                                            <p style="margin: 0 0 0.4rem 0; font-size: 0.8rem; color: #64748b; line-height: 1.4;">
+                                                <span style="font-weight: 600;">{{ $notification->data['sender_name'] }}:</span> "{{ $notification->data['message'] }}"
+                                            </p>
+                                            <p style="margin: 0; font-size: 0.7rem; color: #94a3b8; font-weight: 600;">
+                                                {{ $notification->created_at->diffForHumans() }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </a>
+                            @empty
+                                <div style="padding: 2rem; text-align: center; color: #94a3b8;">
+                                    <i class="fas fa-bell-slash" style="font-size: 1.5rem; margin-bottom: 0.75rem; opacity: 0.5;"></i>
+                                    <p style="margin: 0; font-size: 0.85rem; font-weight: 600;">No new notifications</p>
+                                </div>
+                            @endforelse
+                        </div>
+                    </div>
                 </div>
-                <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&background=4f46e5&color=fff" class="user-avatar" alt="Avatar">
+
+                <div style="display: flex; align-items: center; gap: 0.75rem; border-left: 2px solid #f1f5f9; padding-left: 1.5rem;">
+                    <div class="header-user-text" style="text-align: right;">
+                        <div style="font-weight: 600; font-size: 0.85rem; line-height: 1.2;">{{ Auth::user()->name }}</div>
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">{{ ucfirst(Auth::user()->getRoleNames()->first() ?? 'User') }}</div>
+                    </div>
+                    <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&background=4f46e5&color=fff" class="user-avatar" alt="Avatar">
+                </div>
             </div>
         </header>
+
+        <script>
+            // Close notification dropdown when clicking outside
+            document.addEventListener('click', function(event) {
+                var dropdown = document.getElementById('notification-dropdown');
+                var bell = dropdown.parentElement;
+                if (!bell.contains(event.target)) {
+                    dropdown.classList.remove('show');
+                }
+            });
+        </script>
 
         <div class="content-inner">
             @include('layouts.backend.notifications') {{-- Simple notifications if needed --}}

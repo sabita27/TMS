@@ -8,6 +8,7 @@ use App\Models\Project;
 use App\Models\Service;
 use App\Models\TicketStatus;
 use App\Models\User;
+use App\Models\TicketReply;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -174,8 +175,7 @@ class TicketController extends Controller
                 abort(403);
             }
         }
-        
-        $ticket->load(['user', 'product', 'project', 'service', 'assignedStaff']);
+        $ticket->load(['user', 'product', 'project', 'service', 'assignedStaff', 'replies.user']);
         $staffMembers = User::role('staff')->get();
         $ticketStatuses = TicketStatus::where('status', 'active')->get();
         
@@ -191,5 +191,46 @@ class TicketController extends Controller
         }
 
         return view('auth.ticket_show', compact('ticket', 'staffMembers', 'ticketStatuses'));
+    }
+
+    public function reply(Request $request, Ticket $ticket)
+    {
+        $request->validate([
+            'replay' => 'required|string'
+        ]);
+
+        $user = Auth::user();
+        $isStaffOrAdmin = $user->hasAnyRole(['admin', 'manager', 'staff']);
+
+        TicketReply::create([
+            'ticket_id' => $ticket->id,
+            'replay' => $request->replay,
+            'user_id' => $ticket->user_id, // Store ticket's user unconditionally
+            'staff_id' => $isStaffOrAdmin ? $user->id : $ticket->assigned_to, // Store staff
+            'reply_by' => $isStaffOrAdmin ? 'staff' : 'user', // Identify the sender
+        ]);
+
+        // Truncate message for notification snippet
+        $messageSnippet = \Illuminate\Support\Str::limit($request->replay, 50);
+
+        if ($isStaffOrAdmin) {
+            // Notify the user who created the ticket
+            if ($ticket->user) {
+                $ticket->user->notify(new \App\Notifications\TicketReplyNotification($ticket, $user->name, $messageSnippet));
+            }
+        } else {
+            // Notify assigned staff if exists, else notify admins/managers
+            if ($ticket->assigned_to) {
+                $staff = User::find($ticket->assigned_to);
+                if ($staff) {
+                    $staff->notify(new \App\Notifications\TicketReplyNotification($ticket, $user->name, $messageSnippet));
+                }
+            } else {
+                $adminsManagers = User::role(['admin', 'manager'])->get();
+                \Illuminate\Support\Facades\Notification::send($adminsManagers, new \App\Notifications\TicketReplyNotification($ticket, $user->name, $messageSnippet));
+            }
+        }
+
+        return back()->with('success', 'Reply added successfully.');
     }
 }
