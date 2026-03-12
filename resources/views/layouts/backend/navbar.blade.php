@@ -126,6 +126,9 @@
                 <a href="{{ route('manager.tickets') }}" class="nav-item-link {{ $curr == 'manager.tickets' ? 'active' : '' }}">
                     <i class="fas fa-tasks"></i> All Tickets
                 </a>
+                <a href="{{ route('manager.conversations') }}" class="nav-item-link {{ $curr == 'manager.conversations' ? 'active' : '' }}">
+                    <i class="fas fa-comment-medical"></i> Conversations
+                </a>
             @endcan
 
             {{-- Staff level: Assigned Tickets --}}

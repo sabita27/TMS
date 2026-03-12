@@ -200,7 +200,9 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['auth'])->prefix('manager')->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->middleware(['role_or_permission:manager|manage tickets'])->name('manager.dashboard');
         Route::get('/tickets', [TicketController::class, 'managerTickets'])->middleware(['role_or_permission:manager|manage tickets'])->name('manager.tickets');
+        Route::get('/conversations', [TicketController::class, 'allConversations'])->middleware(['role_or_permission:manager|manage tickets'])->name('manager.conversations');
         Route::post('/tickets/{ticket}/assign', [TicketController::class, 'assign'])->middleware(['role_or_permission:manager|manage tickets'])->name('manager.tickets.assign');
         Route::post('/tickets/{ticket}/forward', [TicketController::class, 'forward'])->middleware(['role_or_permission:manager|manage tickets'])->name('manager.tickets.forward');
+        Route::delete('/tickets/{ticket}', [TicketController::class, 'destroy'])->middleware(['role_or_permission:manager|manage tickets'])->name('manager.tickets.delete');
     });
 });

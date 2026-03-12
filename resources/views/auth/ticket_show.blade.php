@@ -203,20 +203,21 @@
             </div>
 
             @if($ticket->attachment)
-            <div>
-                <span class="meta-label">Attached Document</span>
-                <div style="background: #f1f5f9; padding: 1.5rem; border-radius: 1.25rem; display: flex; align-items: center; justify-content: space-between;">
-                    <div style="display: flex; align-items: center; gap: 1rem;">
-                        <div style="width: 40px; height: 40px; background: white; border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; color: #64748b; font-size: 1.1rem; border: 1px solid #e2e8f0;">
+            <div style="margin-top: 1.5rem;">
+                <span class="meta-label">Attached Resources</span>
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <a href="{{ asset('storage/' . $ticket->attachment) }}" target="_blank" style="text-decoration: none; display: flex; align-items: center; gap: 1rem; background: #ffffff; border: 1px solid #e2e8f0; padding: 0.75rem 1.25rem; border-radius: 0.75rem; min-width: 280px; transition: 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 4px 6px -1px rgba(0,0,0,0.05)';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';">
+                        <div style="width: 40px; height: 40px; background: #fef2f2; color: #ef4444; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0;">
                             <i class="fas fa-file-pdf"></i>
                         </div>
-                        <div>
-                            <p style="margin: 0; font-weight: 700; color: #334155; font-size: 0.9rem;">Supporting Media/File</p>
-                            <p style="margin: 0; font-size: 0.75rem; color: #94a3b8;">{{ strtoupper(pathinfo($ticket->attachment, PATHINFO_EXTENSION)) }} Document</p>
+                        <div style="overflow: hidden;">
+                            <p style="margin: 0; font-weight: 700; color: #1e293b; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                {{ basename($ticket->attachment) }}
+                            </p>
+                            <p style="margin: 0; font-size: 0.75rem; color: #94a3b8; font-weight: 600;">
+                                {{ strtoupper(pathinfo($ticket->attachment, PATHINFO_EXTENSION)) }} • Support File
+                            </p>
                         </div>
-                    </div>
-                    <a href="{{ asset('storage/' . $ticket->attachment) }}" target="_blank" style="background: white; color: #3b82f6; border: 1.5px solid #dbeafe; padding: 0.6rem 1.25rem; border-radius: 0.75rem; font-weight: 700; font-size: 0.85rem; text-decoration: none; transition: 0.3s;" onmouseover="this.style.background='#3b82f6'; this.style.color='white';" onmouseout="this.style.background='white'; this.style.color='#3b82f6';">
-                        <i class="fas fa-download"></i> Download
                     </a>
                 </div>
             </div>
@@ -225,99 +226,103 @@
             <hr style="margin: 3.5rem 0; border: 0; border-top: 1px solid #f1f5f9;">
 
             {{-- Conversation Log --}}
-            <div style="margin-bottom: 2rem;">
-                <span class="meta-label" style="margin-bottom: 1.5rem;"><i class="fas fa-comments"></i> Conversation</span>
+            <div style="margin-bottom: 1.5rem;">
+                <span class="meta-label" style="margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; color: #64748b;">
+                    <i class="fas fa-comments"></i> Conversation Feed
+                </span>
                 
-                <div style="display: flex; flex-direction: column; gap: 1rem; background: #e5ddd5; padding: 1.5rem; border-radius: 1rem; border: 1px solid #d1d5db; box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05); max-height: 500px; overflow-y: auto;">
-
-
-                    {{-- Replies --}}
-                    @forelse($ticket->replies as $reply)
-                        @php
-                            // Check who sent this specific reply
-                            $isStaffReply = ($reply->reply_by === 'staff');
-                            
-                            // It was sent by me if it's a staff reply and I am that staff, OR it's a user reply and I am that user.
-                            $isSentByMe = false;
-                            if ($isStaffReply && $reply->staff_id === Auth::id()) {
-                                $isSentByMe = true;
-                            } elseif (!$isStaffReply && $reply->user_id === Auth::id()) {
-                                $isSentByMe = true;
-                            }
-
-                            // Default incoming
-                            $align = 'flex-start';
-                            $bg = '#ffffff'; 
-                            $borderRadius = '0 1rem 1rem 1rem';
-
-                            // If it was sent by me, force right side outgoing
-                            if ($isSentByMe) {
-                                $align = 'flex-end';
-                                $bg = '#dcf8c6';
-                                $borderRadius = '1rem 0 1rem 1rem';
-                            } else {
-                                // Admin viewer logic: if neither, but staff sent it, push staff to right.
-                                if (!Auth::user()->hasAnyRole(['user', 'staff']) && $isStaffReply) {
-                                    $align = 'flex-end';
-                                    $bg = '#dcf8c6';
-                                    $borderRadius = '1rem 0 1rem 1rem';
-                                }
-                            }
-                            
-                            $senderName = $isStaffReply ? ($reply->staff->name ?? 'Staff') : ($reply->user->name ?? 'User');
-                        @endphp
-                        <div style="display: flex; flex-direction: column; align-items: {{ $align }}; position: relative; width: 100%;">
-                            <div style="display: flex; flex-direction: column; align-items: {{ $align }}; max-width: 85%;">
-                                @if(!$isSentByMe)
-                                <span style="font-size: 0.7rem; font-weight: 700; color: #6b7280; margin-bottom: 0.2rem; padding: 0 0.5rem;">
-                                    {{ $senderName }}
-                                </span>
-                                @endif
-                                <div style="position: relative; background: {{ $bg }}; padding: 0.6rem 1rem; border-radius: {{ $borderRadius }}; box-shadow: 0 1px 2px rgba(0,0,0,0.1); color: #1f2937; line-height: 1.5; font-size: 0.95rem;">
-                                    {{-- Triangle Tail --}}
-                                    @if($align === 'flex-end')
-                                        <div style="position: absolute; top: 0; right: -8px; width: 0; height: 0; border-top: 0px solid transparent; border-bottom: 12px solid transparent; border-left: 12px solid {{ $bg }};"></div>
-                                    @else
-                                        <div style="position: absolute; top: 0; left: -8px; width: 0; height: 0; border-top: 0px solid transparent; border-bottom: 12px solid transparent; border-right: 12px solid {{ $bg }};"></div>
-                                    @endif
-
-                                    <div style="margin-bottom: 0.25rem;">{!! nl2br(e($reply->replay)) !!}</div>
-                                    
-                                    {{-- Live Time --}}
-                                    <div style="text-align: right; font-size: 0.65rem; color: #6b7280; font-weight: 500; display: flex; justify-content: flex-end; align-items: center; gap: 0.2rem; margin-top: 0.1rem;">
-                                        <span class="live-time" data-time="{{ $reply->created_at->format('Y-m-d\TH:i:s\Z') }}">
-                                            {{ $reply->created_at->format('g:i A') }}
-                                        </span>
-                                        @if($isSentByMe)
-                                        <i class="fas fa-check-double" style="color: #4ade80;"></i>
-                                        @endif
-                                    </div>
+                <div style="background: #ffffff; border-radius: 1.25rem; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); overflow: hidden;">
+                    <div style="max-height: 550px; overflow-y: auto; display: flex; flex-direction: column;">
+                        
+                        {{-- Initial Description as First Message --}}
+                        <div style="display: flex; gap: 1.25rem; padding: 1.5rem; transition: 0.2s; border-bottom: 1px solid #f1f5f9;">
+                            <img src="https://ui-avatars.com/api/?name={{ urlencode($ticket->user->name) }}&background=3b82f6&color=fff&bold=true" style="width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0; margin-top: 2px;" alt="Avatar">
+                            <div style="flex-grow: 1; min-width: 0;">
+                                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.5rem;">
+                                    <span style="font-weight: 700; color: #0f172a; font-size: 0.95rem;">{{ $ticket->user->name }}</span>
+                                    <span style="font-size: 0.75rem; color: #94a3b8; font-weight: 600;">{{ $ticket->created_at->format('l g:i A') }}</span>
+                                </div>
+                                <div style="font-size: 0.95rem; color: #334155; line-height: 1.6; word-wrap: break-word;">
+                                    {!! $ticket->description !!}
                                 </div>
                             </div>
                         </div>
-                    @empty
-                    @endforelse
+
+                        {{-- Replies --}}
+                        @php 
+                            $currentDate = $ticket->created_at->format('Y-m-d');
+                        @endphp
+
+                        @foreach($ticket->replies as $reply)
+                            @php
+                                $replyDate = $reply->created_at->format('Y-m-d');
+                                $showDateSeparator = ($replyDate !== $currentDate);
+                                if($showDateSeparator) $currentDate = $replyDate;
+
+                                $isStaffReply = ($reply->reply_by === 'staff');
+                                $senderName = $isStaffReply ? ($reply->staff->name ?? 'Staff') : ($reply->user->name ?? 'User');
+                                $avatarBg = $isStaffReply ? '4f46e5' : '3b82f6';
+                                
+                                $isSentByMe = false;
+                                if ($isStaffReply && $reply->staff_id === Auth::id()) {
+                                    $isSentByMe = true;
+                                } elseif (!$isStaffReply && $reply->user_id === Auth::id()) {
+                                    $isSentByMe = true;
+                                }
+                            @endphp
+
+                            @if($showDateSeparator)
+                                <div style="display: flex; align-items: center; justify-content: center; padding: 1.5rem 2rem; background: #fcfdfe;">
+                                    <div style="flex-grow: 1; height: 1px; background: #f1f5f9;"></div>
+                                    <span style="padding: 0 1.25rem; font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; background: #fcfdfe;">
+                                        {{ $reply->created_at->format('F d, Y') }}
+                                    </span>
+                                    <div style="flex-grow: 1; height: 1px; background: #f1f5f9;"></div>
+                                </div>
+                            @endif
+
+                            <div style="display: flex; gap: 1.25rem; padding: 1.5rem; border-bottom: 1px solid #f1f5f9; transition: 0.2s; {{ $isSentByMe ? 'background: #fcfdfe;' : '' }}" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='{{ $isSentByMe ? '#fcfdfe' : 'transparent' }}'">
+                                <img src="https://ui-avatars.com/api/?name={{ urlencode($senderName) }}&background={{ $avatarBg }}&color=fff&bold=true" style="width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0; margin-top: 2px;" alt="Avatar">
+                                <div style="flex-grow: 1; min-width: 0;">
+                                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.5rem;">
+                                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                            <span style="font-weight: 700; color: #0f172a; font-size: 0.95rem;">
+                                                {{ $isSentByMe ? 'You' : $senderName }}
+                                            </span>
+                                            @if($isStaffReply)
+                                                <span style="font-size: 0.6rem; background: #eef2ff; color: #4f46e5; padding: 0.15rem 0.5rem; border-radius: 0.5rem; font-weight: 800; text-transform: uppercase;">Staff</span>
+                                            @endif
+                                        </div>
+                                        <span style="font-size: 0.75rem; color: #94a3b8; font-weight: 600;">{{ $reply->created_at->format('g:i A') }}</span>
+                                    </div>
+                                    <div style="font-size: 0.95rem; color: #334155; line-height: 1.6; word-wrap: break-word;">
+                                        {!! nl2br(e($reply->replay)) !!}
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
             </div>
 
             {{-- Reply Form --}}
             @if(strtolower($ticket->status) !== 'closed')
-            <div style="margin-top: 2rem;">
-                <form action="{{ route('ticket.reply', $ticket->id) }}" method="POST">
+            <div style="background: #ffffff; border-radius: 1.25rem; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); overflow: hidden; padding: 1.5rem;">
+                <form id="reply-form" action="{{ route('ticket.reply', $ticket->id) }}" method="POST" style="margin: 0;">
                     @csrf
-                    <div style="margin-bottom: 1rem;">
-                        <textarea name="replay" rows="3" placeholder="Type your reply here..." style="width: 100%; border: 2px solid #e2e8f0; border-radius: 1rem; padding: 1rem; font-family: inherit; font-size: 0.95rem; resize: vertical; outline: none; transition: 0.3s; background: white;" onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 4px rgba(59, 130, 246, 0.1)';" onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';" required></textarea>
+                    <div style="width: 100%; box-sizing: border-box; margin-bottom: 1.25rem;">
+                        <textarea id="reply-textarea" name="replay" rows="3" placeholder="Write a response..." style="width: 100%; box-sizing: border-box; border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 1rem 1.25rem; font-family: inherit; font-size: 0.95rem; resize: none; outline: none; transition: 0.3s; background: #fcfdfe; line-height: 1.6; display: block;" onfocus="this.style.borderColor='#3b82f6'; this.style.background='white'; this.style.boxShadow='0 0 0 4px rgba(59, 130, 246, 0.05)';" onblur="this.style.borderColor='#e2e8f0'; this.style.background='#fcfdfe';" required onkeydown="if(event.keyCode == 13 && !event.shiftKey) { event.preventDefault(); document.getElementById('reply-form').submit(); }"></textarea>
                     </div>
-                    <div style="display: flex; justify-content: flex-end;">
-                        <button type="submit" style="background: #3b82f6; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; transition: 0.3s; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);" onmouseover="this.style.background='#2563eb';" onmouseout="this.style.background='#3b82f6';">
-                            <i class="fas fa-paper-plane"></i> Send Reply
+                    <div style="display: flex; justify-content: flex-end; align-items: center;">
+                        <button type="submit" style="background: #0f172a; color: white; border: none; padding: 0.8rem 2.25rem; border-radius: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; transition: 0.3s; font-size: 0.95rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);" onmouseover="this.style.background='#1e293b'; this.style.transform='translateY(-1px)';" onmouseout="this.style.background='#0f172a'; this.style.transform='none';">
+                            Send Reply <i class="fas fa-paper-plane" style="font-size: 0.85rem; opacity: 0.9;"></i>
                         </button>
                     </div>
                 </form>
             </div>
             @else
-            <div style="margin-top: 2rem; padding: 1.5rem; background: #fef2f2; border: 1px solid #fecaca; border-radius: 1rem; text-align: center; color: #991b1b; font-weight: 600; font-size: 0.9rem;">
-                <i class="fas fa-lock" style="margin-right: 0.5rem;"></i> This ticket has been closed. You cannot add further replies.
+            <div style="padding: 1.5rem; background: #fef2f2; border: 1px solid #fecaca; border-radius: 1.25rem; text-align: center; color: #991b1b; font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; gap: 0.75rem;">
+                <i class="fas fa-lock"></i> This ticket is closed. No further replies are accepted.
             </div>
             @endif
         </div>
@@ -441,7 +446,7 @@
                 // Parse UTC string and format to user's local time (e.g. "10:30 AM")
                 const date = new Date(utcString);
                 if (!isNaN(date)) {
-                    el.textContent = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    el.textContent = date.toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit', hour12: true });
                 }
             }
         });

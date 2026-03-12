@@ -105,6 +105,15 @@ class TicketController extends Controller
         return view('auth.tickets', compact('tickets', 'staffMembers'));
     }
 
+    public function allConversations()
+    {
+        $tickets = Ticket::with(['user', 'assignedStaff', 'replies' => function($query) {
+            $query->latest();
+        }])->latest()->paginate(15);
+        
+        return view('auth.conversations', compact('tickets'));
+    }
+
     public function assign(Request $request, Ticket $ticket)
     {
         $request->validate(['assigned_to' => 'required|exists:users,id']);
@@ -232,5 +241,16 @@ class TicketController extends Controller
         }
 
         return back()->with('success', 'Reply added successfully.');
+    }
+
+    public function destroy(Ticket $ticket)
+    {
+        // Authorization check - only admin and manager can delete tickets
+        if (!Auth::user()->hasAnyRole(['admin', 'manager'])) {
+            abort(403);
+        }
+
+        $ticket->delete();
+        return back()->with('success', 'Ticket and conversation deleted successfully.');
     }
 }
