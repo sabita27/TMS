@@ -89,9 +89,14 @@ class TicketController extends Controller
         $ticket->status = 'open';
         $ticket->save();
 
-        // Notify Admins and Managers
-        $adminsManagers = User::role(['admin', 'manager'])->get();
-        \Illuminate\Support\Facades\Notification::send($adminsManagers, new TicketCreatedNotification($ticket));
+        // Notify Admins and Managers (excluding the sender)
+        $adminsManagers = User::role(['admin', 'manager'])->get()->reject(function($u) {
+            return $u->id === Auth::id();
+        });
+        
+        if ($adminsManagers->count() > 0) {
+            \Illuminate\Support\Facades\Notification::send($adminsManagers, new TicketCreatedNotification($ticket));
+        }
 
         return redirect()->route('user.tickets')->with('success', 'Ticket raised successfully. ID: ' . $ticket->ticket_id);
     }
@@ -258,22 +263,41 @@ class TicketController extends Controller
         // Truncate message for notification snippet
         $messageSnippet = \Illuminate\Support\Str::limit($request->replay, 50);
 
+        // Logic-based Notifications
+        $recipients = collect();
+
         if ($isStaffOrAdmin) {
-            // Notify the user who created the ticket
-            if ($ticket->user) {
-                $ticket->user->notify(new \App\Notifications\TicketReplyNotification($ticket, $user->name, $messageSnippet));
+            // 1. Always notify the ticket owner (User)
+            if ($ticket->user && $ticket->user_id !== $user->id) {
+                $recipients->push($ticket->user);
+            }
+            
+            // 2. Notify assigned staff (if someone else replied, like an admin)
+            if ($ticket->assigned_to && $ticket->assigned_to !== $user->id) {
+                $assignedStaff = User::find($ticket->assigned_to);
+                if ($assignedStaff) $recipients->push($assignedStaff);
             }
         } else {
-            // Notify assigned staff if exists, else notify admins/managers
+            // 3. User replied: Notify assigned staff
             if ($ticket->assigned_to) {
-                $staff = User::find($ticket->assigned_to);
-                if ($staff) {
-                    $staff->notify(new \App\Notifications\TicketReplyNotification($ticket, $user->name, $messageSnippet));
-                }
+                $assignedStaff = User::find($ticket->assigned_to);
+                if ($assignedStaff) $recipients->push($assignedStaff);
             } else {
-                $adminsManagers = User::role(['admin', 'manager'])->get();
-                \Illuminate\Support\Facades\Notification::send($adminsManagers, new \App\Notifications\TicketReplyNotification($ticket, $user->name, $messageSnippet));
+                // 4. Unassigned: Notify Admins ONLY (Managers don't need noise yet)
+                $admins = User::role('admin')->get();
+                foreach($admins as $admin) {
+                    $recipients->push($admin);
+                }
             }
+        }
+
+        // Send unique notifications (exclude sender)
+        $uniqueRecipients = $recipients->unique('id')->reject(function ($u) use ($user) {
+            return $u->id === $user->id;
+        });
+
+        if ($uniqueRecipients->count() > 0) {
+            \Illuminate\Support\Facades\Notification::send($uniqueRecipients, new \App\Notifications\TicketReplyNotification($ticket, $user->name, $messageSnippet));
         }
 
         return back()->with('success', 'Reply added successfully.');

@@ -188,8 +188,8 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/tickets/{ticket}/close', [TicketController::class, 'close'])->name('user.tickets.close');
     });
 
-    // Staff Routes (accessible by anyone with the 'staff' role)
-    Route::middleware(['auth', 'role_or_permission:staff|edit tickets'])->prefix('staff')->group(function () {
+    // Staff Routes (accessible by anyone with the 'staff', 'admin', or 'manager' role)
+    Route::middleware(['auth', 'role_or_permission:admin|manager|staff|edit tickets'])->prefix('staff')->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->name('staff.dashboard');
         Route::get('/tickets', [TicketController::class, 'staffAssignedTickets'])->name('staff.assigned_tickets');
         Route::post('/tickets/{ticket}/status', [TicketController::class, 'updateStatus'])->name('staff.tickets.status');

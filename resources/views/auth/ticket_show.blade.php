@@ -232,6 +232,28 @@
                 </span>
                 
                 <div style="background: #ffffff; border-radius: 1.25rem; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); overflow: hidden;">
+                    
+                    {{-- Resolution/Closed Banner --}}
+                    @if(in_array(strtolower($ticket->status), ['resolved', 'closed']))
+                        <div style="background: {{ strtolower($ticket->status) === 'resolved' ? '#f0fdf4' : '#f1f5f9' }}; padding: 1.25rem; border-bottom: 3px solid {{ strtolower($ticket->status) === 'resolved' ? '#22c55e' : '#94a3b8' }}; display: flex; align-items: center; justify-content: center; gap: 1rem; text-align: center;">
+                            <div style="width: 48px; height: 48px; border-radius: 50%; background: {{ strtolower($ticket->status) === 'resolved' ? '#dcfce7' : '#e2e8f0' }}; display: flex; align-items: center; justify-content: center; color: {{ strtolower($ticket->status) === 'resolved' ? '#166534' : '#475569' }}; font-size: 1.25rem;">
+                                <i class="fas {{ strtolower($ticket->status) === 'resolved' ? 'fa-check-circle' : 'fa-archive' }}"></i>
+                            </div>
+                            <div>
+                                <h4 style="margin: 0; color: #0f172a; font-size: 1rem; font-weight: 800;">
+                                    This ticket is {{ strtoupper($ticket->status) }}
+                                </h4>
+                                <p style="margin: 2px 0 0 0; color: #64748b; font-size: 0.85rem; font-weight: 600;">
+                                    @if(strtolower($ticket->status) === 'resolved')
+                                        This issue has been marked as completed by the support team.
+                                    @else
+                                        This conversation is archived and locked.
+                                    @endif
+                                </p>
+                            </div>
+                        </div>
+                    @endif
+
                     <div id="chat-container" style="max-height: 550px; overflow-y: auto; display: flex; flex-direction: column; scroll-behavior: smooth;">
                         
 
@@ -326,8 +348,8 @@
                 </div>
             </div>
 
-            {{-- Integrated Reply Area --}}
-            @if(strtolower($ticket->status) !== 'closed')
+            {{-- Integrated Reply Area (Disabled/Locked if Solved) --}}
+            @if(!in_array(strtolower($ticket->status), ['closed', 'resolved']))
             <div style="background: #ffffff; border-radius: 1.25rem; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.03); overflow: hidden;">
                 <form id="reply-form" action="{{ route('ticket.reply', $ticket->id) }}" method="POST" enctype="multipart/form-data" style="margin: 0;">
                     @csrf
@@ -373,6 +395,17 @@
                             Send <i class="fas fa-paper-plane" style="font-size: 0.8rem;"></i>
                         </button>
                     </div>
+                </form>
+            </div>
+            @elseif(strtolower($ticket->status) === 'resolved')
+            <div style="padding: 2rem; background: #ffffff; border: 2px dashed #cbd5e1; border-radius: 1.25rem; text-align: center; color: #64748b;">
+                <p style="margin: 0 0 1rem 0; font-size: 0.95rem; font-weight: 600;">If your issue is still not solved, you can re-open this ticket.</p>
+                <form action="{{ route('staff.tickets.status', $ticket->id) }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="status" value="In-Progress">
+                    <button type="submit" style="background: #f8fafc; color: #0f172a; border: 1.5px solid #e2e8f0; padding: 0.6rem 2rem; border-radius: 0.75rem; font-weight: 800; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='#fff'; this.style.borderColor='#3b82f6'; this.style.color='#3b82f6'" onmouseout="this.style.background='#f8fafc'; this.style.borderColor='#e2e8f0'; this.style.color='#0f172a'">
+                        <i class="fas fa-undo"></i> Re-open Ticket
+                    </button>
                 </form>
             </div>
             @else
@@ -436,54 +469,73 @@
             <div style="margin-top: 3.5rem;">
                 <h4 style="margin: 0 0 1.5rem 0; font-size: 0.9rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em;">Console Management</h4>
                 
-                {{-- Staff Solve Button --}}
-                @if(Auth::user()->hasRole('staff') && $ticket->assigned_to == Auth::id() && !in_array(strtolower($ticket->status), ['resolved', 'closed']))
-                <div class="action-panel" style="background: #ecfdf5; border-color: #10b98130;">
-                    <form action="{{ route('staff.tickets.solve', $ticket->id) }}" method="POST">
-                        @csrf
-                        <button type="submit" class="custom-btn" style="background: #10b981; color: white; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);">
-                            <i class="fas fa-check-circle"></i> Resolve Ticket
-                        </button>
-                    </form>
-                </div>
-                @endif
+                @if(in_array(strtolower($ticket->status), ['resolved', 'closed']))
+                    <div style="padding: 1.5rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 1rem; text-align: center;">
+                        <i class="fas fa-lock" style="color: #94a3b8; font-size: 1.5rem; margin-bottom: 0.75rem;"></i>
+                        <p style="margin: 0; font-size: 0.85rem; font-weight: 600; color: #64748b; line-height: 1.4;">
+                            Console is locked because the ticket is {{ strtoupper($ticket->status) }}.
+                        </p>
+                        {{-- Admins can still re-open if needed --}}
+                        @if(Auth::user()->hasAnyRole(['admin', 'manager']))
+                            <form action="{{ route('staff.tickets.status', $ticket->id) }}" method="POST" style="margin-top: 1rem;">
+                                @csrf
+                                <input type="hidden" name="status" value="In-Progress">
+                                <button type="submit" style="background: none; border: none; color: #3b82f6; font-size: 0.8rem; font-weight: 700; cursor: pointer; text-decoration: underline;">
+                                    Re-activate Management
+                                </button>
+                            </form>
+                        @endif
+                    </div>
+                @else
+                    {{-- Staff Solve Button --}}
+                    @if(Auth::user()->hasRole('staff') && $ticket->assigned_to == Auth::id())
+                    <div class="action-panel" style="background: #ecfdf5; border-color: #10b98130;">
+                        <form action="{{ route('staff.tickets.solve', $ticket->id) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="custom-btn" style="background: #10b981; color: white; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);">
+                                <i class="fas fa-check-circle"></i> Resolve Ticket
+                            </button>
+                        </form>
+                    </div>
+                    @endif
 
-                {{-- Management Assignment --}}
-                @if(Auth::user()->hasAnyRole(['admin', 'manager']))
-                <div class="action-panel">
-                    <span class="meta-label" style="margin-bottom: 1rem;">Transfer Assignment</span>
-                    <form action="{{ route('manager.tickets.assign', $ticket->id) }}" method="POST">
-                        @csrf
-                        <select name="assigned_to" style="width: 100%; height: 45px; border-radius: 0.75rem; border: 1.5px solid #e2e8f0; margin-bottom: 1rem; padding: 0 1rem; font-weight: 600; font-size: 0.85rem; background: #f8fafc;">
-                            <option value="">Select Resource</option>
-                            @foreach($staffMembers as $staff)
-                                <option value="{{ $staff->id }}" {{ $ticket->assigned_to == $staff->id ? 'selected' : '' }}>{{ $staff->name }}</option>
-                            @endforeach
-                        </select>
-                        <button type="submit" class="custom-btn" style="background: #3b82f6; color: white;">
-                             Update Link
-                        </button>
-                    </form>
-                </div>
-                @endif
-
-                {{-- Admin Status Force --}}
-                <div class="action-panel">
-                    <span class="meta-label" style="margin-bottom: 1rem;">Manual Status override</span>
-                    <form action="{{ route('staff.tickets.status', $ticket->id) }}" method="POST">
-                        @csrf
-                        <select name="status" style="width: 100%; height: 45px; border-radius: 0.75rem; border: 1.5px solid #e2e8f0; margin-bottom: 1rem; padding: 0 1rem; font-weight: 600; font-size: 0.85rem; background: #f8fafc;">
-                            @if(isset($ticketStatuses))
-                                @foreach($ticketStatuses as $stat)
-                                    <option value="{{ $stat->name }}" {{ strtolower($ticket->status) == strtolower($stat->name) ? 'selected' : '' }}>{{ $stat->name }}</option>
+                    {{-- Management Assignment --}}
+                    @if(Auth::user()->hasAnyRole(['admin', 'manager']))
+                    <div class="action-panel">
+                        <span class="meta-label" style="margin-bottom: 1rem;">Transfer Assignment</span>
+                        <form action="{{ route('manager.tickets.assign', $ticket->id) }}" method="POST">
+                            @csrf
+                            <select name="assigned_to" style="width: 100%; height: 45px; border-radius: 0.75rem; border: 1.5px solid #e2e8f0; margin-bottom: 1rem; padding: 0 1rem; font-weight: 600; font-size: 0.85rem; background: #f8fafc;">
+                                <option value="">Select Resource</option>
+                                @foreach($staffMembers as $staff)
+                                    <option value="{{ $staff->id }}" {{ $ticket->assigned_to == $staff->id ? 'selected' : '' }}>{{ $staff->name }}</option>
                                 @endforeach
-                            @endif
-                        </select>
-                        <button type="submit" class="custom-btn" style="background: #64748b; color: white;">
-                             Force Update
-                        </button>
-                    </form>
-                </div>
+                            </select>
+                            <button type="submit" class="custom-btn" style="background: #3b82f6; color: white;">
+                                 Update Link
+                            </button>
+                        </form>
+                    </div>
+                    @endif
+
+                    {{-- Admin Status Force --}}
+                    <div class="action-panel">
+                        <span class="meta-label" style="margin-bottom: 1rem;">Manual Status override</span>
+                        <form action="{{ route('staff.tickets.status', $ticket->id) }}" method="POST">
+                            @csrf
+                            <select name="status" style="width: 100%; height: 45px; border-radius: 0.75rem; border: 1.5px solid #e2e8f0; margin-bottom: 1rem; padding: 0 1rem; font-weight: 600; font-size: 0.85rem; background: #f8fafc;">
+                                @if(isset($ticketStatuses))
+                                    @foreach($ticketStatuses as $stat)
+                                        <option value="{{ $stat->name }}" {{ strtolower($ticket->status) == strtolower($stat->name) ? 'selected' : '' }}>{{ $stat->name }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                            <button type="submit" class="custom-btn" style="background: #64748b; color: white;">
+                                 Force Update
+                            </button>
+                        </form>
+                    </div>
+                @endif
             </div>
             @endif
         </div>
