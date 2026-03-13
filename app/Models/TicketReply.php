@@ -16,7 +16,8 @@ class TicketReply extends Model
         'user_id',
         'staff_id',
         'reply_by',
-        'replay'
+        'replay',
+        'attachment'
     ];
 
     public function user()

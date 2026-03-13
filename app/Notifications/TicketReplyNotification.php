@@ -43,6 +43,7 @@ class TicketReplyNotification extends Notification
     public function toArray(object $notifiable): array
     {
         return [
+            'type' => 'ticket_reply',
             'ticket_id' => $this->ticket->id,
             'ticket_number' => $this->ticket->ticket_id,
             'subject' => $this->ticket->subject,

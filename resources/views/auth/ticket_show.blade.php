@@ -232,25 +232,14 @@
                 </span>
                 
                 <div style="background: #ffffff; border-radius: 1.25rem; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); overflow: hidden;">
-                    <div style="max-height: 550px; overflow-y: auto; display: flex; flex-direction: column;">
+                    <div id="chat-container" style="max-height: 550px; overflow-y: auto; display: flex; flex-direction: column; scroll-behavior: smooth;">
                         
-                        {{-- Initial Description as First Message --}}
-                        <div style="display: flex; gap: 1.25rem; padding: 1.5rem; transition: 0.2s; border-bottom: 1px solid #f1f5f9;">
-                            <img src="https://ui-avatars.com/api/?name={{ urlencode($ticket->user->name) }}&background=3b82f6&color=fff&bold=true" style="width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0; margin-top: 2px;" alt="Avatar">
-                            <div style="flex-grow: 1; min-width: 0;">
-                                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.5rem;">
-                                    <span style="font-weight: 700; color: #0f172a; font-size: 0.95rem;">{{ $ticket->user->name }}</span>
-                                    <span style="font-size: 0.75rem; color: #94a3b8; font-weight: 600;">{{ $ticket->created_at->format('l g:i A') }}</span>
-                                </div>
-                                <div style="font-size: 0.95rem; color: #334155; line-height: 1.6; word-wrap: break-word;">
-                                    {!! $ticket->description !!}
-                                </div>
-                            </div>
-                        </div>
+
 
                         {{-- Replies --}}
                         @php 
-                            $currentDate = $ticket->created_at->format('Y-m-d');
+                            $currentDate = null;
+                            $isStaffViewer = Auth::user()->hasAnyRole(['admin', 'manager', 'staff']);
                         @endphp
 
                         @foreach($ticket->replies as $reply)
@@ -269,6 +258,11 @@
                                 } elseif (!$isStaffReply && $reply->user_id === Auth::id()) {
                                     $isSentByMe = true;
                                 }
+
+                                // Alignment Logic:
+                                // Staff Viewer: Staff Left, User Right
+                                // User Viewer: User Left, Staff Right
+                                $alignRight = ($isStaffViewer && !$isStaffReply) || (!$isStaffViewer && $isStaffReply);
                             @endphp
 
                             @if($showDateSeparator)
@@ -281,11 +275,11 @@
                                 </div>
                             @endif
 
-                            <div style="display: flex; gap: 1.25rem; padding: 1.5rem; border-bottom: 1px solid #f1f5f9; transition: 0.2s; {{ $isSentByMe ? 'background: #fcfdfe;' : '' }}" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='{{ $isSentByMe ? '#fcfdfe' : 'transparent' }}'">
+                            <div style="display: flex; gap: 1.25rem; padding: 1.5rem; border-bottom: 1px solid #f1f5f9; transition: 0.2s; flex-direction: {{ $alignRight ? 'row-reverse' : 'row' }}; {{ $isSentByMe ? 'background: #fcfdfe;' : '' }}" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='{{ $isSentByMe ? '#fcfdfe' : 'transparent' }}'">
                                 <img src="https://ui-avatars.com/api/?name={{ urlencode($senderName) }}&background={{ $avatarBg }}&color=fff&bold=true" style="width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0; margin-top: 2px;" alt="Avatar">
-                                <div style="flex-grow: 1; min-width: 0;">
-                                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.5rem;">
-                                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <div style="flex-grow: 1; min-width: 0; text-align: {{ $alignRight ? 'right' : 'left' }};">
+                                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.5rem; flex-direction: {{ $alignRight ? 'row-reverse' : 'row' }};">
+                                        <div style="display: flex; align-items: center; gap: 0.5rem; flex-direction: {{ $alignRight ? 'row-reverse' : 'row' }};">
                                             <span style="font-weight: 700; color: #0f172a; font-size: 0.95rem;">
                                                 {{ $isSentByMe ? 'You' : $senderName }}
                                             </span>
@@ -295,9 +289,36 @@
                                         </div>
                                         <span style="font-size: 0.75rem; color: #94a3b8; font-weight: 600;">{{ $reply->created_at->format('g:i A') }}</span>
                                     </div>
-                                    <div style="font-size: 0.95rem; color: #334155; line-height: 1.6; word-wrap: break-word;">
+                                    <div style="font-size: 0.95rem; color: #334155; line-height: 1.6; word-wrap: break-word; margin-bottom: 0.5rem;">
                                         {!! nl2br(e($reply->replay)) !!}
                                     </div>
+
+                                    @if($reply->attachment)
+                                        @php
+                                            $extension = pathinfo($reply->attachment, PATHINFO_EXTENSION);
+                                            $isImage = in_array(strtolower($extension), ['jpg', 'jpeg', 'png', 'gif', 'webp']);
+                                        @endphp
+                                        
+                                        <div style="display: flex; justify-content: {{ $alignRight ? 'flex-end' : 'flex-start' }}; margin-top: 0.5rem;">
+                                            @if($isImage)
+                                                <div style="max-width: 300px; border-radius: 0.75rem; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+                                                    <a href="{{ asset('storage/' . $reply->attachment) }}" target="_blank">
+                                                        <img src="{{ asset('storage/' . $reply->attachment) }}" alt="Attachment" style="width: 100%; height: auto; display: block; transition: 0.3s;" onmouseover="this.style.opacity='0.9';" onmouseout="this.style.opacity='1';">
+                                                    </a>
+                                                </div>
+                                            @else
+                                                <a href="{{ asset('storage/' . $reply->attachment) }}" target="_blank" style="display: inline-flex; align-items: center; gap: 0.6rem; background: #fff; padding: 0.6rem 1rem; border-radius: 0.75rem; text-decoration: none; border: 1.5px solid #e2e8f0; transition: 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.05);" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#f8fafc';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='#fff';">
+                                                    <div style="width: 32px; height: 32px; background: #f1f5f9; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; color: #64748b;">
+                                                        <i class="fas fa-file-alt" style="font-size: 0.9rem;"></i>
+                                                    </div>
+                                                    <div style="overflow: hidden; max-width: 200px;">
+                                                        <p style="margin: 0; font-size: 0.8rem; font-weight: 700; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ basename($reply->attachment) }}</p>
+                                                        <p style="margin: 0; font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; font-weight: 700;">{{ strtoupper($extension) }} File</p>
+                                                    </div>
+                                                </a>
+                                            @endif
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
                         @endforeach
@@ -305,17 +326,51 @@
                 </div>
             </div>
 
-            {{-- Reply Form --}}
+            {{-- Integrated Reply Area --}}
             @if(strtolower($ticket->status) !== 'closed')
-            <div style="background: #ffffff; border-radius: 1.25rem; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); overflow: hidden; padding: 1.5rem;">
-                <form id="reply-form" action="{{ route('ticket.reply', $ticket->id) }}" method="POST" style="margin: 0;">
+            <div style="background: #ffffff; border-radius: 1.25rem; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.03); overflow: hidden;">
+                <form id="reply-form" action="{{ route('ticket.reply', $ticket->id) }}" method="POST" enctype="multipart/form-data" style="margin: 0;">
                     @csrf
-                    <div style="width: 100%; box-sizing: border-box; margin-bottom: 1.25rem;">
-                        <textarea id="reply-textarea" name="replay" rows="3" placeholder="Write a response..." style="width: 100%; box-sizing: border-box; border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 1rem 1.25rem; font-family: inherit; font-size: 0.95rem; resize: none; outline: none; transition: 0.3s; background: #fcfdfe; line-height: 1.6; display: block;" onfocus="this.style.borderColor='#3b82f6'; this.style.background='white'; this.style.boxShadow='0 0 0 4px rgba(59, 130, 246, 0.05)';" onblur="this.style.borderColor='#e2e8f0'; this.style.background='#fcfdfe';" required onkeydown="if(event.keyCode == 13 && !event.shiftKey) { event.preventDefault(); document.getElementById('reply-form').submit(); }"></textarea>
+                    
+                    {{-- Unified Input Container --}}
+                    <div style="padding: 1.25rem;">
+                        {{-- Live Media Preview (Integrated) --}}
+                        <div id="reply-preview-area" style="display: none; margin-bottom: 1rem; padding: 0.75rem; background: #f8fafc; border-radius: 0.75rem; border: 1px solid #edf2f7;">
+                            <div style="display: flex; align-items: center; gap: 1rem;">
+                                <div id="preview-content" style="width: 60px; height: 60px; border-radius: 0.5rem; overflow: hidden; background: #fff; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                    <!-- Thumbnail injected here -->
+                                </div>
+                                <div style="flex-grow: 1; min-width: 0;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <p id="preview-filename" style="margin: 0; font-size: 0.85rem; font-weight: 700; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></p>
+                                        <button type="button" onclick="clearAttachment()" style="background: #fee2e2; color: #ef4444; border: none; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s;">
+                                            <i class="fas fa-times" style="font-size: 0.7rem;"></i>
+                                        </button>
+                                    </div>
+                                    <p id="preview-filesize" style="margin: 2px 0 0 0; font-size: 0.7rem; color: #94a3b8; font-weight: 600;"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <textarea id="reply-textarea" name="replay" rows="3" placeholder="Write a response..." style="width: 100%; box-sizing: border-box; border: none; padding: 0; font-family: inherit; font-size: 0.95rem; resize: none; outline: none; background: transparent; line-height: 1.6; display: block;" onkeydown="if(event.keyCode == 13 && !event.shiftKey) { event.preventDefault(); document.getElementById('reply-form').submit(); }"></textarea>
                     </div>
-                    <div style="display: flex; justify-content: flex-end; align-items: center;">
-                        <button type="submit" style="background: #0f172a; color: white; border: none; padding: 0.8rem 2.25rem; border-radius: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; transition: 0.3s; font-size: 0.95rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);" onmouseover="this.style.background='#1e293b'; this.style.transform='translateY(-1px)';" onmouseout="this.style.background='#0f172a'; this.style.transform='none';">
-                            Send Reply <i class="fas fa-paper-plane" style="font-size: 0.85rem; opacity: 0.9;"></i>
+
+                    {{-- Actions Bar --}}
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1.25rem; background: #fcfdfe; border-top: 1px solid #f1f5f9;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <div id="attachment-container" style="display: flex; align-items: center; gap: 0.5rem; background: #fff; padding: 0.4rem 0.8rem; border-radius: 0.5rem; border: 1px solid #cbd5e1; cursor: pointer; transition: 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#f8fafc';" onmouseout="this.style.borderColor='#cbd5e1'; this.style.background='#fff';">
+                                <label for="reply-attachment" style="cursor: pointer; display: flex; align-items: center; gap: 0.4rem; color: #64748b; font-size: 0.8rem; font-weight: 700; margin: 0;">
+                                    <i class="fas fa-paperclip" id="attachment-icon"></i> 
+                                    <span id="attachment-text">Attach</span>
+                                </label>
+                                <input type="file" id="reply-attachment" name="attachment" style="display: none;" onchange="updateFileName(this)">
+                                <button type="button" id="remove-attachment" onclick="clearAttachment()" style="display: none; background: none; border: none; padding: 0; cursor: pointer; color: #ef4444; font-size: 0.9rem;">
+                                    <i class="fas fa-times-circle"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <button type="submit" style="background: #0f172a; color: white; border: none; padding: 0.7rem 2rem; border-radius: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; transition: 0.3s; font-size: 0.9rem;" onmouseover="this.style.background='#1e293b';" onmouseout="this.style.background='#0f172a';">
+                            Send <i class="fas fa-paper-plane" style="font-size: 0.8rem;"></i>
                         </button>
                     </div>
                 </form>
@@ -443,13 +498,104 @@
         timeElements.forEach(el => {
             const utcString = el.getAttribute('data-time');
             if (utcString) {
-                // Parse UTC string and format to user's local time (e.g. "10:30 AM")
                 const date = new Date(utcString);
                 if (!isNaN(date)) {
                     el.textContent = date.toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit', hour12: true });
                 }
             }
         });
+
+        // Force label click to trigger file input (safari/mobile fix)
+        const attachmentLabel = document.querySelector('label[for="reply-attachment"]');
+        const attachmentInput = document.getElementById('reply-attachment');
+        if (attachmentLabel && attachmentInput) {
+            attachmentLabel.addEventListener('click', function(e) {
+                attachmentInput.click();
+            });
+        }
     });
+
+    function updateFileName(input) {
+        const container = document.getElementById('attachment-container');
+        const text = document.getElementById('attachment-text');
+        const icon = document.getElementById('attachment-icon');
+        const removeBtn = document.getElementById('remove-attachment');
+        const textarea = document.getElementById('reply-textarea');
+        
+        const previewArea = document.getElementById('reply-preview-area');
+        const previewContent = document.getElementById('preview-content');
+        const previewFilename = document.getElementById('preview-filename');
+        const previewFilesize = document.getElementById('preview-filesize');
+        
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            const fileName = file.name;
+            const fileSize = (file.size / 1024).toFixed(1) + ' KB';
+            
+            // Update button UI
+            text.textContent = fileName;
+            text.style.color = '#3b82f6';
+            container.style.borderColor = '#3b82f6';
+            container.style.background = '#eff6ff';
+            container.style.borderStyle = 'solid';
+            icon.style.color = '#3b82f6';
+            removeBtn.style.display = 'block';
+
+            // Update Preview Area
+            previewFilename.textContent = fileName;
+            previewFilesize.textContent = fileSize;
+            previewArea.style.display = 'block';
+            
+            // Show Image Overlay or Icon
+            if (file.type.match('image.*')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewContent.innerHTML = `<img src="${e.target.result}" style="width: 100%; height: 100%; object-fit: cover;">`;
+                }
+                reader.readAsDataURL(file);
+            } else {
+                previewContent.innerHTML = `<i class="fas fa-file-alt" style="font-size: 2rem; color: #64748b;"></i>`;
+            }
+
+            // Automatically fill textarea if empty
+            if (textarea.value.trim() === '') {
+                textarea.value = 'Attached: ' + fileName;
+            }
+        } else {
+            resetAttachmentUI();
+        }
+    }
+
+    function clearAttachment() {
+        const input = document.getElementById('reply-attachment');
+        const textarea = document.getElementById('reply-textarea');
+        const previewArea = document.getElementById('reply-preview-area');
+        
+        // If textarea was auto-filled, clear it
+        if (input.files[0] && textarea.value === 'Attached: ' + input.files[0].name) {
+            textarea.value = '';
+        }
+        
+        input.value = '';
+        previewArea.style.display = 'none';
+        resetAttachmentUI();
+    }
+
+    function resetAttachmentUI() {
+        const container = document.getElementById('attachment-container');
+        const text = document.getElementById('attachment-text');
+        const icon = document.getElementById('attachment-icon');
+        const removeBtn = document.getElementById('remove-attachment');
+        const previewArea = document.getElementById('reply-preview-area');
+        
+        text.textContent = 'Attach File';
+        text.style.color = '#64748b';
+        container.style.borderColor = '#cbd5e1';
+        container.style.borderStyle = 'dashed';
+        container.style.background = '#f8fafc';
+        icon.style.color = '#64748b';
+        removeBtn.style.display = 'none';
+        if (previewArea) previewArea.style.display = 'none';
+    }
 </script>
 @endpush

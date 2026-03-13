@@ -28,7 +28,7 @@
                     @endif
                     
                     {{-- Dropdown --}}
-                    <div id="notification-dropdown" class="notification-dropdown" style="display: none; position: absolute; top: 150%; right: -10px; width: 320px; background: white; border-radius: 1rem; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; z-index: 50;">
+                    <div id="notification-dropdown" class="notification-dropdown" onclick="event.stopPropagation()">
                         <div style="padding: 1rem 1.25rem; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
                             <h4 style="margin: 0; font-size: 0.95rem; font-weight: 800; color: #0f172a;">Notifications</h4>
                             @if(Auth::user()->unreadNotifications->count() > 0)
@@ -40,17 +40,44 @@
                         </div>
                         <div style="max-height: 350px; overflow-y: auto;">
                             @forelse(Auth::user()->unreadNotifications as $notification)
+                                @php
+                                    $type = $notification->data['type'] ?? 'ticket_reply';
+                                    $icon = 'fa-comment-dots';
+                                    $iconBg = '#eff6ff';
+                                    $iconColor = '#3b82f6';
+                                    $title = 'New Notification';
+                                    $desc = $notification->data['message'] ?? '';
+                                    
+                                    if ($type === 'ticket_created') {
+                                        $icon = 'fa-plus-circle';
+                                        $iconBg = '#fff7ed';
+                                        $iconColor = '#f59e0b';
+                                        $title = 'New Ticket Raised';
+                                    } elseif ($type === 'ticket_assigned') {
+                                        $icon = 'fa-user-tag';
+                                        $iconBg = '#f5f3ff';
+                                        $iconColor = '#8b5cf6';
+                                        $title = 'Ticket Assigned to You';
+                                    } elseif ($type === 'status_updated') {
+                                        $icon = 'fa-info-circle';
+                                        $iconBg = '#f0fdf4';
+                                        $iconColor = '#22c55e';
+                                        $title = 'Ticket Status Updated';
+                                    } else {
+                                        $title = 'New Reply in #' . ($notification->data['ticket_number'] ?? '');
+                                    }
+                                @endphp
                                 <a href="{{ route('ticket.show', $notification->data['ticket_id']) }}" style="display: block; padding: 1rem 1.25rem; border-bottom: 1px solid #f8fafc; text-decoration: none; transition: 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
                                     <div style="display: flex; gap: 0.75rem;">
-                                        <div style="width: 36px; height: 36px; border-radius: 50%; background: #eff6ff; color: #3b82f6; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.85rem;">
-                                            <i class="fas fa-comment-dots"></i>
+                                        <div style="width: 36px; height: 36px; border-radius: 50%; background: {{ $iconBg }}; color: {{ $iconColor }}; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.85rem;">
+                                            <i class="fas {{ $icon }}"></i>
                                         </div>
                                         <div>
                                             <p style="margin: 0 0 0.25rem 0; font-size: 0.85rem; color: #1e293b; font-weight: 700;">
-                                                New reply in #{{ $notification->data['ticket_number'] }}
+                                                {{ $title }}
                                             </p>
                                             <p style="margin: 0 0 0.4rem 0; font-size: 0.8rem; color: #64748b; line-height: 1.4;">
-                                                <span style="font-weight: 600;">{{ $notification->data['sender_name'] }}:</span> "{{ $notification->data['message'] }}"
+                                                {{ $desc }}
                                             </p>
                                             <p style="margin: 0; font-size: 0.7rem; color: #94a3b8; font-weight: 600;">
                                                 {{ $notification->created_at->diffForHumans() }}
@@ -163,6 +190,30 @@
             border-top: 1px solid #e2e8f0; 
             background: #fff; 
             text-align: center;
+        }
+
+        .notification-dropdown {
+            display: none;
+            position: absolute;
+            top: 150%;
+            right: -10px;
+            width: 320px;
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+            border: 1px solid #e2e8f0;
+            z-index: 1000;
+            overflow: hidden;
+            animation: dropdownFade 0.2s ease-out;
+        }
+
+        .notification-dropdown.show {
+            display: block;
+        }
+
+        @keyframes dropdownFade {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         @media (max-width: 1024px) {

@@ -9,6 +9,9 @@ use App\Models\Service;
 use App\Models\TicketStatus;
 use App\Models\User;
 use App\Models\TicketReply;
+use App\Notifications\TicketCreatedNotification;
+use App\Notifications\TicketAssignedNotification;
+use App\Notifications\TicketStatusNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -86,6 +89,10 @@ class TicketController extends Controller
         $ticket->status = 'open';
         $ticket->save();
 
+        // Notify Admins and Managers
+        $adminsManagers = User::role(['admin', 'manager'])->get();
+        \Illuminate\Support\Facades\Notification::send($adminsManagers, new TicketCreatedNotification($ticket));
+
         return redirect()->route('user.tickets')->with('success', 'Ticket raised successfully. ID: ' . $ticket->ticket_id);
     }
 
@@ -121,6 +128,13 @@ class TicketController extends Controller
             'assigned_to' => $request->assigned_to,
             'status' => 'in-progress'
         ]);
+
+        // Notify assigned staff
+        $staff = User::find($request->assigned_to);
+        if ($staff) {
+            $staff->notify(new TicketAssignedNotification($ticket));
+        }
+
         return back()->with('success', 'Ticket assigned successfully.');
     }
 
@@ -139,6 +153,11 @@ class TicketController extends Controller
     {
         $request->validate(['status' => 'required|string']);
         $ticket->update(['status' => $request->status]);
+        
+        // Notify the user
+        if ($ticket->user) {
+            $ticket->user->notify(new TicketStatusNotification($ticket));
+        }
         
         // Check if the new status is 'closed' or 'resolved'
         if (in_array(strtolower($request->status), ['closed', 'resolved'])) {
@@ -164,6 +183,11 @@ class TicketController extends Controller
             'closed_at' => now()
         ]);
 
+        // Notify the user
+        if ($ticket->user) {
+            $ticket->user->notify(new TicketStatusNotification($ticket));
+        }
+
         return back()->with('success', 'Ticket marked as Solved!');
     }
 
@@ -184,7 +208,9 @@ class TicketController extends Controller
                 abort(403);
             }
         }
-        $ticket->load(['user', 'product', 'project', 'service', 'assignedStaff', 'replies.user']);
+        $ticket->load(['user', 'product', 'project', 'service', 'assignedStaff', 'replies' => function($query) {
+            $query->orderBy('id', 'desc');
+        }, 'replies.user', 'replies.staff']);
         $staffMembers = User::role('staff')->get();
         $ticketStatuses = TicketStatus::where('status', 'active')->get();
         
@@ -205,19 +231,29 @@ class TicketController extends Controller
     public function reply(Request $request, Ticket $ticket)
     {
         $request->validate([
-            'replay' => 'required|string'
+            'replay' => 'nullable|required_without:attachment|string',
+            'attachment' => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx,zip|max:20480',
         ]);
 
         $user = Auth::user();
         $isStaffOrAdmin = $user->hasAnyRole(['admin', 'manager', 'staff']);
 
-        TicketReply::create([
+        $data = [
             'ticket_id' => $ticket->id,
             'replay' => $request->replay,
-            'user_id' => $ticket->user_id, // Store ticket's user unconditionally
-            'staff_id' => $isStaffOrAdmin ? $user->id : $ticket->assigned_to, // Store staff
-            'reply_by' => $isStaffOrAdmin ? 'staff' : 'user', // Identify the sender
-        ]);
+            'user_id' => $ticket->user_id,
+            'staff_id' => $isStaffOrAdmin ? $user->id : $ticket->assigned_to,
+            'reply_by' => $isStaffOrAdmin ? 'staff' : 'user',
+        ];
+
+        if ($request->hasFile('attachment')) {
+            $file = $request->file('attachment');
+            $filename = time() . '_reply_' . $file->getClientOriginalName();
+            $path = $file->storeAs('reply_attachments', $filename, 'public');
+            $data['attachment'] = $path;
+        }
+
+        TicketReply::create($data);
 
         // Truncate message for notification snippet
         $messageSnippet = \Illuminate\Support\Str::limit($request->replay, 50);
