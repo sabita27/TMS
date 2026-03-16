@@ -2,6 +2,18 @@
 
 @section('styles')
 <style>
+    .conversation-wrapper {
+        position: relative; 
+        display: flex; 
+        align-items: center; 
+        border-bottom: 1px solid #f1f5f9;
+        transition: background 0.3s;
+    }
+
+    .conversation-wrapper:hover {
+        background: #f8fafc;
+    }
+
     .conversation-card {
         background: white;
         border-radius: 1.5rem;
@@ -17,22 +29,13 @@
 
     .conversation-item {
         padding: 1.5rem 2rem;
-        border-bottom: 1px solid #f1f5f9;
         display: flex;
         align-items: center;
         gap: 1.5rem;
         transition: 0.3s;
         text-decoration: none;
-        position: relative;
-    }
-
-    .conversation-item:hover {
-        background: #f8fafc;
-    }
-
-    .conversation-item.active {
-        background: #eff6ff;
-        border-left: 4px solid #3b82f6;
+        flex-grow: 1;
+        min-width: 0;
     }
 
     .user-avatar-init {
@@ -94,6 +97,21 @@
         white-space: nowrap;
     }
 
+    .convo-status-area {
+        text-align: right; 
+        display: flex; 
+        flex-direction: column; 
+        gap: 0.5rem; 
+        align-items: flex-end; 
+        margin-right: 1.5rem;
+        flex-shrink: 0;
+    }
+
+    .convo-actions {
+        padding-right: 2rem;
+        flex-shrink: 0;
+    }
+
     .status-pill {
         padding: 0.35rem 0.85rem;
         border-radius: 2rem;
@@ -101,6 +119,7 @@
         font-weight: 800;
         text-transform: uppercase;
         letter-spacing: 0.05em;
+        white-space: nowrap;
     }
 
     .solved-badge {
@@ -115,25 +134,71 @@
         border: 1px solid #fecaca;
     }
 
-    @media (max-width: 640px) {
+    @media (max-width: 768px) {
+        .hub-header h2 {
+            font-size: 1.4rem !important;
+        }
+        
         .conversation-item {
             padding: 1.25rem;
             gap: 1rem;
+            flex-wrap: wrap;
         }
+
         .user-avatar-init {
             width: 44px;
             height: 44px;
             font-size: 1rem;
         }
+
+        .convo-content {
+            width: calc(100% - 60px);
+        }
+
+        .convo-header {
+            flex-direction: column;
+            gap: 2px;
+        }
+
         .convo-meta {
-            display: none;
+            font-size: 0.7rem;
+        }
+
+        .convo-status-area {
+            width: 100%;
+            margin-top: 0.5rem;
+            margin-right: 0;
+            padding-left: 3.75rem; /* Align with content */
+            text-align: left;
+            align-items: center;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .convo-status-area > div, .convo-status-area > span {
+            margin: 0 !important;
+        }
+
+        .convo-actions {
+            padding-right: 1rem;
+            position: absolute;
+            top: 1.25rem;
+            right: 0;
+        }
+
+        .convo-actions button {
+            width: 32px !important;
+            height: 32px !important;
+            border-radius: 0.5rem !important;
         }
     }
+
 </style>
 @endsection
 
 @section('content')
-<div style="margin-bottom: 2rem;">
+<div class="hub-header" style="margin-bottom: 2rem;">
     <h2 style="margin: 0; font-size: 1.75rem; font-weight: 900; color: #0f172a;">Support Messaging Hub</h2>
     <p style="margin: 0.5rem 0 0 0; color: #64748b; font-size: 0.95rem;">Monitor and engage in all customer support conversations.</p>
 </div>
@@ -151,8 +216,8 @@
                 $colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
                 $avatarColor = $colors[$ticket->id % count($colors)];
             @endphp
-            <div style="position: relative; display: flex; align-items: center; border-bottom: 1px solid #f1f5f9;">
-                <a href="{{ route('ticket.show', $ticket->id) }}" class="conversation-item" style="flex-grow: 1; border-bottom: none;">
+            <div class="conversation-wrapper">
+                <a href="{{ route('ticket.show', $ticket->id) }}" class="conversation-item">
                     <div class="user-avatar-init" style="background: {{ $avatarColor }};">
                         {{ strtoupper(substr($ticket->user->name, 0, 1)) }}
                     </div>
@@ -171,7 +236,7 @@
                         </p>
                     </div>
 
-                    <div style="text-align: right; display: flex; flex-direction: column; gap: 0.5rem; align-items: flex-end; margin-right: 1rem;">
+                    <div class="convo-status-area">
                         <span class="status-pill {{ $isSolved ? 'solved-badge' : 'unsolved-badge' }}">
                             <i class="fas {{ $isSolved ? 'fa-check-circle' : 'fa-clock' }}"></i>
                             {{ $isSolved ? 'Solved' : 'Active' }}
@@ -195,7 +260,7 @@
                     </div>
                 </a>
                 
-                <div style="padding-right: 2rem;">
+                <div class="convo-actions">
                     <form action="{{ route('manager.tickets.delete', $ticket->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to permanently delete this ticket and all its conversations?');">
                         @csrf
                         @method('DELETE')
@@ -205,6 +270,7 @@
                     </form>
                 </div>
             </div>
+
         @empty
             <div style="padding: 5rem 2rem; text-align: center;">
                 <div style="width: 80px; height: 80px; background: #f1f5f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; color: #cbd5e1; font-size: 2rem;">

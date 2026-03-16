@@ -103,6 +103,26 @@
         gap: 0.5rem;
     }
 
+    .ticket-view-grid {
+        display: grid; 
+        grid-template-columns: 1fr 340px;
+    }
+
+    .ticket-header-section {
+        background: linear-gradient(to right, #ffffff, #f9fafb); 
+        padding: 2.5rem; 
+        border-bottom: 1px solid #f1f5f9; 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: flex-start; 
+        flex-wrap: wrap; 
+        gap: 2rem;
+    }
+
+    .ticket-content-area {
+        padding: 3rem;
+    }
+
     @media (max-width: 992px) {
         .ticket-view-grid {
             grid-template-columns: 1fr !important;
@@ -111,7 +131,60 @@
             border-left: none;
             border-top: 1px solid #f1f5f9;
         }
+        .ticket-header-section {
+            padding: 1.5rem;
+            gap: 1.5rem;
+        }
+        .ticket-content-area {
+            padding: 1.5rem;
+        }
     }
+
+    @media (max-width: 640px) {
+        .ticket-header-section {
+            flex-direction: column;
+            align-items: stretch;
+            text-align: left;
+        }
+        .ticket-header-section > div:last-child {
+            text-align: left !important;
+        }
+        .header-icon-box {
+            width: 48px !important;
+            height: 48px !important;
+            font-size: 1.25rem !important;
+        }
+        .ticket-id-title {
+            font-size: 1.25rem !important;
+        }
+        .subject-title {
+            font-size: 1.5rem !important;
+        }
+        .description-box {
+            padding: 1.5rem !important;
+        }
+        .chat-bubble {
+            padding: 1rem !important;
+            gap: 0.75rem !important;
+        }
+        .chat-avatar {
+            width: 32px !important;
+            height: 32px !important;
+        }
+        .attachment-link {
+            min-width: 100% !important;
+        }
+        .reply-actions-bar {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: stretch !important;
+        }
+        .reply-actions-bar button {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
 </style>
 @endsection
 
@@ -137,14 +210,14 @@
 
 <div class="ticket-view-card">
     {{-- Header Section --}}
-    <div style="background: linear-gradient(to right, #ffffff, #f9fafb); padding: 2.5rem; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 2rem;">
-        <div style="display: flex; gap: 1.5rem;">
-            <div style="width: 64px; height: 64px; background: #3b82f6; border-radius: 1.5rem; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.75rem; box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3);">
+<div class="ticket-header-section">
+        <div style="display: flex; gap: 1.5rem; align-items: center;">
+            <div class="header-icon-box" style="width: 64px; height: 64px; background: #3b82f6; border-radius: 1.5rem; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.75rem; box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3); flex-shrink: 0;">
                 <i class="fas fa-ticket-alt"></i>
             </div>
             <div>
-                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
-                    <h3 style="margin: 0; font-size: 1.5rem; font-weight: 800; color: #0f172a;">#{{ $ticket->ticket_id }}</h3>
+                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; flex-wrap: wrap;">
+                    <h3 class="ticket-id-title" style="margin: 0; font-size: 1.5rem; font-weight: 800; color: #0f172a;">#{{ $ticket->ticket_id }}</h3>
                     @php
                         $currentStatusName = strtolower($ticket->status);
                         $statusColor = '#3b82f6'; 
@@ -162,13 +235,14 @@
                         {{ strtoupper($ticket->status) }}
                     </span>
                 </div>
-                <p style="margin: 0; color: #64748b; font-size: 0.95rem; display: flex; align-items: center; gap: 0.5rem;">
+                <p style="margin: 0; color: #64748b; font-size: 0.95rem; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
                     <i class="fas fa-user-circle"></i> {{ $ticket->user->name }} 
                     <span style="color: #cbd5e1;">•</span> 
                     <i class="far fa-clock"></i> {{ $ticket->created_at->diffForHumans() }}
                 </p>
             </div>
         </div>
+
         
         <div style="text-align: right;">
             <span class="meta-label">Current Priority</span>
@@ -187,13 +261,14 @@
     </div>
 
     {{-- Main Grid --}}
-    <div class="ticket-view-grid" style="display: grid; grid-template-columns: 1fr 340px;">
+    <div class="ticket-view-grid">
         {{-- Content Area --}}
-        <div style="padding: 3rem;">
+        <div class="ticket-content-area">
             <div style="margin-bottom: 2.5rem;">
                 <span class="meta-label">Ticket Subject</span>
-                <h2 style="margin: 0; font-size: 2rem; font-weight: 900; color: #0f172a; line-height: 1.2;">{{ $ticket->subject }}</h2>
+                <h2 class="subject-title" style="margin: 0; font-size: 2rem; font-weight: 900; color: #0f172a; line-height: 1.2;">{{ $ticket->subject }}</h2>
             </div>
+
 
             <div class="description-box" style="margin-bottom: 2.5rem; background: #f8fafc; padding: 1.5rem; border-radius: 1rem; border-left: 4px solid #3b82f6;">
                 <span style="font-size: 0.8rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem; display: block;">Ticket Description</span>
@@ -206,7 +281,7 @@
             <div style="margin-top: 1.5rem;">
                 <span class="meta-label">Attached Resources</span>
                 <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                    <a href="{{ asset('storage/' . $ticket->attachment) }}" target="_blank" style="text-decoration: none; display: flex; align-items: center; gap: 1rem; background: #ffffff; border: 1px solid #e2e8f0; padding: 0.75rem 1.25rem; border-radius: 0.75rem; min-width: 280px; transition: 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 4px 6px -1px rgba(0,0,0,0.05)';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';">
+                    <a href="{{ asset('storage/' . $ticket->attachment) }}" target="_blank" class="attachment-link" style="text-decoration: none; display: flex; align-items: center; gap: 1rem; background: #ffffff; border: 1px solid #e2e8f0; padding: 0.75rem 1.25rem; border-radius: 0.75rem; min-width: 280px; transition: 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 4px 6px -1px rgba(0,0,0,0.05)';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';">
                         <div style="width: 40px; height: 40px; background: #fef2f2; color: #ef4444; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0;">
                             <i class="fas fa-file-pdf"></i>
                         </div>
@@ -214,6 +289,7 @@
                             <p style="margin: 0; font-weight: 700; color: #1e293b; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                                 {{ basename($ticket->attachment) }}
                             </p>
+
                             <p style="margin: 0; font-size: 0.75rem; color: #94a3b8; font-weight: 600;">
                                 {{ strtoupper(pathinfo($ticket->attachment, PATHINFO_EXTENSION)) }} • Support File
                             </p>
@@ -297,10 +373,10 @@
                                 </div>
                             @endif
 
-                            <div style="display: flex; gap: 1.25rem; padding: 1.5rem; border-bottom: 1px solid #f1f5f9; transition: 0.2s; flex-direction: {{ $alignRight ? 'row-reverse' : 'row' }}; {{ $isSentByMe ? 'background: #fcfdfe;' : '' }}" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='{{ $isSentByMe ? '#fcfdfe' : 'transparent' }}'">
-                                <img src="https://ui-avatars.com/api/?name={{ urlencode($senderName) }}&background={{ $avatarBg }}&color=fff&bold=true" style="width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0; margin-top: 2px;" alt="Avatar">
+                            <div class="chat-bubble" style="display: flex; gap: 1.25rem; padding: 1.5rem; border-bottom: 1px solid #f1f5f9; transition: 0.2s; flex-direction: {{ $alignRight ? 'row-reverse' : 'row' }}; {{ $isSentByMe ? 'background: #fcfdfe;' : '' }}" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='{{ $isSentByMe ? '#fcfdfe' : 'transparent' }}'">
+                                <img src="https://ui-avatars.com/api/?name={{ urlencode($senderName) }}&background={{ $avatarBg }}&color=fff&bold=true" class="chat-avatar" style="width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0; margin-top: 2px;" alt="Avatar">
                                 <div style="flex-grow: 1; min-width: 0; text-align: {{ $alignRight ? 'right' : 'left' }};">
-                                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.5rem; flex-direction: {{ $alignRight ? 'row-reverse' : 'row' }};">
+                                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.5rem; flex-direction: {{ $alignRight ? 'row-reverse' : 'row' }}; flex-wrap: wrap; gap: 0.5rem;">
                                         <div style="display: flex; align-items: center; gap: 0.5rem; flex-direction: {{ $alignRight ? 'row-reverse' : 'row' }};">
                                             <span style="font-weight: 700; color: #0f172a; font-size: 0.95rem;">
                                                 {{ $isSentByMe ? 'You' : $senderName }}
@@ -314,6 +390,7 @@
                                     <div style="font-size: 0.95rem; color: #334155; line-height: 1.6; word-wrap: break-word; margin-bottom: 0.5rem;">
                                         {!! nl2br(e($reply->replay)) !!}
                                     </div>
+
 
                                     @if($reply->attachment)
                                         @php
@@ -378,12 +455,12 @@
                     </div>
 
                     {{-- Actions Bar --}}
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1.25rem; background: #fcfdfe; border-top: 1px solid #f1f5f9;">
+                    <div class="reply-actions-bar" style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1.25rem; background: #fcfdfe; border-top: 1px solid #f1f5f9;">
                         <div style="display: flex; align-items: center; gap: 0.5rem;">
                             <div id="attachment-container" style="display: flex; align-items: center; gap: 0.5rem; background: #fff; padding: 0.4rem 0.8rem; border-radius: 0.5rem; border: 1px solid #cbd5e1; cursor: pointer; transition: 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#f8fafc';" onmouseout="this.style.borderColor='#cbd5e1'; this.style.background='#fff';">
                                 <label for="reply-attachment" style="cursor: pointer; display: flex; align-items: center; gap: 0.4rem; color: #64748b; font-size: 0.8rem; font-weight: 700; margin: 0;">
                                     <i class="fas fa-paperclip" id="attachment-icon"></i> 
-                                    <span id="attachment-text">Attach</span>
+                                    <span id="attachment-text" style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Attach</span>
                                 </label>
                                 <input type="file" id="reply-attachment" name="attachment" style="display: none;" onchange="updateFileName(this)">
                                 <button type="button" id="remove-attachment" onclick="clearAttachment()" style="display: none; background: none; border: none; padding: 0; cursor: pointer; color: #ef4444; font-size: 0.9rem;">
@@ -395,6 +472,7 @@
                             Send <i class="fas fa-paper-plane" style="font-size: 0.8rem;"></i>
                         </button>
                     </div>
+
                 </form>
             </div>
             @elseif(strtolower($ticket->status) === 'resolved')

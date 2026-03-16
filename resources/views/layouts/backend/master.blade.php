@@ -275,6 +275,40 @@
             .footer-main {
                 padding: 1.25rem !important;
             }
+
+            /* Notification Dropdown Mobile Optimization */
+            .notification-dropdown {
+                width: 300px !important;
+                right: -80px !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .notification-dropdown {
+                position: fixed !important;
+                top: 65px !important;
+                left: 1rem !important;
+                right: 1rem !important;
+                width: calc(100% - 2rem) !important;
+                max-width: none !important;
+                max-height: 80vh !important;
+                border-radius: 1.25rem !important;
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+            }
+
+            .notification-dropdown h4 {
+                font-size: 0.85rem !important;
+            }
+
+            .notification-dropdown a {
+                padding: 0.75rem 1rem !important;
+            }
+
+            .notification-dropdown a img, 
+            .notification-dropdown a .fas {
+                width: 32px !important;
+                height: 32px !important;
+            }
         }
     </style>
 </body>
