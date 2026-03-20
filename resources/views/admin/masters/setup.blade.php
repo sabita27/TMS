@@ -29,10 +29,10 @@
 
     <div class="setup-grid" style="display: grid; grid-template-columns: 280px 1fr; gap: 2rem; align-items: stretch; min-height: 600px;">
         <!-- Internal Sidebar -->
-        <div style="background: white; border-radius: 1.25rem; padding: 1.5rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.04); border: 1px solid #f1f5f9; height: 100%;">
-            <div class="setup-sidebar-nav" style="display: flex; flex-direction: column; gap: 0.5rem;">
+        <div class="setup-sidebar-container" style="background: white; border-radius: 1.25rem; padding: 1.5rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.04); border: 1px solid #f1f5f9; height: 100%;">
+            <div class="setup-sidebar-nav">
                 <!-- 1. Global Setting Dropdown -->
-                <div style="margin-bottom: 0.25rem;">
+                <div class="global-setting-group">
                     <a href="javascript:void(0)" onclick="toggleGlobalMenu()" class="setup-tab {{ $type == 'global' ? 'active' : '' }}" style="display: flex; justify-content: space-between; align-items: center;">
                         <div style="display: flex; align-items: center; gap: 0.75rem;">
                             <i class="fas fa-globe"></i>
@@ -40,49 +40,49 @@
                         </div>
                         <i class="fas fa-chevron-down" style="font-size: 0.7rem; transition: transform 0.3s;" id="global-chevron"></i>
                     </a>
-                    <div id="global-submenu" style="display: {{ $type == 'global' ? 'flex' : 'none' }}; flex-direction: column; gap: 0.25rem; padding: 0.5rem 0 0.5rem 2.25rem;">
+                    <div id="global-submenu" class="global-submenu-v3" style="display: {{ $type == 'global' ? 'flex' : 'none' }}; flex-direction: column; gap: 0.25rem; padding: 0.5rem 0 0.5rem 2.25rem;">
                         <a href="{{ route('admin.setup', ['type' => 'global', 'section' => 'identity']) }}" class="submenu-link {{ ($type == 'global' && $section == 'identity') ? 'active' : '' }}">Home Page Setting</a>
                         <a href="{{ route('admin.setup', ['type' => 'global', 'section' => 'logo']) }}" class="submenu-link {{ ($type == 'global' && $section == 'logo') ? 'active' : '' }}">Logo & Favicon</a>
                         <a href="{{ route('admin.setup', ['type' => 'global', 'section' => 'smtp']) }}" class="submenu-link {{ ($type == 'global' && $section == 'smtp') ? 'active' : '' }}">SMTP Setting</a>
                     </div>
                 </div>
 
-                <!-- 3. Designation -->
+                <!-- 2. Designation -->
                 <a href="{{ route('admin.setup', ['type' => 'designation']) }}" class="setup-tab {{ $type == 'designation' ? 'active' : '' }}">
                     <div style="display: flex; align-items: center; gap: 0.75rem;">
                         <i class="fas fa-id-badge"></i>
                         <span>Designation</span>
                     </div>
                 </a>
-                <!-- 4. Position -->
+                <!-- 3. Position -->
                 <a href="{{ route('admin.setup', ['type' => 'position']) }}" class="setup-tab {{ $type == 'position' ? 'active' : '' }}">
                     <div style="display: flex; align-items: center; gap: 0.75rem;">
                         <i class="fas fa-chair"></i>
                         <span>Position</span>
                     </div>
                 </a>
-                <!-- 5. Category -->
+                <!-- 4. Category -->
                 <a href="{{ route('admin.setup', ['type' => 'category']) }}" class="setup-tab {{ $type == 'category' ? 'active' : '' }}">
                     <div style="display: flex; align-items: center; gap: 0.75rem;">
                         <i class="fas fa-tags"></i>
                         <span>Category</span>
                     </div>
                 </a>
-                <!-- 6. Sub-Category -->
+                <!-- 5. Sub-Category -->
                 <a href="{{ route('admin.setup', ['type' => 'subcategory']) }}" class="setup-tab {{ $type == 'subcategory' ? 'active' : '' }}">
                     <div style="display: flex; align-items: center; gap: 0.75rem;">
                         <i class="fas fa-layer-group"></i>
                         <span>Sub-Category</span>
                     </div>
                 </a>
-                <!-- 7. Priority -->
+                <!-- 6. Priority -->
                 <a href="{{ route('admin.setup', ['type' => 'priority']) }}" class="setup-tab {{ $type == 'priority' ? 'active' : '' }}">
                     <div style="display: flex; align-items: center; gap: 0.75rem;">
                         <i class="fas fa-flag"></i>
                         <span>Priority</span>
                     </div>
                 </a>
-                <!-- 8. Ticket Status -->
+                <!-- 7. Ticket Status -->
                 <a href="{{ route('admin.setup', ['type' => 'status']) }}" class="setup-tab {{ $type == 'status' ? 'active' : '' }}">
                     <div style="display: flex; align-items: center; gap: 0.75rem;">
                         <i class="fas fa-info-circle"></i>
@@ -645,97 +645,124 @@
     @media (max-width: 1024px) {
         .setup-grid {
             grid-template-columns: 1fr !important;
-            gap: 1rem !important;
+            gap: 0 !important;
+            display: block !important;
+        }
+        .setup-sidebar-container {
+            padding: 0.75rem !important;
+            margin: 0 0 1rem 0 !important;
+            background: #fff !important;
+            border-radius: 1rem !important;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05) !important;
+            position: relative !important;
         }
         .setup-sidebar-nav {
             overflow-x: auto;
             display: flex !important;
             flex-direction: row !important;
             gap: 0.5rem !important;
-            padding: 0.25rem 0.25rem 0.75rem 0.25rem !important;
+            padding: 0.25rem !important;
             scrollbar-width: none;
             -ms-overflow-style: none;
+            width: 100%;
+            white-space: nowrap;
         }
         .setup-sidebar-nav::-webkit-scrollbar { display: none; }
         
         .setup-header-section {
+            padding: 0 0.25rem !important;
             margin-bottom: 1.5rem !important;
         }
         .setup-title-group h1 {
-            font-size: 1.5rem !important;
+            font-size: 1.35rem !important;
+            margin-bottom: 0.25rem !important;
         }
         .setup-breadcrumb {
-            font-size: 0.8rem !important;
+            font-size: 0.75rem !important;
         }
         
         .setup-tab {
             white-space: nowrap;
-            padding: 0.6rem 1.2rem !important;
-            font-size: 0.85rem !important;
+            padding: 0.5rem 1.15rem !important;
+            font-size: 0.8rem !important;
             border-radius: 2rem !important;
             border: 1px solid #e2e8f0 !important;
             flex-shrink: 0;
-            justify-content: center !important;
-        }
-        .setup-tab i {
-            display: none;
+            background: #fff;
+            color: #64748b !important;
+            font-weight: 600 !important;
         }
         .setup-tab.active {
             border-color: #6366f1 !important;
             background: #6366f1 !important;
             color: white !important;
-            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.2) !important;
         }
         
         #global-submenu {
-            position: fixed;
-            left: 1.25rem;
-            right: 1.25rem;
-            bottom: 1.25rem;
-            top: auto;
+            display: none !important; /* Hide by default on mobile */
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 4rem;
             background: white;
-            box-shadow: 0 -10px 25px rgba(0,0,0,0.1);
-            border: 1px solid #f1f5f9;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.12);
+            border: 1px solid #e2e8f0;
             border-radius: 1.25rem;
-            z-index: 1000;
+            z-index: 3000;
             padding: 1rem !important;
             flex-direction: column !important;
-            gap: 0.5rem !important;
+            gap: 0.4rem !important;
+        }
+        #global-submenu.active {
+            display: flex !important; /* Show when active class is toggled */
+            animation: submenuSlideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @keyframes submenuSlideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         .submenu-link {
-            padding: 0.75rem 1rem !important;
-            border-radius: 0.75rem !important;
+            padding: 0.85rem 1rem !important;
+            border-radius: 0.85rem !important;
             font-size: 0.9rem !important;
+            border: 1px solid #f8fafc;
+            color: #475569 !important;
+            font-weight: 600 !important;
+        }
+        .submenu-link.active {
+            background: #eef2ff !important;
+            color: #6366f1 !important;
+            border-color: #eef2ff !important;
         }
         
-        .form-grid-3, .form-grid-2 {
-            grid-template-columns: 1fr !important;
-            gap: 1rem !important;
-        }
         .setup-content-area {
             padding: 1.25rem !important;
-            border-radius: 1.25rem !important;
+            border-radius: 1rem !important;
+            margin: 0 !important;
         }
         .setup-content-header {
-            flex-direction: column !important;
-            gap: 1.25rem !important;
-            align-items: flex-start !important; /* Left-aligned */
+            flex-direction: row !important;
+            flex-wrap: wrap;
+            justify-content: space-between !important;
+            align-items: center !important;
+            gap: 0.75rem !important;
             padding: 0 !important;
-            margin-bottom: 2rem !important;
+            margin-bottom: 1.25rem !important;
         }
         .setup-content-header h2 {
-            font-size: 1.25rem !important;
+            font-size: 1.1rem !important;
             margin: 0 !important;
-            text-align: left !important;
+            flex: 1 1 auto;
         }
         .setup-content-header .btn {
-            width: max-content !important;
-            padding: 0.6rem 2rem !important;
-            margin-left: 0 !important;
+            width: auto !important;
+            padding: 0.45rem 0.9rem !important;
+            font-size: 0.75rem !important;
+            margin: 0 !important;
         }
         .setup-table-container {
-            margin: 0 -1.25rem;
-            width: calc(100% + 2.5rem);
+            margin: 0 -0.5rem;
+            width: calc(100% + 1rem);
         }
     }
 
@@ -809,7 +836,7 @@
     }
     .setup-tab i { font-size: 1.1rem; }
     
-    /* Premium Card Styles */
+    /* Premium Card Style */
     .premium-card {
         background: #f8fafc;
         border-radius: 1rem;
@@ -911,12 +938,26 @@
     function toggleGlobalMenu() {
         const menu = document.getElementById('global-submenu');
         const chevron = document.getElementById('global-chevron');
-        if (menu.style.display === 'none') {
-            menu.style.display = 'flex';
-            chevron.style.transform = 'rotate(180deg)';
+        
+        // Toggle active class for mobile
+        menu.classList.toggle('active');
+        
+        // Handle desktop visibility if necessary
+        if (window.innerWidth > 1024) {
+            if (menu.style.display === 'none') {
+                menu.style.display = 'flex';
+                chevron.style.transform = 'rotate(180deg)';
+            } else {
+                menu.style.display = 'none';
+                chevron.style.transform = 'rotate(0deg)';
+            }
         } else {
-            menu.style.display = 'none';
-            chevron.style.transform = 'rotate(0deg)';
+            // Mobile chevron rotation
+            if (menu.classList.contains('active')) {
+                chevron.style.transform = 'rotate(180deg)';
+            } else {
+                chevron.style.transform = 'rotate(0deg)';
+            }
         }
     }
 

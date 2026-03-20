@@ -30,17 +30,21 @@
                             <td>
                                 @if ($project->category)
                                     <span class="badge"
-                                        style="background: #e0e7ff; color: #4338ca; font-weight: 600;">{{ $project->category->name }}</span>
+                                        style="background: #e0e7ff; color: #4338ca; font-weight: 700; font-size: 0.75rem; padding: 0.35rem 0.75rem; border-radius: 50px; white-space: nowrap;">
+                                        {{ $project->category->name }}
+                                    </span>
                                 @else
-                                    <span style="color: #9ca3af; font-style: italic;">-</span>
+                                    <span style="color: #94a3b8; font-style: italic;">-</span>
                                 @endif
                             </td>
                             <td>
                                 @if ($project->subcategory)
                                     <span class="badge"
-                                        style="background: #dbeafe; color: #1e40af; font-weight: 600;">{{ $project->subcategory->name }}</span>
+                                        style="background: #dbeafe; color: #1e40af; font-weight: 700; font-size: 0.75rem; padding: 0.35rem 0.75rem; border-radius: 50px; white-space: nowrap;">
+                                        {{ $project->subcategory->name }}
+                                    </span>
                                 @else
-                                    <span style="color: #9ca3af; font-style: italic;">-</span>
+                                    <span style="color: #94a3b8; font-style: italic;">-</span>
                                 @endif
                             </td>
                             <td>{{ $project->start_date ? \Carbon\Carbon::parse($project->start_date)->format('M d, Y') : '-' }}
@@ -50,27 +54,29 @@
                             <td>
                                 @if ($project->projectStatus)
                                     <span class="badge"
-                                        style="background-color: {{ $project->projectStatus->color }}20; color: {{ $project->projectStatus->color }}; border: 1px solid {{ $project->projectStatus->color }}; font-weight: 700; padding: 0.4rem 0.8rem;">
+                                        style="background-color: {{ $project->projectStatus->color }}15; color: {{ $project->projectStatus->color }}; border: 1.5px solid {{ $project->projectStatus->color }}; font-weight: 700; font-size: 0.75rem; padding: 0.4rem 0.9rem; border-radius: 50px; white-space: nowrap; display: inline-block;">
                                         {{ $project->projectStatus->name }}
                                     </span>
                                 @else
-                                    <span style="color: #9ca3af; font-style: italic;">-</span>
+                                    <span style="color: #94a3b8; font-style: italic;">-</span>
                                 @endif
                             </td>
                             <td>
                                 @if ($project->priority)
                                     <span class="badge"
-                                        style="background-color: {{ $project->priority->color }}20; color: {{ $project->priority->color }}; border: 1px solid {{ $project->priority->color }}; font-weight: 700; padding: 0.4rem 0.8rem;">
+                                        style="background-color: {{ $project->priority->color }}15; color: {{ $project->priority->color }}; border: 1.5px solid {{ $project->priority->color }}; font-weight: 700; font-size: 0.75rem; padding: 0.4rem 0.9rem; border-radius: 50px; white-space: nowrap; display: inline-block;">
                                         {{ $project->priority->name }}
                                     </span>
                                 @else
-                                    <span style="color: #9ca3af; font-style: italic;">-</span>
+                                    <span style="color: #94a3b8; font-style: italic;">-</span>
                                 @endif
                             </td>
                             <td>
-                                <span class="badge {{ $project->status ? 'badge-success' : 'badge-danger' }}">
-                                    {{ $project->status ? 'Active' : 'Inactive' }}
-                                </span>
+                                @if($project->status)
+                                    <span class="badge" style="background: #dcfce7; color: #15803d; font-weight: 700; font-size: 0.75rem; padding: 0.35rem 0.75rem; border-radius: 50px; white-space: nowrap;">ACTIVE</span>
+                                @else
+                                    <span class="badge" style="background: #fee2e2; color: #b91c1c; font-weight: 700; font-size: 0.75rem; padding: 0.35rem 0.75rem; border-radius: 50px; white-space: nowrap;">INACTIVE</span>
+                                @endif
                             </td>
                             <td>
                                 <div style="display: flex; gap: 0.5rem;">
@@ -105,11 +111,10 @@
         </div>
     </div>
 
-    <!-- View Project Modal -->
     <div id="viewProjectModal"
-        style="display:none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); overflow-y: auto;">
+        style="display:none; position: fixed; z-index: 5000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); overflow-y: auto;">
         <div
-            style="background: white; width: 850px; margin: 3rem auto; border-radius: 1.25rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.1); overflow: hidden; animation: modalAppear 0.3s ease-out;">
+            style="background: white; width: 850px; margin: 6rem auto; border-radius: 1.25rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.1); overflow: hidden; animation: modalAppear 0.3s ease-out;">
             <!-- Header -->
             <div
                 style="display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 2rem; background: linear-gradient(to right, #f8fafc, #ffffff); border-bottom: 1px solid #e2e8f0;">
@@ -219,9 +224,9 @@
 
     <!-- Add Project Modal -->
     <div id="addProjectModal"
-        style="display:none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); overflow-y: auto;">
+        style="display:none; position: fixed; z-index: 5000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); overflow-y: auto;">
         <div
-            style="background: white; width: 800px; margin: 2rem auto; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);">
+            style="background: white; width: 850px; margin: 6rem auto; padding: 2.5rem; border-radius: 1.25rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);">
             <div
                 style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid #eee; padding-bottom: 1rem;">
                 <h3 style="margin: 0;">Add New Project</h3>
@@ -316,11 +321,10 @@
         </div>
     </div>
 
-    <!-- Edit Project Modal -->
     <div id="editProjectModal"
-        style="display:none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); overflow-y: auto;">
+        style="display:none; position: fixed; z-index: 5000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); overflow-y: auto;">
         <div
-            style="background: white; width: 800px; margin: 2rem auto; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);">
+            style="background: white; width: 850px; margin: 6rem auto; padding: 2.5rem; border-radius: 1.25rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);">
             <div
                 style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid #eee; padding-bottom: 1rem;">
                 <h3 style="margin: 0;">Edit Project</h3>

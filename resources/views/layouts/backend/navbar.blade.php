@@ -4,13 +4,17 @@
             $sys_logo = \App\Models\Setting::get('system_logo');
             $sys_name = \App\Models\Setting::get('system_name', 'TMS PRO');
         @endphp
-        @if($sys_logo)
+        @if($sys_logo && file_exists(public_path('storage/' . $sys_logo)))
             <div style="display: flex; align-items: center; gap: 0.5rem;">
-                <img src="{{ asset('storage/' . $sys_logo) }}" style="height: 35px; max-width: 120px; object-fit: contain;">
-                {{-- <span style="font-size: 1.1rem; font-weight: 800; color: #fff; letter-spacing: 1px;">{{ $sys_name }}</span> --}}
+                <img src="{{ asset('storage/' . $sys_logo) }}" style="height: 35px; max-width: 120px; object-fit: contain; border: none; outline: none; display: block;" alt="Logo">
             </div>
         @else
-            <h2 style="margin: 0; font-size: 1.5rem; color: #fff; letter-spacing: 1px;">{{ $sys_name }}</h2>
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <div style="width: 35px; height: 35px; background: linear-gradient(135deg, #6366f1, #4f46e5); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 1.2rem;">
+                    {{ substr($sys_name, 0, 1) }}
+                </div>
+                <h2 style="margin: 0; font-size: 1.25rem; color: #fff; letter-spacing: 1px; font-weight: 700;">{{ $sys_name }}</h2>
+            </div>
         @endif
         <button class="close-sidebar-btn" onclick="document.getElementById('app-sidebar').classList.remove('active'); document.getElementById('mobile-overlay').style.display='none';" style="background: #374151; border: none; color: #fff; width: 32px; height: 32px; border-radius: 6px; font-size: 1rem; cursor: pointer; display: none; align-items: center; justify-content: center;">
             <i class="fas fa-times"></i>

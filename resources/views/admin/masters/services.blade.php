@@ -76,11 +76,10 @@
         </div>
     </div>
 
-    <!-- Add Service Modal -->
     <div id="addServiceModal"
-        style="display:none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); overflow-y: auto;">
+        style="display:none; position: fixed; z-index: 5000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); overflow-y: auto;">
         <div
-            style="background: white; width: 800px; margin: 2rem auto; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);">
+            style="background: white; width: 850px; margin: 6rem auto; padding: 2.5rem; border-radius: 1.25rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);">
             <div
                 style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid #eee; padding-bottom: 1rem;">
                 <h3 style="margin: 0;">Add New Service</h3>
@@ -143,11 +142,10 @@
         </div>
     </div>
 
-    <!-- Edit Service Modal -->
     <div id="editServiceModal"
-        style="display:none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); overflow-y: auto;">
+        style="display:none; position: fixed; z-index: 5000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); overflow-y: auto;">
         <div
-            style="background: white; width: 800px; margin: 2rem auto; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);">
+            style="background: white; width: 850px; margin: 6rem auto; padding: 2.5rem; border-radius: 1.25rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);">
             <div
                 style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid #eee; padding-bottom: 1rem;">
                 <h3 style="margin: 0;">Edit Service</h3>

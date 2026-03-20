@@ -180,9 +180,9 @@
 
     <!-- Add Client Modal -->
     <div id="addClientModal"
-        style="display:none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); overflow-y: auto;">
+        style="display:none; position: fixed; z-index: 5000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); overflow-y: auto;">
         <div
-            style="background: white; width: 800px; margin: 2rem auto; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);">
+            style="background: white; width: 850px; margin: 6rem auto; padding: 2.5rem; border-radius: 1.25rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);">
             <div
                 style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 1rem; margin-bottom: 1.5rem;">
                 <h3 style="margin: 0;">Add New Client</h3>
@@ -342,11 +342,10 @@
         </div>
     </div>
 
-    <!-- Edit Client Modal -->
     <div id="editClientModal"
-        style="display:none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); overflow-y: auto;">
+        style="display:none; position: fixed; z-index: 5000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); overflow-y: auto;">
         <div
-            style="background: white; width: 800px; margin: 2rem auto; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);">
+            style="background: white; width: 850px; margin: 6rem auto; padding: 2.5rem; border-radius: 1.25rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);">
             <div
                 style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 1rem; margin-bottom: 1.5rem;">
                 <h3 style="margin: 0;">Edit Client</h3>
@@ -511,11 +510,10 @@
         </div>
     </div>
 
-    <!-- View Client Modal -->
     <div id="viewClientModal"
-        style="display:none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); overflow-y: auto;">
+        style="display:none; position: fixed; z-index: 5000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); overflow-y: auto;">
         <div
-            style="background: white; width: 700px; margin: 3rem auto; border-radius: 1rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.1); overflow: hidden; font-family: 'Inter', sans-serif;">
+            style="background: white; width: 850px; margin: 6rem auto; border-radius: 1.25rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.1); overflow: hidden; font-family: 'Inter', sans-serif;">
 
             <!-- Header -->
             <div
@@ -653,12 +651,6 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <style>
         @media (max-width: 768px) {
-            .card-header { 
-                flex-direction: column; 
-                align-items: flex-start !important; 
-                gap: 1.25rem; 
-                padding: 1.5rem !important; 
-            }
             .filter-section {
                 flex-direction: column !important;
                 align-items: stretch !important;

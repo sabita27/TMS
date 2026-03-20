@@ -29,6 +29,8 @@
             --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
 
+        *, ::before, ::after { box-sizing: border-box; }
+
         body { font-family: 'Inter', sans-serif; background-color: var(--bg-light); color: var(--text-main); margin: 0; display: flex; height: 100vh; overflow: hidden; }
         
         /* Shared Styles */
@@ -90,6 +92,8 @@
                 width: 100% !important;
                 min-width: 100% !important;
                 display: block !important;
+                overflow-x: hidden !important;
+                position: relative !important;
             }
             .card {
                 padding: 1rem !important;
@@ -98,41 +102,56 @@
 
         @media (max-width: 768px) {
             .card-header { 
-                flex-direction: column; 
-                align-items: flex-start; 
-                gap: 1rem; 
+                flex-direction: row !important;
+                flex-wrap: wrap !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                gap: 0.75rem !important;
+                padding: 1rem 0.5rem !important;
+            }
+            .card-title {
+                font-size: 1.15rem !important;
+                margin: 0 !important;
+                flex: 1 1 auto !important;
             }
             .card-header .btn { 
-                width: 100%; 
+                width: auto !important;
+                padding: 0.5rem 1rem !important;
+                font-size: 0.8rem !important;
+                margin-left: 0 !important;
                 justify-content: center; 
             }
             .dataTables_wrapper .top {
                 flex-direction: column !important;
-                gap: 1.25rem !important;
+                gap: 1rem !important;
                 align-items: flex-start !important;
                 padding: 0 !important;
+                margin-top: 1rem !important;
             }
             .dataTables_wrapper .dt-buttons {
                 width: 100% !important;
                 justify-content: flex-start !important;
                 display: flex !important;
                 flex-wrap: wrap !important;
-                gap: 0.5rem !important;
+                gap: 0.4rem !important;
+                margin-bottom: 0.5rem !important;
             }
             .dataTables_wrapper .dt-buttons .btn {
                 width: auto !important;
-                min-width: 80px !important;
-                max-width: 120px !important;
-                padding: 0.5rem 1rem !important;
-                font-size: 0.75rem !important;
-                flex: none !important;
+                min-width: 60px !important;
+                padding: 0.45rem 0.8rem !important;
+                font-size: 0.7rem !important;
+                flex: 1 1 auto !important;
+                justify-content: center !important;
             }
             .dataTables_filter {
                 width: 100% !important;
+                margin-top: 0.5rem !important;
             }
             .dataTables_filter input {
                 width: 100% !important;
                 margin: 0 !important;
+                height: 40px !important;
             }
             /* FORCE wrapper to stay within screen width */
             .dataTables_wrapper {
@@ -145,37 +164,39 @@
             .dataTables_wrapper .bottom {
                 display: flex !important;
                 flex-direction: column !important;
-                align-items: flex-end !important;
-                text-align: right !important;
+                align-items: center !important;
+                text-align: center !important;
                 width: 100% !important;
-                padding: 1.5rem 0 !important;
-                gap: 0.5rem !important;
+                padding: 2rem 0 !important;
+                gap: 1.25rem !important;
             }
             
             .dataTables_info, 
             .dataTables_wrapper .dataTables_info {
                 width: 100% !important;
-                text-align: right !important;
+                text-align: center !important;
                 font-size: 0.8rem !important;
                 color: #64748b !important;
-                margin: 0 0 0.5rem 0 !important;
+                margin: 0 !important;
                 display: block !important;
+                padding: 0 !important;
             }
             
             .dataTables_paginate,
             .dataTables_wrapper .dataTables_paginate {
                 display: flex !important;
                 width: 100% !important;
-                justify-content: flex-end !important;
+                justify-content: center !important;
+                margin: 0 !important;
+                padding: 0 !important;
             }
 
             .pagination, 
-            .dataTables_wrapper .pagination,
-            .dataTables_wrapper .dataTables_paginate .pagination {
+            .dataTables_wrapper .pagination {
                 margin: 0 !important;
                 display: flex !important;
-                justify-content: flex-end !important;
-                flex-direction: row !important;
+                justify-content: center !important;
+                flex-wrap: wrap !important;
                 gap: 0.25rem !important;
             }
         }

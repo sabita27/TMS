@@ -22,7 +22,7 @@
                 <div style="position: relative; cursor: pointer;" onclick="document.getElementById('notification-dropdown').classList.toggle('show')">
                     <i class="fas fa-bell" style="font-size: 1.25rem; color: #64748b; transition: 0.2s;" onmouseover="this.style.color='#3b82f6'" onmouseout="this.style.color='#64748b'"></i>
                     @if(Auth::user()->unreadNotifications->count() > 0)
-                        <span style="position: absolute; top: -6px; right: -6px; background: #ef4444; color: white; font-size: 0.6rem; font-weight: 800; padding: 0.15rem 0.35rem; border-radius: 1rem; border: 2px solid white;">
+                        <span style="position: absolute; top: 2px; right: 2px; background: #ef4444; color: white; font-size: 0.6rem; font-weight: 800; padding: 0.15rem 0.35rem; border-radius: 1rem; border: 2px solid white; z-index: 10;">
                             {{ Auth::user()->unreadNotifications->count() }}
                         </span>
                     @endif
@@ -149,10 +149,12 @@
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
+            border-bottom: 1px solid #f1f5f9; 
+            border-top: none !important;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1); 
             position: sticky; 
             top: 0; 
-            z-index: 1001; 
+            z-index: 100;
             transition: all 0.3s ease;
         }
 
@@ -220,7 +222,10 @@
             body { 
                 display: block !important;
                 overflow-y: auto !important;
+                overflow-x: hidden !important;
                 height: auto !important;
+                width: 100% !important;
+                position: relative !important;
             }
             .sidebar-main { 
                 position: fixed !important;
@@ -234,6 +239,9 @@
                 width: 100% !important;
                 min-width: 100% !important;
                 display: block !important;
+                overflow-x: hidden !important;
+                position: relative !important;
+                box-sizing: border-box !important;
             }
 
             .content-inner {

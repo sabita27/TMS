@@ -320,14 +320,6 @@
         }
 
         @media (max-width: 768px) {
-            .card-header {
-                flex-direction: column;
-                align-items: flex-start !important;
-                gap: 1rem;
-            }
-            .card-header .btn {
-                width: 100%;
-            }
             .modal-view-container {
                 margin: 2rem auto;
             }

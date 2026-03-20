@@ -59,10 +59,9 @@
         </div>
     </div>
 
-    <!-- Add Product Modal -->
     <div id="addProductModal"
-        style="display:none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); overflow-y: auto;">
-        <div style="background: white; width: 500px; margin: 5% auto; padding: 2rem; border-radius: 0.5rem;">
+        style="display:none; position: fixed; z-index: 5000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); overflow-y: auto;">
+        <div style="background: white; width: 600px; margin: 6rem auto; padding: 2.5rem; border-radius: 1.25rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);">
             <div
                 style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid #eee; padding-bottom: 1rem;">
                 <h3 style="margin: 0;">Add New Product</h3>
@@ -120,10 +119,9 @@
         </div>
     </div>
 
-    <!-- Edit Product Modal -->
     <div id="editProductModal"
-        style="display:none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); overflow-y: auto;">
-        <div style="background: white; width: 500px; margin: 5% auto; padding: 2rem; border-radius: 0.5rem;">
+        style="display:none; position: fixed; z-index: 5000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); overflow-y: auto;">
+        <div style="background: white; width: 600px; margin: 6rem auto; padding: 2.5rem; border-radius: 1.25rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);">
             <div
                 style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid #eee; padding-bottom: 1rem;">
                 <h3 style="margin: 0;">Edit Product</h3>
