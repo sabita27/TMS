@@ -10,6 +10,12 @@
             grid-template-columns: 1fr !important;
         }
     }
+    @media (max-width: 768px) {
+        .stats-grid {
+            grid-template-columns: 1fr 1fr !important;
+            gap: 1rem !important;
+        }
+    }
     @media (max-width: 640px) {
         .dashboard-header {
             text-align: center;
@@ -18,26 +24,34 @@
         .dashboard-header h1 {
             font-size: 1.25rem !important;
         }
+        .stats-grid {
+            grid-template-columns: 1fr 1fr !important;
+            gap: 0.75rem !important;
+        }
     }
     @media (max-width: 480px) {
         .stats-grid > div {
             padding: 1rem !important;
-            gap: 1rem !important;
+            gap: 0.75rem !important;
             border-radius: 1rem !important;
         }
         .stats-grid div[style*="width: 56px"] {
             width: 44px !important;
             height: 44px !important;
-            font-size: 1.15rem !important;
+            font-size: 1rem !important;
         }
         .stats-grid h2 {
-            font-size: 1.35rem !important;
+            font-size: 1.25rem !important;
+        }
+        .stats-grid p {
+            font-size: 0.65rem !important;
         }
     }
 </style>
 @endsection
 
 @section('content')
+<div class="dashboard-header">
     <h1 style="font-size: 1.5rem; font-weight: 700; color: #111827;">
         @can('manage users') Admin Dashboard
         @elseif(Auth::user()->can('manage tickets')) Manager Dashboard
@@ -216,6 +230,8 @@
     activityGradient.addColorStop(0, 'rgba(99, 102, 241, 0.2)');
     activityGradient.addColorStop(1, 'rgba(99, 102, 241, 0)');
 
+    const isMobile = window.innerWidth < 768;
+
     new Chart(activityCtx, {
         type: 'line',
         data: {
@@ -230,10 +246,28 @@
             }]
         },
         options: {
+            responsive: true,
             maintainAspectRatio: false,
+            layout: {
+                padding: {
+                    left: isMobile ? 15 : 0,
+                    right: isMobile ? 25 : 0,
+                    top: 10,
+                    bottom: 0
+                }
+            },
             plugins: { legend: { display: false } },
             scales: {
-                x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 10 } } },
+                x: { 
+                    grid: { display: false }, 
+                    ticks: { 
+                        color: '#94a3b8', 
+                        font: { size: 10 },
+                        autoSkip: isMobile,
+                        maxRotation: 0,
+                        minRotation: 0
+                    } 
+                },
                 y: { grid: { color: '#f1f5f9' }, ticks: { color: '#94a3b8', font: { size: 10 } } }
             }
         }
