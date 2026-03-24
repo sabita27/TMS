@@ -29,7 +29,7 @@
                 <select id="productFilter" class="form-control" style="width: 100%; height: 42px; border-radius: 8px;">
                     <option value="">All Products</option>
                     @foreach ($products as $product)
-                        <option value="{{ $product->name }}">{{ $product->name }}</option>
+                        <option value="{{ $product->id }}">{{ $product->name }}</option>
                     @endforeach
                 </select>
             </div>
@@ -40,7 +40,7 @@
                 <select id="serviceFilter" class="form-control" style="width: 100%; height: 42px; border-radius: 8px;">
                     <option value="">All Services</option>
                     @foreach ($services as $service)
-                        <option value="{{ $service->name }}">{{ $service->name }}</option>
+                        <option value="{{ $service->id }}">{{ $service->name }}</option>
                     @endforeach
                 </select>
             </div>
@@ -65,113 +65,6 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($clients as $client)
-                        <tr>
-                            <td>
-                                <div style="font-weight: 600; color: #1e293b;">{{ $client->name }}</div>
-                                <div style="font-size: 0.75rem; color: #64748b;">
-                                    {{ $client->state }}{{ $client->country ? ', ' . $client->country : '' }}
-                                </div>
-                            </td>
-                            <td>
-                                <div style="font-weight: 500;">{{ $client->contact_person1_name ?? '-' }}</div>
-                                <div style="font-size: 0.75rem; color: #64748b;">{{ $client->contact_person1_phone ?? '-' }}
-                                </div>
-                            </td>
-                            <td>
-                                <div style="font-weight: 500;">{{ $client->email }}</div>
-                                <div style="font-size: 0.75rem; color: #64748b;">{{ $client->phone ?? '-' }}</div>
-                            </td>
-                            <td>
-                                @php
-                                    $selectedProductIds = $client->product_id ?? [];
-                                    $productNames = $products
-                                        ->whereIn('id', $selectedProductIds)
-                                        ->pluck('name')
-                                        ->toArray();
-                                @endphp
-                                @if (!empty($productNames))
-                                    <div style="display: flex; flex-wrap: wrap; gap: 0.25rem;">
-                                        @foreach ($productNames as $pName)
-                                            <span class="badge"
-                                                style="background: #eff6ff; color: #1d4ed8; font-weight: 600;">{{ $pName }}</span>
-                                        @endforeach
-                                    </div>
-                                @else
-                                    <span style="color: #94a3b8; font-style: italic;">-</span>
-                                @endif
-                            </td>
-                            <td>
-                                @php
-                                    $selectedProjectIds = $client->project_id ?? [];
-                                    $projectNames = $projects
-                                        ->whereIn('id', $selectedProjectIds)
-                                        ->pluck('name')
-                                        ->toArray();
-                                @endphp
-                                @if (!empty($projectNames))
-                                    <div style="display: flex; flex-wrap: wrap; gap: 0.25rem;">
-                                        @foreach ($projectNames as $pName)
-                                            <span class="badge"
-                                                style="background: #f0fdf4; color: #15803d; font-weight: 600;">{{ $pName }}</span>
-                                        @endforeach
-                                    </div>
-                                @else
-                                    <span style="color: #94a3b8; font-style: italic;">-</span>
-                                @endif
-                            </td>
-                            <td>
-                                @if ($client->services->isNotEmpty())
-                                    <div style="display: flex; flex-direction: column; gap: 0.25rem;">
-                                        @foreach ($client->services as $clientService)
-                                            @if ($clientService->service)
-                                                <div
-                                                    style="font-size: 0.8rem; background: #fdf4ff; color: #a21caf; padding: 0.2rem 0.5rem; border-radius: 4px; border: 1px solid #f5d0fe;">
-                                                    <strong>{{ $clientService->service->name }}</strong>
-                                                    @if ($clientService->start_date)
-                                                        <div style="font-size: 0.7rem; color: #701a75;">
-                                                            {{ $clientService->start_date->format('d M Y') }} -
-                                                            {{ $clientService->end_date ? $clientService->end_date->format('d M Y') : 'N/A' }}
-                                                        </div>
-                                                    @endif
-                                                </div>
-                                            @endif
-                                        @endforeach
-                                    </div>
-                                @else
-                                    <span style="color: #94a3b8; font-style: italic;">-</span>
-                                @endif
-                            </td>
-                            <td>
-                                <span class="badge {{ $client->status ? 'badge-success' : 'badge-danger' }}">
-                                    {{ $client->status ? 'Active' : 'Inactive' }}
-                                </span>
-                            </td>
-                            <td>
-                                <div style="display: flex; gap: 0.5rem;">
-                                    <button onclick="viewClient({{ $client->id }})" class="btn"
-                                        style="padding: 0.4rem 0.7rem; font-size: 0.75rem; background: #10b981; color: white;">
-                                        <i class="fas fa-eye"></i> View
-                                    </button>
-                                    <button onclick="editClient({{ $client->id }})" class="btn btn-primary"
-                                        style="padding: 0.4rem 0.7rem; font-size: 0.75rem;">
-                                        <i class="fas fa-edit"></i> Edit
-                                    </button>
-                                    @if(Auth::user()->hasRole('admin'))
-                                        <form action="{{ route('admin.clients.delete', $client->id) }}" method="POST"
-                                            onsubmit="return confirm('Are you sure you want to delete this client?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-danger"
-                                                style="padding: 0.4rem 0.7rem; font-size: 0.75rem;">
-                                                <i class="fas fa-trash"></i> Delete
-                                            </button>
-                                        </form>
-                                    @endif
-                                </div>
-                            </td>
-                        </tr>
-                    @endforeach
                 </tbody>
             </table>
         </div>
@@ -807,8 +700,27 @@
             });
 
             const table = $('#clientTable').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url: "{{ route('admin.clients') }}",
+                    data: function (d) {
+                        d.product_id = $('#productFilter').val();
+                        d.service_id = $('#serviceFilter').val();
+                    }
+                },
+                columns: [
+                    {data: 'name', name: 'name'},
+                    {data: 'contact_person', name: 'contact_person1_name', orderable: false, searchable: true},
+                    {data: 'email_phone', name: 'email', orderable: false, searchable: true},
+                    {data: 'products_list', name: 'products_list', orderable: false, searchable: false},
+                    {data: 'projects_list', name: 'projects_list', orderable: false, searchable: false},
+                    {data: 'services_list', name: 'services_list', orderable: false, searchable: false},
+                    {data: 'status', name: 'status', orderable: false, searchable: false},
+                    {data: 'action', name: 'action', orderable: false, searchable: false},
+                ],
                 "pageLength": 10,
-                "order": [],
+                "order": [[0, 'asc']],
                 "dom": '<"top"Bf><"table-container"rt><"bottom"ip><"clear">',
                 "buttons": [
                     'copy', 'csv', 'excel', 'pdf', 'print'
@@ -820,17 +732,17 @@
             });
 
             $('#productFilter').on('change', function() {
-                table.column(3).search(this.value).draw();
+                table.draw();
             });
 
             $('#serviceFilter').on('change', function() {
-                table.column(5).search(this.value).draw();
+                table.draw();
             });
 
             window.resetFilters = function() {
-                $('#productFilter').val('');
-                $('#serviceFilter').val('');
-                table.search('').columns().search('').draw();
+                $('#productFilter').val('').trigger('change');
+                $('#serviceFilter').val('').trigger('change');
+                table.draw();
             };
 
             toggleClientFields('add');

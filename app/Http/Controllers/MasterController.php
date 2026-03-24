@@ -18,6 +18,7 @@ use App\Models\ClientService;
 use Illuminate\Http\Request;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception as PHPMailerException;
+use Yajra\DataTables\Facades\DataTables;
 
 class MasterController extends Controller
 {
@@ -63,13 +64,114 @@ class MasterController extends Controller
     }
 
     // Clients
-    public function clients()
+    public function clients(Request $request)
     {
-        $clients = Client::with('services.service')->latest()->get();
+        if ($request->ajax()) {
+            $clients = Client::with('services.service')->latest();
+            
+            // Handle filters
+            if ($request->filled('product_id')) {
+                $clients->whereJsonContains('product_id', (string)$request->product_id);
+            }
+            if ($request->filled('service_id')) {
+                $clients->whereHas('services', function($q) use ($request){
+                    $q->where('service_id', $request->service_id);
+                });
+            }
+
+            // Get products and projects for mapping (ID => Name)
+            $allProducts = Product::pluck('name', 'id')->toArray();
+            $allProjects = Project::pluck('name', 'id')->toArray();
+
+            return DataTables::of($clients)
+                ->addIndexColumn()
+                ->editColumn('name', function($row){
+                    return '<div><div style="font-weight: 600; color: #1e293b;">'.e($row->name).'</div>
+                            <div style="font-size: 0.75rem; color: #64748b;">'.e($row->state).($row->country ? ', '.e($row->country) : '').'</div></div>';
+                })
+                ->addColumn('contact_person', function($row){
+                    return '<div><div style="font-weight: 500;">'.e($row->contact_person1_name ?? '-').'</div>
+                            <div style="font-size: 0.75rem; color: #64748b;">'.e($row->contact_person1_phone ?? '-').'</div></div>';
+                })
+                ->addColumn('email_phone', function($row){
+                    return '<div><div style="font-weight: 500;">'.e($row->email).'</div>
+                            <div style="font-size: 0.75rem; color: #64748b;">'.e($row->phone ?? '-').'</div></div>';
+                })
+                ->addColumn('products_list', function($row) use ($allProducts){
+                    $ids = $row->product_id ?? [];
+                    $names = [];
+                    foreach($ids as $id) {
+                        if(isset($allProducts[$id])) $names[] = $allProducts[$id];
+                    }
+                    if (!empty($names)) {
+                        $html = '<div style="display: flex; flex-wrap: wrap; gap: 0.25rem;">';
+                        foreach ($names as $name) {
+                            $html .= '<span class="badge" style="background: #eff6ff; color: #1d4ed8; font-weight: 600;">'.e($name).'</span>';
+                        }
+                        $html .= '</div>';
+                        return $html;
+                    }
+                    return '<span style="color: #94a3b8; font-style: italic;">-</span>';
+                })
+                ->addColumn('projects_list', function($row) use ($allProjects){
+                    $ids = $row->project_id ?? [];
+                    $names = [];
+                    foreach($ids as $id) {
+                        if(isset($allProjects[$id])) $names[] = $allProjects[$id];
+                    }
+                    if (!empty($names)) {
+                        $html = '<div style="display: flex; flex-wrap: wrap; gap: 0.25rem;">';
+                        foreach ($names as $name) {
+                            $html .= '<span class="badge" style="background: #f0fdf4; color: #15803d; font-weight: 600;">'.e($name).'</span>';
+                        }
+                        $html .= '</div>';
+                        return $html;
+                    }
+                    return '<span style="color: #94a3b8; font-style: italic;">-</span>';
+                })
+                ->addColumn('services_list', function($row){
+                    if ($row->services->isNotEmpty()) {
+                        $html = '<div style="display: flex; flex-direction: column; gap: 0.25rem;">';
+                        foreach ($row->services as $clientService) {
+                            if ($clientService->service) {
+                                $dateStr = '';
+                                if ($clientService->start_date) {
+                                    $dateStr = '<div style="font-size: 0.7rem; color: #701a75;">'
+                                        . $clientService->start_date->format('d M Y') . ' - '
+                                        . ($clientService->end_date ? $clientService->end_date->format('d M Y') : 'N/A')
+                                        . '</div>';
+                                }
+                                $html .= '<div style="font-size: 0.8rem; background: #fdf4ff; color: #a21caf; padding: 0.2rem 0.5rem; border-radius: 4px; border: 1px solid #f5d0fe;">
+                                            <strong>'.e($clientService->service->name).'</strong>' . $dateStr . '</div>';
+                            }
+                        }
+                        $html .= '</div>';
+                        return $html;
+                    }
+                    return '<span style="color: #94a3b8; font-style: italic;">-</span>';
+                })
+                ->editColumn('status', function($row){
+                    return '<span class="badge '.($row->status ? 'badge-success' : 'badge-danger').'">'.($row->status ? 'Active' : 'Inactive').'</span>';
+                })
+                ->addColumn('action', function($row){
+                    $btn = '<div style="display: flex; gap: 0.5rem;">';
+                    $btn .= '<button onclick="viewClient('.$row->id.')" class="btn" style="padding: 0.4rem 0.7rem; font-size: 0.75rem; background: #10b981; color: white;"><i class="fas fa-eye"></i></button>';
+                    $btn .= '<button onclick="editClient('.$row->id.')" class="btn btn-primary" style="padding: 0.4rem 0.7rem; font-size: 0.75rem;"><i class="fas fa-edit"></i></button>';
+                    
+                    if(auth()->user()->hasRole('admin')){
+                        $btn .= '<form action="'.route('admin.clients.delete', $row->id).'" method="POST" onsubmit="return confirm(\'Are you sure you want to delete this client?\')" style="display:inline;">'.csrf_field().method_field('DELETE').'<button type="submit" class="btn btn-danger" style="padding: 0.4rem 0.7rem; font-size: 0.75rem;"><i class="fas fa-trash"></i></button></form>';
+                    }
+                    $btn .= '</div>';
+                    return $btn;
+                })
+                ->rawColumns(['name', 'contact_person', 'email_phone', 'products_list', 'projects_list', 'services_list', 'status', 'action'])
+                ->make(true);
+        }
+
         $products = Product::where('status', true)->get();
         $projects = Project::where('status', true)->get();
         $services = Service::where('status', true)->get();
-        return view('admin.masters.clients', compact('clients', 'products', 'projects', 'services'));
+        return view('admin.masters.clients', compact('products', 'projects', 'services'));
     }
 
     public function storeClient(Request $request)
