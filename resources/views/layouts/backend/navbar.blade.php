@@ -3,10 +3,12 @@
         @php
             $sys_logo = \App\Models\Setting::get('system_logo');
             $sys_name = \App\Models\Setting::get('system_name', 'TMS PRO');
+            $logo_height = \App\Models\Setting::get('system_logo_height', '35');
+            $logo_width = \App\Models\Setting::get('system_logo_width', '120');
         @endphp
         @if($sys_logo && file_exists(public_path('storage/' . $sys_logo)))
             <div style="display: flex; align-items: center; gap: 0.5rem;">
-                <img src="{{ asset('storage/' . $sys_logo) }}" style="height: 35px; max-width: 120px; object-fit: contain; border: none; outline: none; display: block;" alt="Logo">
+                <img src="{{ asset('storage/' . $sys_logo) }}" style="height: {{ $logo_height }}px; width: {{ $logo_width }}px; object-fit: contain; border: none; outline: none; display: block;" alt="Logo">
             </div>
         @else
             <div style="display: flex; align-items: center; gap: 0.75rem;">

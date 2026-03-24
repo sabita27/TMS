@@ -117,11 +117,18 @@ class TicketController extends Controller
         return view('auth.tickets', compact('tickets', 'staffMembers'));
     }
 
-    public function allConversations()
+    public function allConversations(Request $request)
     {
-        $tickets = Ticket::with(['user', 'assignedStaff', 'replies' => function($query) {
+        $query = Ticket::with(['user', 'assignedStaff', 'replies' => function($query) {
             $query->latest();
-        }])->latest()->paginate(15);
+        }]);
+
+        if ($request->has('search') && !empty($request->search)) {
+            $search = $request->search;
+            $query->where('ticket_id', 'LIKE', "%{$search}%");
+        }
+
+        $tickets = $query->latest()->paginate(15);
         
         return view('auth.conversations', compact('tickets'));
     }

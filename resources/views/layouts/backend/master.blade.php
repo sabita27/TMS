@@ -7,7 +7,7 @@
         @php
             $isUser = auth()->check() && auth()->user()->hasRole('user');
             $headerHeight = $isUser ? '100px' : '80px';
-            $headerPadding = $isUser ? '0 3rem' : '0 1.5rem 0 3rem';
+            $headerPadding = '0 2.5rem';
         @endphp
         <header class="header-main">
             <div style="display: flex; align-items: center; gap: 1rem;">
@@ -130,21 +130,25 @@
             display: flex;
             flex-direction: column;
             overflow-y: auto;
+            overflow-x: hidden;
             margin-left: 260px;
             transition: all 0.3s ease;
             width: calc(100% - 260px);
+            min-height: 100vh;
         }
 
         .content-inner {
-            padding: 2rem;
+            padding: 3rem;
             width: 100%;
+            max-width: 100%;
             box-sizing: border-box;
             flex-grow: 1;
+            margin: 0 auto;
         }
 
         .header-main {
             height: {{ $isUser ? '100px' : '80px' }};
-            padding: {{ $isUser ? '0 3rem' : '0 1.5rem 0 3rem' }};
+            padding: 0 3rem;
             background: #fff; 
             display: flex; 
             justify-content: space-between; 
@@ -248,6 +252,12 @@
                 padding: 1rem !important;
             }
 
+            @media (max-width: 480px) {
+                .content-inner {
+                    padding: 0.75rem !important;
+                }
+            }
+
             #sidebar-toggle {
                 display: flex !important;
                 width: 38px !important;
@@ -261,6 +271,12 @@
                 box-sizing: border-box !important;
                 background: #ffffff !important;
                 border-bottom: 1px solid #f1f5f9 !important;
+            }
+
+            @media (max-width: 480px) {
+                .header-main {
+                    padding: 0 0.75rem !important;
+                }
             }
             
             .page-title-text {

@@ -198,9 +198,28 @@
 @endsection
 
 @section('content')
-<div class="hub-header" style="margin-bottom: 2rem;">
-    <h2 style="margin: 0; font-size: 1.75rem; font-weight: 900; color: #0f172a;">Support Messaging Hub</h2>
-    <p style="margin: 0.5rem 0 0 0; color: #64748b; font-size: 0.95rem;">Monitor and engage in all customer support conversations.</p>
+<div class="hub-header" style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1.5rem;">
+    <div>
+        <h2 style="margin: 0; font-size: 1.75rem; font-weight: 900; color: #0f172a;">Support Messaging Hub</h2>
+        <p style="margin: 0.5rem 0 0 0; color: #64748b; font-size: 0.95rem;">Monitor and engage in all customer support conversations.</p>
+    </div>
+    
+    {{-- High-Contrast Search Form --}}
+    <form action="{{ route('manager.conversations') }}" method="GET" style="display: flex; gap: 0.5rem; background: white; border-radius: 1.25rem; padding: 0.6rem 0.75rem; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); border: 2px solid #f1f5f9; min-width: 320px; transition: 0.3s; border-color: {{ request('search') ? '#6366f1' : '#f1f5f9' }};" onmouseover="this.style.borderColor='#cbd5e1'" onmouseout="this.style.borderColor='{{ request('search') ? '#6366f1' : '#f1f5f9' }}'">
+        <div style="flex-grow: 1; position: relative; display: flex; align-items: center; padding-left: 0.75rem;">
+            <i class="fas fa-search" style="color: {{ request('search') ? '#6366f1' : '#94a3b8' }}; font-size: 0.95rem;"></i>
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="Search by Ticket ID (e.g. TKT-ABC12)" autocomplete="off"
+                style="width: 100%; border: none; background: transparent; padding: 0.6rem 0.75rem; font-size: 0.9rem; font-weight: 700; color: #1e293b; outline: none;">
+        </div>
+        <button type="submit" style="background: #3b82f6; color: white; border: none; padding: 0.6rem 1.25rem; border-radius: 0.75rem; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 0.5rem;" onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">
+            Search
+        </button>
+        @if(request('search'))
+            <a href="{{ route('manager.conversations') }}" style="background: #f8fafc; color: #64748b; width: 42px; height: 42px; border-radius: 0.75rem; text-decoration: none; font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; justify-content: center; border: 1px solid #e2e8f0;" title="Clear Search">
+                <i class="fas fa-times"></i>
+            </a>
+        @endif
+    </form>
 </div>
 
 <div class="conversation-card">

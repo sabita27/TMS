@@ -208,6 +208,20 @@
                                                         </label>
                                                     </div>
                                                 </div>
+
+                                                <!-- Additional Dimension Settings -->
+                                                <div class="form-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 2.5rem; padding: 1.5rem; background: #fff; border: 1px solid #f1f5f9; border-radius: 1rem;">
+                                                    <div class="form-group">
+                                                        <label class="form-label">Logo Height (px)</label>
+                                                        <input type="number" name="system_logo_height" class="form-control" value="{{ $data['settings']['system_logo_height'] ?? '35' }}" placeholder="35">
+                                                        <small style="color: #64748b; font-size: 0.75rem;">Controls the height in the navbar. Default: 35px</small>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label class="form-label">Logo Max Width (px)</label>
+                                                        <input type="number" name="system_logo_width" class="form-control" value="{{ $data['settings']['system_logo_width'] ?? '120' }}" placeholder="120">
+                                                        <small style="color: #64748b; font-size: 0.75rem;">Constrains the logo width. Default: 120px</small>
+                                                    </div>
+                                                </div>
                                             </div>
                                         @elseif($section == 'smtp')
                                             <!-- Professional SMTP Settings -->

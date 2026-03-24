@@ -2,23 +2,68 @@
 
 @section('styles')
 <style>
+    /* Baseline for grids to avoid alignment shift */
+    .stats-grid, .analytical-grid, .recent-tickets-card {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Desktop layout for management roles */
+    @media (min-width: 1025px) {
+        .stats-grid {
+            grid-template-columns: repeat(4, 1fr) !important;
+        }
+        .analytical-grid {
+            grid-template-columns: 1.25fr 1fr !important;
+            gap: 2rem !important;
+        }
+    }
+
+    @media (max-width: 1280px) {
+        .stats-grid {
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
+            margin-right: 0 !important;
+            margin-left: 0 !important;
+        }
+    }
+
     @media (max-width: 1024px) {
         .stats-grid {
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 1.25rem !important;
+            width: 100% !important;
         }
         .analytical-grid {
             grid-template-columns: 1fr !important;
+            gap: 1.5rem !important;
+            width: 100% !important;
         }
     }
+
     @media (max-width: 768px) {
+        .dashboard-header {
+            margin-bottom: 2rem !important;
+        }
         .stats-grid {
-            grid-template-columns: 1fr 1fr !important;
             gap: 1rem !important;
         }
+        .stats-grid > div {
+            padding: 1rem !important;
+        }
+        .analytical-grid .card {
+            padding: 1.25rem !important;
+        }
+        .chart-container {
+            min-height: 260px !important;
+        }
     }
+
     @media (max-width: 640px) {
         .dashboard-header {
-            text-align: center;
+            text-align: left;
             margin-bottom: 1.5rem !important;
         }
         .dashboard-header h1 {
@@ -28,23 +73,54 @@
             grid-template-columns: 1fr 1fr !important;
             gap: 0.75rem !important;
         }
-    }
-    @media (max-width: 480px) {
         .stats-grid > div {
-            padding: 1rem !important;
+            padding: 0.85rem !important;
             gap: 0.75rem !important;
             border-radius: 1rem !important;
         }
         .stats-grid div[style*="width: 56px"] {
-            width: 44px !important;
-            height: 44px !important;
-            font-size: 1rem !important;
+            width: 40px !important;
+            height: 40px !important;
+            font-size: 0.9rem !important;
+            border-radius: 0.75rem !important;
         }
         .stats-grid h2 {
-            font-size: 1.25rem !important;
+            font-size: 1.15rem !important;
         }
         .stats-grid p {
-            font-size: 0.65rem !important;
+            font-size: 0.6rem !important;
+        }
+        
+        .kpi-grid {
+            grid-template-columns: 1fr 1fr !important;
+            gap: 0.75rem !important;
+        }
+        .kpi-grid > div {
+            padding: 0.75rem !important;
+        }
+        .kpi-grid canvas {
+            max-height: 50px !important;
+        }
+        .kpi-grid h4 {
+            font-size: 1rem !important;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .stats-grid {
+            grid-template-columns: 1fr !important;
+        }
+        
+        .analytical-grid .card {
+            padding: 1rem !important;
+        }
+        
+        .kpi-grid {
+            grid-template-columns: 1fr !important;
+        }
+        
+        .chart-container {
+            min-height: 220px !important;
         }
     }
 </style>
@@ -65,7 +141,7 @@
     </p>
 </div>
 
-<div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">
+<div class="stats-grid" style="display: grid; gap: 1.5rem; margin-bottom: 2.5rem; width: 100%;">
     <!-- Dynamic Stat Cards based on Permissions -->
     @if(Auth::user()->can('manage tickets'))
     <div style="background: linear-gradient(135deg, #e0e7ff 0%, #ffffff 100%); padding: 1.5rem; border-radius: 1.25rem; border: 1px solid #c7d2fe; display: flex; align-items: center; gap: 1.25rem; transition: transform 0.3s; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
@@ -112,22 +188,22 @@
 
 @if(Auth::user()->can('manage tickets'))
 <!-- Analytical Section for Management Roles -->
-<div class="analytical-grid" style="display: grid; grid-template-columns: 1.6fr 1fr; gap: 1.5rem; margin-bottom: 2rem; align-items: stretch;">
-    <div class="card" style="padding: 1.75rem; border: none; border-radius: 1.5rem; background: white; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; display: flex; flex-direction: column;">
+<div class="analytical-grid" style="display: grid; gap: 1.5rem; margin-bottom: 2rem; align-items: stretch; width: 100%;">
+    <div class="card" style="padding: 2rem; border: none; border-radius: 1.5rem; background: white; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; display: flex; flex-direction: column;">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem;">
             <div>
                 <h3 style="font-size: 1.125rem; font-weight: 800; color: #0f172a; margin: 0;">Support Performance</h3>
                 <p style="font-size: 0.8125rem; color: #64748b; margin-top: 0.25rem;">Live ticket inflow & resolution tracking</p>
             </div>
         </div>
-        <div style="flex: 1; min-height: 320px; position: relative;">
+        <div class="chart-container" style="flex: 1; min-height: 320px; position: relative;">
             <canvas id="mainActivityChart"></canvas>
         </div>
     </div>
 
-    <div class="card" style="padding: 1.75rem; border: none; border-radius: 1.5rem; background: white; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; display: flex; flex-direction: column;">
-        <h3 style="font-size: 1.125rem; font-weight: 800; color: #0f172a; margin-bottom: 1.5rem;">Key Performance</h3>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; flex: 1;">
+    <div class="card" style="padding: 2rem; border: none; border-radius: 1.5rem; background: white; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; display: flex; flex-direction: column;">
+        <h3 style="font-size: 1.125rem; font-weight: 800; color: #0f172a; margin-bottom: 2rem;">Key Performance</h3>
+        <div class="kpi-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; flex: 1; align-content: start;">
             <div style="background: #eef7f2; padding: 1rem; border-radius: 1.25rem; text-align: center;">
                 <span style="font-size: 0.7rem; font-weight: 700; color: #166534; display: block; margin-bottom: 0.5rem;">Open Requests</span>
                 <canvas id="kpiOpenChart" style="max-height: 60px;"></canvas>
@@ -156,7 +232,7 @@
 </div>
 @endif
 
-<div class="card" style="border-radius: 1.25rem; border: 1px solid #f1f5f9; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); background: white;">
+<div class="card recent-tickets-card" style="border-radius: 1.25rem; border: 1px solid #f1f5f9; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); background: white; width: 100%;">
     <div style="padding: 1.5rem; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
         <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: #1e293b;">Recent Tickets</h3>
         @php 
@@ -250,8 +326,8 @@
             maintainAspectRatio: false,
             layout: {
                 padding: {
-                    left: isMobile ? 15 : 0,
-                    right: isMobile ? 25 : 0,
+                    left: isMobile ? 5 : 0,
+                    right: isMobile ? 5 : 0,
                     top: 10,
                     bottom: 0
                 }
