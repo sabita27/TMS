@@ -110,27 +110,156 @@ class TicketController extends Controller
         return back()->with('success', 'Ticket closed successfully.');
     }
 
-    public function managerTickets()
+    public function managerTickets(Request $request)
     {
-        $tickets = Ticket::with(['user', 'product', 'project', 'service', 'assignedStaff'])->latest()->paginate(15);
+        if ($request->ajax()) {
+            $tickets = Ticket::with(['user', 'product', 'project', 'service', 'assignedStaff'])->latest();
+            $staffMembers = User::role('staff')->get();
+
+            return \Yajra\DataTables\Facades\DataTables::of($tickets)
+                ->addIndexColumn()
+                ->editColumn('ticket_id', function($row){
+                    return '<a href="'.route('ticket.show', $row->id).'" style="color: #3b82f6; font-weight: 700; text-decoration: none;">#'.e($row->ticket_id).'</a>';
+                })
+                ->addColumn('customer', function($row){
+                    return e($row->user->name ?? '');
+                })
+                ->editColumn('subject', function($row){
+                    return e($row->subject);
+                })
+                ->editColumn('priority', function($row){
+                    $badgeClass = $row->priority == 'high' ? 'badge-danger' : 'badge-warning';
+                    return '<span class="badge '.$badgeClass.'">'.ucfirst($row->priority).'</span>';
+                })
+                ->editColumn('status', function($row){
+                    $statusColors = [
+                        'open' => 'badge-danger',
+                        'in-progress' => 'badge-warning',
+                        'resolved' => 'badge-success',
+                        'closed' => 'badge-secondary'
+                    ];
+                    $badgeClass = $statusColors[strtolower($row->status)] ?? 'badge-info';
+                    return '<span class="badge '.$badgeClass.'">'.ucfirst($row->status).'</span>';
+                })
+                ->addColumn('assign_to_staff', function($row) use ($staffMembers){
+                    $html = '<div style="display: flex; gap: 0.5rem;">';
+                    $html .= '<form action="'.route('manager.tickets.assign', $row->id).'" method="POST" style="display:flex; gap:0.25rem;">';
+                    $html .= csrf_field();
+                    $html .= '<select name="assigned_to" class="form-control" style="padding: 0.25rem; font-size: 0.75rem; width: 120px;">';
+                    $html .= '<option value="">Select Staff</option>';
+                    foreach($staffMembers as $staff) {
+                        $selected = $row->assigned_to == $staff->id ? 'selected' : '';
+                        $html .= '<option value="'.$staff->id.'" '.$selected.'>'.e($staff->name).'</option>';
+                    }
+                    $html .= '</select>';
+                    $html .= '<button type="submit" class="btn btn-primary" title="Assign" style="padding: 0.25rem 0.5rem; background: #3b82f6;"><i class="fas fa-user-check"></i></button>';
+                    $html .= '</form></div>';
+                    return $html;
+                })
+                ->rawColumns(['ticket_id', 'priority', 'status', 'assign_to_staff'])
+                ->make(true);
+        }
+
         $staffMembers = User::role('staff')->get();
-        return view('auth.tickets', compact('tickets', 'staffMembers'));
+        return view('auth.tickets', compact('staffMembers'));
     }
 
     public function allConversations(Request $request)
     {
-        $query = Ticket::with(['user', 'assignedStaff', 'replies' => function($query) {
-            $query->latest();
-        }]);
+        if ($request->ajax()) {
+            $query = Ticket::with(['user', 'assignedStaff', 'replies' => function($q) {
+                $q->latest();
+            }])->latest();
+            
+            return \Yajra\DataTables\Facades\DataTables::of($query)
+                ->addColumn('card', function($ticket) {
+                    $lastReply = $ticket->replies->first();
+                    $lastMsg = $lastReply ? $lastReply->replay : $ticket->description;
+                    $lastMsgSender = $lastReply ? ($lastReply->reply_by == 'staff' ? 'Staff: ' : 'User: ') : 'User: ';
+                    $isSolved = in_array(strtolower($ticket->status), ['resolved', 'closed']);
+                    
+                    $colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+                    $avatarColor = $colors[$ticket->id % count($colors)];
 
-        if ($request->has('search') && !empty($request->search)) {
-            $search = $request->search;
-            $query->where('ticket_id', 'LIKE', "%{$search}%");
+                    $route = route('ticket.show', $ticket->id);
+                    $deleteRoute = route('manager.tickets.delete', $ticket->id);
+                    $csrf = csrf_field();
+                    $method = method_field('DELETE');
+
+                    $timeDiff = $ticket->created_at->diffForHumans();
+                    $userName = e($ticket->user->name);
+                    $ticketId = e($ticket->ticket_id);
+                    $subject = e($ticket->subject);
+                    $msgPreview = \Illuminate\Support\Str::limit(strip_tags($lastMsg), 100);
+
+                    $solvedStatusHtml = $isSolved ? '<i class="fas fa-check-circle"></i> Solved' : '<i class="fas fa-clock"></i> Active';
+                    $solvedBadgeClass = $isSolved ? 'solved-badge' : 'unsolved-badge';
+
+                    $resolvedExtra = '';
+                    if($isSolved && $ticket->closed_at) {
+                        $resolvedExtra = '<div style="font-size: 0.65rem; color: #15803d; font-weight: 700; text-transform: uppercase;">Resolved: '.$ticket->closed_at->diffForHumans().'</div>';
+                    }
+
+                    $assignInfo = '';
+                    if($ticket->assigned_to) {
+                        $assignInfo = '<div style="font-size: 0.65rem; color: #94a3b8; font-weight: 700; text-transform: uppercase;">Resource: <span style="color: #64748b;">'.e($ticket->assignedStaff->name ?? 'Unknown').'</span></div>';
+                    } else {
+                        $assignInfo = '<div style="font-size: 0.65rem; color: #ef4444; font-weight: 700; text-transform: uppercase;">Unassigned</div>';
+                    }
+
+                    return '
+                    <div class="conversation-wrapper" style="border-bottom: 1px solid #f1f5f9;">
+                        <a href="'.$route.'" class="conversation-item">
+                            <div class="user-avatar-init" style="background: '.$avatarColor.';">
+                                '.strtoupper(substr($userName, 0, 1)).'
+                            </div>
+                            
+                            <div class="convo-content">
+                                <div class="convo-header">
+                                    <h4 class="convo-name">'.$userName.' <span style="color: #cbd5e1; font-weight: 400; font-size: 0.8rem; margin-left: 0.5rem;">#'.$ticketId.'</span></h4>
+                                    <span class="convo-meta">'.$timeDiff.'</span>
+                                </div>
+                                
+                                <div class="convo-subject">'.$subject.'</div>
+                                
+                                <p class="convo-last-msg">
+                                    <span style="font-weight: 700; color: #475569;">'.$lastMsgSender.'</span>
+                                    '.$msgPreview.'
+                                </p>
+                            </div>
+
+                            <div class="convo-status-area">
+                                <span class="status-pill '.$solvedBadgeClass.'">
+                                    '.$solvedStatusHtml.'
+                                </span>
+                                '.$resolvedExtra.'
+                                '.$assignInfo.'
+                            </div>
+                        </a>
+                        
+                        <div class="convo-actions">
+                            <form action="'.$deleteRoute.'" method="POST" onsubmit="return confirm(\'Are you sure you want to permanently delete this ticket and all its conversations?\');">
+                                '.$csrf.'
+                                '.$method.'
+                                <button type="submit" style="background: #fee2e2; color: #ef4444; border: 1px solid #fecaca; width: 40px; height: 40px; border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background=\'#ef4444\'; this.style.color=\'white\';" onmouseout="this.style.background=\'#fee2e2\'; this.style.color=\'#ef4444\';" title="Delete Ticket">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>';
+                })
+                ->filterColumn('card', function($query, $keyword) {
+                    $query->where('ticket_id', 'LIKE', "%{$keyword}%")
+                          ->orWhere('subject', 'LIKE', "%{$keyword}%")
+                          ->orWhereHas('user', function($q) use($keyword) {
+                              $q->where('name', 'LIKE', "%{$keyword}%");
+                          });
+                })
+                ->rawColumns(['card'])
+                ->make(true);
         }
 
-        $tickets = $query->latest()->paginate(15);
-        
-        return view('auth.conversations', compact('tickets'));
+        return view('auth.conversations');
     }
 
     public function assign(Request $request, Ticket $ticket)

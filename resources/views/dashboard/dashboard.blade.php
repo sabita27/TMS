@@ -203,28 +203,30 @@
 
     <div class="card" style="padding: 2rem; border: none; border-radius: 1.5rem; background: white; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; display: flex; flex-direction: column;">
         <h3 style="font-size: 1.125rem; font-weight: 800; color: #0f172a; margin-bottom: 2rem;">Key Performance</h3>
-        <div class="kpi-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; flex: 1; align-content: start;">
-            <div style="background: #eef7f2; padding: 1rem; border-radius: 1.25rem; text-align: center;">
+        <div class="kpi-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; flex: 1; align-content: start;">
+            <div style="background: #eef7f2; padding: 1rem; border-radius: 1.25rem; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: space-between; height: 100%;">
                 <span style="font-size: 0.7rem; font-weight: 700; color: #166534; display: block; margin-bottom: 0.5rem;">Open Requests</span>
-                <canvas id="kpiOpenChart" style="max-height: 60px;"></canvas>
+                <canvas id="kpiOpenChart" style="max-height: 60px; max-width: 60px;"></canvas>
                 <h4 style="margin: 0.5rem 0 0 0; font-size: 1.25rem;">{{ $stats['open_tickets'] ?? 0 }}</h4>
             </div>
-            <div style="background: #f0f4ff; padding: 1rem; border-radius: 1.25rem; text-align: center;">
+            <div style="background: #f0f4ff; padding: 1rem; border-radius: 1.25rem; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: space-between; height: 100%;">
                 <span style="font-size: 0.7rem; font-weight: 700; color: #1e40af; display: block; margin-bottom: 0.5rem;">Closed Stats</span>
-                <canvas id="kpiResolvedChart" style="max-height: 60px;"></canvas>
+                <canvas id="kpiResolvedChart" style="max-height: 60px; max-width: 60px;"></canvas>
                 <h4 style="margin: 0.5rem 0 0 0; font-size: 1.25rem;">{{ $stats['closed_tickets'] ?? 0 }}</h4>
             </div>
             @if(Auth::user()->can('manage tickets'))
-            <div style="background: #fff9e6; padding: 1rem; border-radius: 1.25rem; text-align: center;">
+            <div style="background: #fff9e6; padding: 1rem; border-radius: 1.25rem; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: space-between; height: 100%;">
                 <span style="font-size: 0.7rem; font-weight: 700; color: #854d0e; display: block; margin-bottom: 0.5rem;">High Priority</span>
-                <canvas id="kpiPriorityChart" style="max-height: 60px;"></canvas>
+                <canvas id="kpiPriorityChart" style="max-height: 60px; max-width: 60px;"></canvas>
                 <h4 style="margin: 0.5rem 0 0 0; font-size: 1.25rem;">{{ $tickets_by_priority['high'] ?? 0 }}</h4>
             </div>
             @endif
             @can('manage users')
-            <div style="background: #fff0f0; padding: 1rem; border-radius: 1.25rem; text-align: center;">
+            <div style="background: #fff0f0; padding: 1rem; border-radius: 1.25rem; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: space-between; height: 100%;">
                 <span style="font-size: 0.7rem; font-weight: 700; color: #9f1239; display: block; margin-bottom: 0.5rem;">System Agents</span>
-                <h4 style="margin: 0.5rem 0 0 0; font-size: 1.25rem; padding-top: 15px;">{{ $stats['agents'] ?? 0 }}</h4>
+                <div style="flex: 1; display: flex; align-items: center; justify-content: center; position: relative; width: 100%;">
+                    <h4 style="margin: 0; font-size: 1.5rem;">{{ $stats['agents'] ?? 0 }}</h4>
+                </div>
             </div>
             @endcan
         </div>

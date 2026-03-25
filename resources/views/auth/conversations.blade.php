@@ -19,7 +19,6 @@
         border-radius: 1.5rem;
         border: none;
         box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
-        overflow: hidden;
     }
 
     .conversation-list {
@@ -194,7 +193,34 @@
         }
     }
 
+    #conversationTable, #conversationTable tbody, #conversationTable tr, #conversationTable td {
+        width: 100% !important;
+    }
+    
+    #conversationTable td {
+        padding: 0 !important;
+        border: none !important;
+        background: transparent !important;
+    }
+    #conversationTable tbody tr {
+        border-bottom: none !important;
+        background: transparent !important;
+        box-shadow: none !important;
+    }
+    #conversationTable tbody tr:hover {
+        background: transparent !important;
+    }
+    #conversationTable tbody tr.odd, #conversationTable tbody tr.even {
+        background-color: transparent !important;
+    }
+    #conversationTable tbody tr td.sorting_1 {
+        background: transparent !important;
+    }
+    #conversationTable.dataTable.no-footer {
+        border-bottom: none !important;
+    }
 </style>
+
 @endsection
 
 @section('content')
@@ -203,106 +229,46 @@
         <h2 style="margin: 0; font-size: 1.75rem; font-weight: 900; color: #0f172a;">Support Messaging Hub</h2>
         <p style="margin: 0.5rem 0 0 0; color: #64748b; font-size: 0.95rem;">Monitor and engage in all customer support conversations.</p>
     </div>
-    
-    {{-- High-Contrast Search Form --}}
-    <form action="{{ route('manager.conversations') }}" method="GET" style="display: flex; gap: 0.5rem; background: white; border-radius: 1.25rem; padding: 0.6rem 0.75rem; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); border: 2px solid #f1f5f9; min-width: 320px; transition: 0.3s; border-color: {{ request('search') ? '#6366f1' : '#f1f5f9' }};" onmouseover="this.style.borderColor='#cbd5e1'" onmouseout="this.style.borderColor='{{ request('search') ? '#6366f1' : '#f1f5f9' }}'">
-        <div style="flex-grow: 1; position: relative; display: flex; align-items: center; padding-left: 0.75rem;">
-            <i class="fas fa-search" style="color: {{ request('search') ? '#6366f1' : '#94a3b8' }}; font-size: 0.95rem;"></i>
-            <input type="text" name="search" value="{{ request('search') }}" placeholder="Search by Ticket ID (e.g. TKT-ABC12)" autocomplete="off"
-                style="width: 100%; border: none; background: transparent; padding: 0.6rem 0.75rem; font-size: 0.9rem; font-weight: 700; color: #1e293b; outline: none;">
-        </div>
-        <button type="submit" style="background: #3b82f6; color: white; border: none; padding: 0.6rem 1.25rem; border-radius: 0.75rem; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 0.5rem;" onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">
-            Search
-        </button>
-        @if(request('search'))
-            <a href="{{ route('manager.conversations') }}" style="background: #f8fafc; color: #64748b; width: 42px; height: 42px; border-radius: 0.75rem; text-decoration: none; font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; justify-content: center; border: 1px solid #e2e8f0;" title="Clear Search">
-                <i class="fas fa-times"></i>
-            </a>
-        @endif
-    </form>
-</div>
-
-<div class="conversation-card">
-    <div class="conversation-list">
-        @forelse($tickets as $ticket)
-            @php
-                $lastReply = $ticket->replies->first();
-                $lastMsg = $lastReply ? $lastReply->replay : $ticket->description;
-                $lastMsgSender = $lastReply ? ($lastReply->reply_by == 'staff' ? 'Staff: ' : 'User: ') : 'User: ';
-                $isSolved = in_array(strtolower($ticket->status), ['resolved', 'closed']);
-                
-                // Color mapping for avatars
-                $colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
-                $avatarColor = $colors[$ticket->id % count($colors)];
-            @endphp
-            <div class="conversation-wrapper">
-                <a href="{{ route('ticket.show', $ticket->id) }}" class="conversation-item">
-                    <div class="user-avatar-init" style="background: {{ $avatarColor }};">
-                        {{ strtoupper(substr($ticket->user->name, 0, 1)) }}
-                    </div>
-                    
-                    <div class="convo-content">
-                        <div class="convo-header">
-                            <h4 class="convo-name">{{ $ticket->user->name }} <span style="color: #cbd5e1; font-weight: 400; font-size: 0.8rem; margin-left: 0.5rem;">#{{ $ticket->ticket_id }}</span></h4>
-                            <span class="convo-meta">{{ $ticket->created_at->diffForHumans() }}</span>
-                        </div>
-                        
-                        <div class="convo-subject">{{ $ticket->subject }}</div>
-                        
-                        <p class="convo-last-msg">
-                            <span style="font-weight: 700; color: #475569;">{{ $lastMsgSender }}</span>
-                            {!! \Illuminate\Support\Str::limit(strip_tags($lastMsg), 100) !!}
-                        </p>
-                    </div>
-
-                    <div class="convo-status-area">
-                        <span class="status-pill {{ $isSolved ? 'solved-badge' : 'unsolved-badge' }}">
-                            <i class="fas {{ $isSolved ? 'fa-check-circle' : 'fa-clock' }}"></i>
-                            {{ $isSolved ? 'Solved' : 'Active' }}
-                        </span>
-                        
-                        @if($isSolved && $ticket->closed_at)
-                            <div style="font-size: 0.65rem; color: #15803d; font-weight: 700; text-transform: uppercase;">
-                                Resolved: {{ $ticket->closed_at->diffForHumans() }}
-                            </div>
-                        @endif
-
-                        @if($ticket->assigned_to)
-                            <div style="font-size: 0.65rem; color: #94a3b8; font-weight: 700; text-transform: uppercase;">
-                                Resource: <span style="color: #64748b;">{{ $ticket->assignedStaff->name ?? 'Unknown' }}</span>
-                            </div>
-                        @else
-                            <div style="font-size: 0.65rem; color: #ef4444; font-weight: 700; text-transform: uppercase;">
-                                Unassigned
-                            </div>
-                        @endif
-                    </div>
-                </a>
-                
-                <div class="convo-actions">
-                    <form action="{{ route('manager.tickets.delete', $ticket->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to permanently delete this ticket and all its conversations?');">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" style="background: #fee2e2; color: #ef4444; border: 1px solid #fecaca; width: 40px; height: 40px; border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='#ef4444'; this.style.color='white';" onmouseout="this.style.background='#fee2e2'; this.style.color='#ef4444';" title="Delete Ticket">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </form>
-                </div>
-            </div>
-
-        @empty
-            <div style="padding: 5rem 2rem; text-align: center;">
-                <div style="width: 80px; height: 80px; background: #f1f5f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; color: #cbd5e1; font-size: 2rem;">
-                    <i class="fas fa-comments"></i>
-                </div>
-                <h3 style="margin: 0; color: #1e293b; font-weight: 800;">No Conversations Found</h3>
-                <p style="margin: 0.5rem 0 0 0; color: #64748b;">Start by raising or assigning a support ticket.</p>
-            </div>
-        @endforelse
     </div>
 </div>
 
-<div style="margin-top: 2rem;">
-    {{ $tickets->links() }}
+<div class="conversation-card" style="padding: 1.5rem;">
+    <div class="conversation-list" style="width: 100%;">
+        <table id="conversationTable" style="width: 100%; border-collapse: collapse;">
+            <thead style="display: none;">
+                <tr>
+                    <th>Conversation Details</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+    $(document).ready(function() {
+        $('#conversationTable').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: "{{ route('manager.conversations') }}",
+            columns: [
+                {data: 'card', name: 'card', orderable: false}
+            ],
+            "pageLength": 15,
+            "ordering": false,
+            "dom": '<"top"Bf>rt<"bottom"ip><"clear">',
+            "buttons": [
+                'copy', 'csv', 'excel', 'pdf', 'print'
+            ],
+            "language": {
+                "search": "_INPUT_",
+                "searchPlaceholder": "Search by Ticket ID or Subject...",
+                "emptyTable": '<div style="padding: 5rem 2rem; text-align: center;"><div style="width: 80px; height: 80px; background: #f1f5f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; color: #cbd5e1; font-size: 2rem;"><i class="fas fa-comments"></i></div><h3 style="margin: 0; color: #1e293b; font-weight: 800;">No Conversations Found</h3><p style="margin: 0.5rem 0 0 0; color: #64748b;">Start by raising or assigning a support ticket.</p></div>'
+            }
+        });
+    });
+</script>
 @endsection
