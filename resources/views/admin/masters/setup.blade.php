@@ -10,6 +10,7 @@
             if($type == 'global') {
                 if($section == 'logo') $displayType = 'System Logo';
                 elseif($section == 'smtp') $displayType = 'SMTP Setting';
+                elseif($section == 'currency') $displayType = 'Currency Setting';
                 else $displayType = 'Home Page Setting';
             }
             elseif($type == 'subcategory') $displayType = 'Sub-Category';
@@ -44,6 +45,7 @@
                         <a href="{{ route('admin.setup', ['type' => 'global', 'section' => 'identity']) }}" class="submenu-link {{ ($type == 'global' && $section == 'identity') ? 'active' : '' }}">Home Page Setting</a>
                         <a href="{{ route('admin.setup', ['type' => 'global', 'section' => 'logo']) }}" class="submenu-link {{ ($type == 'global' && $section == 'logo') ? 'active' : '' }}">Logo & Favicon</a>
                         <a href="{{ route('admin.setup', ['type' => 'global', 'section' => 'smtp']) }}" class="submenu-link {{ ($type == 'global' && $section == 'smtp') ? 'active' : '' }}">SMTP Setting</a>
+                        <a href="{{ route('admin.setup', ['type' => 'global', 'section' => 'currency']) }}" class="submenu-link {{ ($type == 'global' && $section == 'currency') ? 'active' : '' }}">Default Currency</a>
                     </div>
                 </div>
 
@@ -271,6 +273,24 @@
                                                     <div class="form-group" style="grid-column: span 3;">
                                                         <label class="form-label">From Name <small style="color:#94a3b8;">(shown to recipients)</small></label>
                                                         <input type="text" name="mail_from_name" class="form-control" value="{{ $data['settings']['mail_from_name'] ?? config('app.name') }}" placeholder="TMS PROD Support">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @elseif($section == 'currency')
+                                            <!-- Currency Support Settings -->
+                                            <div style="padding: 0;">
+                                                <h4 style="margin: 0 0 2rem; padding-bottom: 1rem; border-bottom: 1px solid #f1f5f9; font-size: 1.1rem; color: #1e293b; display: flex; align-items: center; gap: 0.75rem;">
+                                                    <i class="fas fa-coins" style="color: #6366f1; background: #eef2ff; padding: 0.5rem; border-radius: 0.5rem;"></i> System Currency
+                                                </h4>
+                                                <div class="form-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                                                    <div class="form-group" style="grid-column: span 2;">
+                                                        <label class="form-label">Default Currency</label>
+                                                        <select name="default_currency" class="form-control" style="background: white; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 0.6rem 1rem; width: 100%; color: #475569; font-weight: 500;">
+                                                            <option value="rupees" {{ ($data['settings']['default_currency'] ?? 'dollar') == 'rupees' ? 'selected' : '' }}>Rupees (₹)</option>
+                                                            <option value="dollar" {{ ($data['settings']['default_currency'] ?? 'dollar') == 'dollar' ? 'selected' : '' }}>Dollar ($)</option>
+                                                            <option value="pound" {{ ($data['settings']['default_currency'] ?? 'dollar') == 'pound' ? 'selected' : '' }}>Pound (£)</option>
+                                                        </select>
+                                                        <small style="color: #64748b; font-size: 0.75rem; margin-top: 0.5rem; display: block;">This currency will be dynamically used on the Browse Products page.</small>
                                                     </div>
                                                 </div>
                                             </div>

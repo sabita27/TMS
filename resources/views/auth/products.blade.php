@@ -5,6 +5,16 @@
 @section('header_padding', '0 2.5rem')
 
 @section('content')
+@php
+    $defaultCurrency = \App\Models\Setting::where('key', 'default_currency')->value('value') ?? 'dollar';
+    if ($defaultCurrency == 'rupees') {
+        $currencySymbol = '₹';
+    } elseif ($defaultCurrency == 'pound') {
+        $currencySymbol = '£';
+    } else {
+        $currencySymbol = '$';
+    }
+@endphp
 <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 3rem; border-radius: 1.5rem; margin-bottom: 2.5rem; position: relative; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);">
     <div style="position: relative; z-index: 2;">
         <h3 style="color: #fff; margin: 0; font-size: 2.25rem; font-weight: 800; letter-spacing: -1px;">Premium Product Catalog</h3>
@@ -20,7 +30,7 @@
     <div class="product-card">
         <div class="card-visual">
             <div class="category-pill">{{ $product->category->name ?? 'Enterprise' }}</div>
-            <div class="price-pill">${{ number_format($product->price, 2) }}</div>
+            <div class="price-pill">{{ $currencySymbol }}{{ number_format($product->price, 2) }}</div>
         </div>
         <div class="card-body">
             <h4 class="product-name">{{ $product->name }}</h4>
