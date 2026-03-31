@@ -35,7 +35,7 @@
         <div class="card-body">
             <h4 class="product-name">{{ $product->name }}</h4>
             <div class="subcategory-label"><i class="fas fa-layer-group"></i> {{ $product->subCategory->name ?? 'Standard Edition' }}</div>
-            <p class="product-desc">{{ Str::limit($product->description, 100) }}</p>
+            <p class="product-desc">{!! Str::limit(strip_tags($product->description), 100) !!}</p>
             
             <div class="card-footer">
                 <a href="{{ route('user.tickets.create', ['product_id' => $product->id]) }}" class="support-btn">

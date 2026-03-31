@@ -107,20 +107,16 @@
     }
 
     @media (max-width: 480px) {
-        .stats-grid {
-            grid-template-columns: 1fr !important;
-        }
-        
         .analytical-grid .card {
             padding: 1rem !important;
         }
         
-        .kpi-grid {
-            grid-template-columns: 1fr !important;
-        }
-        
         .chart-container {
             min-height: 220px !important;
+        }
+        
+        .recent-tickets-card table {
+            white-space: nowrap !important;
         }
     }
 </style>
@@ -189,19 +185,19 @@
 @if(Auth::user()->can('manage tickets'))
 <!-- Analytical Section for Management Roles -->
 <div class="analytical-grid" style="display: grid; gap: 1.5rem; margin-bottom: 2rem; align-items: stretch; width: 100%;">
-    <div class="card" style="padding: 2rem; border: none; border-radius: 1.5rem; background: white; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; display: flex; flex-direction: column;">
+    <div class="card" style="min-width: 0; padding: 2rem; border: none; border-radius: 1.5rem; background: white; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; display: flex; flex-direction: column;">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem;">
             <div>
                 <h3 style="font-size: 1.125rem; font-weight: 800; color: #0f172a; margin: 0;">Support Performance</h3>
                 <p style="font-size: 0.8125rem; color: #64748b; margin-top: 0.25rem;">Live ticket inflow & resolution tracking</p>
             </div>
         </div>
-        <div class="chart-container" style="flex: 1; min-height: 320px; position: relative;">
+        <div class="chart-container" style="flex: 1; min-height: 320px; position: relative; width: 100%;">
             <canvas id="mainActivityChart"></canvas>
         </div>
     </div>
 
-    <div class="card" style="padding: 2rem; border: none; border-radius: 1.5rem; background: white; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; display: flex; flex-direction: column;">
+    <div class="card" style="min-width: 0; padding: 2rem; border: none; border-radius: 1.5rem; background: white; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; display: flex; flex-direction: column;">
         <h3 style="font-size: 1.125rem; font-weight: 800; color: #0f172a; margin-bottom: 2rem;">Key Performance</h3>
         <div class="kpi-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; flex: 1; align-content: start;">
             <div style="background: #eef7f2; padding: 1rem; border-radius: 1.25rem; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: space-between; height: 100%;">
