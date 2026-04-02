@@ -12,6 +12,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+
+    $middleware->statefulApi();
         $middleware->alias([
             // Legacy & Spatie built-in
             'role'               => \App\Http\Middleware\RoleMiddleware::class,
@@ -25,6 +27,18 @@ return Application::configure(basePath: dirname(__DIR__))
             'user'    => \App\Http\Middleware\UserMiddleware::class,
         ]);
     })
-    ->withExceptions(function (Exceptions $exceptions): void {
-        //
-    })->create();
+ ->withExceptions(function (Exceptions $exceptions): void {
+
+        $exceptions->render(function (\Throwable $e, $request) {
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => $e->getMessage()
+                ], 500);
+            }
+
+        });
+
+    })
+    ->create(); // ✅ VERY IMPORTANT: Don't forget to call create() at the end to build the app instance!

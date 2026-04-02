@@ -36,42 +36,31 @@ class AuthController extends Controller
         return view('auth.login');
     }
 
-    public function login(Request $request)
-    {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required'],
-        ]);
+ public function login(Request $request)
+{
+    $credentials = $request->validate([
+        'email' => ['required', 'email'],
+        'password' => ['required'],
+    ]);
 
-        Log::info('Login attempt', ['email' => $request->email]);
-        
-        $user = User::where('email', $request->email)->first();
-        if ($user) {
-            Log::info('User found', ['email' => $user->email, 'status' => $user->status]);
-            $passwordMatch = Hash::check($request->password, $user->password);
-            Log::info('Password match check', ['match' => $passwordMatch]);
-            
-            if (Auth::attempt($credentials)) {
-                Log::info('Login successful via Auth::attempt', ['user_id' => Auth::id(), 'roles' => Auth::user()->getRoleNames()]);
-                if (Auth::user()->status == 0) {
-                    Log::warning('User deactivated', ['user_id' => Auth::id()]);
-                    Auth::logout();
-                    return back()->withErrors(['email' => 'Your account is currently deactivated. Please contact support.']);
-                }
-                $request->session()->regenerate();
-                return $this->redirectUser(Auth::user())->with('success', 'Logged in successfully!');
-            } else {
-                Log::warning('Auth::attempt failed despite manual match check being ' . ($passwordMatch ? 'TRUE' : 'FALSE'), ['email' => $request->email]);
-            }
-        } else {
-            Log::warning('User not found in login attempt', ['email' => $request->email]);
-        }
-
+    if (!Auth::attempt($credentials)) {
         return back()->withErrors([
-            'email' => 'The provided credentials do not match our records.',
-        ])->onlyInput('email');
+            'email' => 'Invalid credentials',
+        ]);
     }
 
+    if (Auth::user()->status == 0) {
+        Auth::logout();
+        return back()->withErrors([
+            'email' => 'Your account is deactivated'
+        ]);
+    }
+
+    $request->session()->regenerate();
+
+    return $this->redirectUser(Auth::user())
+        ->with('success', 'Logged in successfully!');
+}
     public function showRegister()
     {
         return view('auth.register');

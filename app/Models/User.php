@@ -1,18 +1,20 @@
 <?php
-
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Models\ClientDetail;
+use App\Models\Role;
+use App\Models\StaffDetail;
+use App\Models\Ticket;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+
+// ✅ IMPORT MISSING MODELS
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use App\Models\Role;
-use Spatie\Permission\Traits\HasRoles;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasApiTokens, HasFactory, Notifiable, HasRoles;
 
     protected $fillable = [
@@ -25,47 +27,52 @@ class User extends Authenticatable
     ];
 
     /**
-     * The relationships that should always be loaded.
-     *
-     * @var array
+     * ⚠️ OPTIONAL: remove if not needed globally
      */
     protected $with = ['legacyRole', 'client_detail'];
 
     /**
-     * Get the role associated with the user.
+     * 🔗 Legacy Role (your custom role_id)
      */
     public function legacyRole()
     {
         return $this->belongsTo(Role::class, 'role_id');
     }
 
+    /**
+     * 👤 Staff Details
+     */
     public function staff_detail()
     {
         return $this->hasOne(StaffDetail::class);
     }
 
+    /**
+     * 👤 Client Details
+     */
     public function client_detail()
     {
         return $this->hasOne(ClientDetail::class);
     }
 
     /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
+     * 🎫 Assigned Tickets
      */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
-
     public function assignedTickets()
     {
         return $this->hasMany(Ticket::class, 'assigned_to');
     }
 
     /**
-     * Get the attributes that should be cast.
+     * 🔒 Hidden fields
+     */
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    /**
+     * 📅 Casting
      */
     protected function casts(): array
     {
