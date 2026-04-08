@@ -580,6 +580,10 @@
         }
 
         /* Reusing Select2 and Toggle Styles from other masters for consistency */
+        .select2-container {
+            z-index: 9999 !important;
+        }
+
         .select2-container--default .select2-selection--multiple {
             border: 1px solid #e2e8f0;
             border-radius: 0.5rem;
@@ -877,7 +881,7 @@
             row.innerHTML = `
             <div>
                 ${isFirst ? '<label class="form-label" style="font-size: 0.7rem;">Service</label>' : ''}
-                <select name="services[${index}][id]" class="form-control service-select" required>
+                <select name="services[${index}][id]" class="form-control service-select">
                     ${options}
                 </select>
             </div>

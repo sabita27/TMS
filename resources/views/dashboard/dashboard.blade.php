@@ -123,6 +123,14 @@
 @endsection
 
 @section('content')
+@php
+    $statusMap = \App\Models\TicketStatus::pluck('color', 'name')->mapWithKeys(function($c, $n) {
+        return [strtolower($n) => $c];
+    })->toArray();
+    $priorityMap = \App\Models\TicketPriority::pluck('color', 'name')->mapWithKeys(function($c, $n) {
+        return [strtolower($n) => $c];
+    })->toArray();
+@endphp
 <div class="dashboard-header">
     <h1 style="font-size: 1.5rem; font-weight: 700; color: #111827;">
         @can('manage users') Admin Dashboard
@@ -259,16 +267,38 @@
                     <td style="padding: 1rem;">{{ $ticket->user->name }}</td>
                     <td style="padding: 1rem;">{{ $ticket->subject }}</td>
                     <td style="padding: 1rem;">
+                        @php
+                            $sName = strtolower(str_replace('-', ' ', $ticket->status));
+                            $sColor = $statusMap[$sName] ?? ($statusMap[strtolower($ticket->status)] ?? null);
+                            if($sColor) {
+                                $sBg = $sColor . '20'; // 12% opacity
+                                $sText = $sColor;
+                            } else {
+                                $sBg = $ticket->status == 'open' ? '#fee2e2' : ($ticket->status == 'closed' ? '#dcfce7' : '#fef3c7');
+                                $sText = $ticket->status == 'open' ? '#991b1b' : ($ticket->status == 'closed' ? '#166534' : '#92400e');
+                            }
+                        @endphp
                         <span style="padding: 0.35rem 0.85rem; border-radius: 2rem; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; 
-                            background: {{ $ticket->status == 'open' ? '#fee2e2' : ($ticket->status == 'closed' ? '#dcfce7' : '#fef3c7') }};
-                            color: {{ $ticket->status == 'open' ? '#991b1b' : ($ticket->status == 'closed' ? '#166534' : '#92400e') }};">
+                            background: {{ $sBg }};
+                            color: {{ $sText }};">
                             {{ ucfirst($ticket->status) }}
                         </span>
                     </td>
                     <td style="padding: 1rem;">
+                        @php
+                            $pName = strtolower(str_replace('-', ' ', $ticket->priority));
+                            $pColor = $priorityMap[$pName] ?? ($priorityMap[strtolower($ticket->priority)] ?? null);
+                            if($pColor) {
+                                $pBg = $pColor . '20';
+                                $pText = $pColor;
+                            } else {
+                                $pBg = $ticket->priority == 'high' ? '#fee2e2' : ($ticket->priority == 'medium' ? '#fef3c7' : '#e0e7ff');
+                                $pText = $ticket->priority == 'high' ? '#991b1b' : ($ticket->priority == 'medium' ? '#92400e' : '#3730a3');
+                            }
+                        @endphp
                         <span style="padding: 0.35rem 0.85rem; border-radius: 2rem; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
-                            background: {{ $ticket->priority == 'high' ? '#fee2e2' : ($ticket->priority == 'medium' ? '#fef3c7' : '#e0e7ff') }};
-                            color: {{ $ticket->priority == 'high' ? '#991b1b' : ($ticket->priority == 'medium' ? '#92400e' : '#3730a3') }};">
+                            background: {{ $pBg }};
+                            color: {{ $pText }};">
                             {{ ucfirst($ticket->priority) }}
                         </span>
                     </td>
