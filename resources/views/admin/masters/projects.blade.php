@@ -82,11 +82,11 @@
                                 <div style="display: flex; gap: 0.5rem;">
                                     <button onclick="viewProject({{ $project->id }})" class="btn"
                                         style="padding: 0.4rem 0.7rem; font-size: 0.75rem; background: #10b981; color: white;">
-                                        <i class="fas fa-eye"></i> View
+                                        <i class="fas fa-eye"></i> 
                                     </button>
                                     <button onclick="editProject({{ $project->id }})" class="btn btn-primary"
                                         style="padding: 0.4rem 0.7rem; font-size: 0.75rem;">
-                                        <i class="fas fa-edit"></i> Edit
+                                        <i class="fas fa-edit"></i> 
                                     </button>
                                     @if(Auth::user()->hasRole('admin'))
                                         <form action="{{ route('admin.projects.delete', $project->id) }}" method="POST"
@@ -95,7 +95,7 @@
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-danger"
                                                 style="padding: 0.4rem 0.7rem; font-size: 0.75rem;">
-                                                <i class="fas fa-trash"></i> Delete
+                                                <i class="fas fa-trash"></i> 
                                             </button>
                                         </form>
                                     @endif

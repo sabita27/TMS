@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Client;
+use App\Models\ClientService;
+use Illuminate\Support\Facades\Storage;
 
 class ClientController extends Controller
 {
@@ -13,7 +15,12 @@ class ClientController extends Controller
      */
     public function index()
     {
-        return response()->json(Client::latest()->get(), 200);
+        $clients = Client::with('services')->latest()->get();
+
+        return response()->json([
+            'status' => true,
+            'data' => $clients
+        ], 200);
     }
 
     /**
@@ -23,37 +30,61 @@ class ClientController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'nullable|email',
-            'phone' => 'nullable|string|max:20',
-            'address' => 'nullable|string',
-            'country' => 'nullable|string|max:100',
-            'state' => 'nullable|string|max:100',
-            'status' => 'required|in:0,1',
+            'email' => 'required|email|unique:clients',
+            'phone' => 'required|string',
+            'address' => 'required|string',
+            'country' => 'required|string|max:100',
+            'state' => 'required|string|max:100',
 
-            // ✅ MATCH MASTER CONTROLLER
-            'contact_person1_name' => 'nullable|string|max:255',
-            'contact_person1_phone' => 'nullable|string|max:20',
+            // ✅ IMPORTANT (MATCH YOUR UI BUTTONS)
+            'business_type' => 'required|in:product,project,service,both',
+
+            'product_id' => 'nullable|array',
+            'project_id' => 'nullable|array',
+            'service_id' => 'nullable|array',
+
+            'project_start_date' => 'nullable|date',
+            'project_end_date' => 'nullable|date',
+
+            'contact_person1_name' => 'required|string|max:255',
+            'contact_person1_phone' => 'required|string|max:20',
             'contact_person2_name' => 'nullable|string|max:255',
             'contact_person2_phone' => 'nullable|string|max:20',
+
+            'remarks' => 'nullable|string',
+            'attachment' => 'nullable|file|max:2048',
+
+            // ✅ SERVICES ARRAY
+            'services' => 'nullable|array',
+            'services.*.id' => 'required|exists:services,id',
+            'services.*.start_date' => 'nullable|date',
+            'services.*.end_date' => 'nullable|date',
         ]);
 
-        $client = Client::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'address' => $request->address,
-            'country' => $request->country,
-            'state' => $request->state,
-            'status' => $request->status,
+        // ✅ STORE FILE
+        $data = $request->except(['attachment', 'services']);
 
-            // ✅ SAME AS MASTER CONTROLLER
-            'contact_person1_name' => $request->contact_person1_name,
-            'contact_person1_phone' => $request->contact_person1_phone,
-            'contact_person2_name' => $request->contact_person2_name,
-            'contact_person2_phone' => $request->contact_person2_phone,
-        ]);
+        if ($request->hasFile('attachment')) {
+            $data['attachment'] = $request->file('attachment')->store('clients', 'public');
+        }
+
+        // ✅ CREATE CLIENT
+        $client = Client::create($data);
+
+        // ✅ STORE MULTIPLE SERVICES
+        if ($request->has('services')) {
+            foreach ($request->services as $service) {
+                ClientService::create([
+                    'client_id' => $client->id,
+                    'service_id' => $service['id'],
+                    'start_date' => $service['start_date'] ?? null,
+                    'end_date' => $service['end_date'] ?? null,
+                ]);
+            }
+        }
 
         return response()->json([
+            'status' => true,
             'message' => 'Client created successfully',
             'data' => $client
         ], 201);
@@ -64,15 +95,19 @@ class ClientController extends Controller
      */
     public function show($id)
     {
-        $client = Client::find($id);
+        $client = Client::with('services')->find($id);
 
         if (!$client) {
             return response()->json([
+                'status' => false,
                 'message' => 'Client not found'
             ], 404);
         }
 
-        return response()->json($client, 200);
+        return response()->json([
+            'status' => true,
+            'data' => $client
+        ], 200);
     }
 
     /**
@@ -84,43 +119,64 @@ class ClientController extends Controller
 
         if (!$client) {
             return response()->json([
+                'status' => false,
                 'message' => 'Client not found'
             ], 404);
         }
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'nullable|email',
-            'phone' => 'nullable|string|max:20',
-            'address' => 'nullable|string',
-            'country' => 'nullable|string|max:100',
-            'state' => 'nullable|string|max:100',
-            'status' => 'required|in:0,1',
+            'email' => "required|email|unique:clients,email,$id",
+            'phone' => 'required|string',
+            'address' => 'required|string',
+            'country' => 'required|string|max:100',
+            'state' => 'required|string|max:100',
+            'business_type' => 'required|in:product,project,service,both',
 
-            // ✅ MATCH MASTER
-            'contact_person1_name' => 'nullable|string|max:255',
-            'contact_person1_phone' => 'nullable|string|max:20',
+            'product_id' => 'nullable|array',
+            'project_id' => 'nullable|array',
+            'service_id' => 'nullable|array',
+
+            'contact_person1_name' => 'required|string|max:255',
+            'contact_person1_phone' => 'required|string|max:20',
             'contact_person2_name' => 'nullable|string|max:255',
             'contact_person2_phone' => 'nullable|string|max:20',
+
+            'remarks' => 'nullable|string',
+            'attachment' => 'nullable|file|max:2048',
+
+            'services' => 'nullable|array',
         ]);
 
-        $client->update([
-            'name' => $request->name,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'address' => $request->address,
-            'country' => $request->country,
-            'state' => $request->state,
-            'status' => $request->status,
+        $data = $request->except(['attachment', 'services']);
 
-            // ✅ SAME STRUCTURE
-            'contact_person1_name' => $request->contact_person1_name,
-            'contact_person1_phone' => $request->contact_person1_phone,
-            'contact_person2_name' => $request->contact_person2_name,
-            'contact_person2_phone' => $request->contact_person2_phone,
-        ]);
+        // ✅ FILE UPDATE
+        if ($request->hasFile('attachment')) {
+            if ($client->attachment && Storage::disk('public')->exists($client->attachment)) {
+                Storage::disk('public')->delete($client->attachment);
+            }
+
+            $data['attachment'] = $request->file('attachment')->store('clients', 'public');
+        }
+
+        $client->update($data);
+
+        // ✅ UPDATE SERVICES (DELETE + INSERT)
+        if ($request->has('services')) {
+            ClientService::where('client_id', $client->id)->delete();
+
+            foreach ($request->services as $service) {
+                ClientService::create([
+                    'client_id' => $client->id,
+                    'service_id' => $service['id'],
+                    'start_date' => $service['start_date'] ?? null,
+                    'end_date' => $service['end_date'] ?? null,
+                ]);
+            }
+        }
 
         return response()->json([
+            'status' => true,
             'message' => 'Client updated successfully',
             'data' => $client
         ], 200);
@@ -135,13 +191,23 @@ class ClientController extends Controller
 
         if (!$client) {
             return response()->json([
+                'status' => false,
                 'message' => 'Client not found'
             ], 404);
         }
 
+        // ✅ DELETE FILE
+        if ($client->attachment && Storage::disk('public')->exists($client->attachment)) {
+            Storage::disk('public')->delete($client->attachment);
+        }
+
+        // ✅ DELETE SERVICES
+        ClientService::where('client_id', $client->id)->delete();
+
         $client->delete();
 
         return response()->json([
+            'status' => true,
             'message' => 'Client deleted successfully'
         ], 200);
     }

@@ -56,13 +56,7 @@
                 </a>
             @endcan
 
-            @can('manage clients')
-                <a href="{{ route('admin.clients') }}" class="nav-item-link {{ str_contains($curr, 'admin.clients') ? 'active' : '' }}">
-                    <i class="fas fa-user-tie"></i> Client 
-                </a>
-            @endcan
-
-            @can('manage projects')
+                    @can('manage projects')
                 <a href="{{ route('admin.projects') }}" class="nav-item-link {{ str_contains($curr, 'admin.projects') ? 'active' : '' }}">
                     <i class="fas fa-project-diagram"></i> Project
                 </a>
@@ -73,6 +67,14 @@
                     <i class="fas fa-concierge-bell"></i> Service
                 </a>
             @endcan
+
+            @can('manage clients')
+                <a href="{{ route('admin.clients') }}" class="nav-item-link {{ str_contains($curr, 'admin.clients') ? 'active' : '' }}">
+                    <i class="fas fa-user-tie"></i> Client 
+                </a>
+            @endcan
+
+    
         @endcanany
 
         @canany(['admin', 'manage roles', 'manage categories', 'manage designations', 'manage positions'])

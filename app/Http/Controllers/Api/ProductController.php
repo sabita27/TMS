@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+use App\Models\ProductCategory;
+use App\Models\ProductSubCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -137,6 +139,28 @@ class ProductController extends Controller
         return response()->json([
             'status'  => true,
             'message' => 'Product deleted successfully',
+        ]);
+    }
+    public function categories()
+    {
+        $categories = ProductCategory::latest()->get();
+
+        return response()->json([
+            'status' => true,
+            'data' => $categories
+        ]);
+    }
+
+    /**
+     * 📂 GET SUBCATEGORIES BY CATEGORY ID
+     */
+    public function subCategories($category_id)
+    {
+        $subCategories = ProductSubCategory::where('category_id', $category_id)->get();
+
+        return response()->json([
+            'status' => true,
+            'data' => $subCategories
         ]);
     }
 }
