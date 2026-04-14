@@ -1,12 +1,10 @@
 <?php
 
 use App\Http\Controllers\AdminController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\StaffController;
-use App\Http\Controllers\ManagerController;
-use App\Http\Controllers\TicketController;
-use App\Http\Controllers\MasterController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\MasterController;
+use App\Http\Controllers\TicketController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -29,7 +27,7 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/profile', 'updateProfile')->name('user.profile.update');
         Route::put('/profile/password', 'updatePassword')->name('user.profile.password');
     });
-    
+
     // Shared Ticket Views
     Route::get('/tickets/{ticket}', [TicketController::class, 'show'])->name('ticket.show');
     Route::post('/tickets/{ticket}/reply', [TicketController::class, 'reply'])->name('ticket.reply');
@@ -92,7 +90,7 @@ Route::middleware(['auth'])->group(function () {
     // Admin-Level Routes (Management by Permission)
     Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->middleware(['role_or_permission:admin|manager|staff|view dashboard'])->name('admin.dashboard');
-        
+
         // Users Management
         Route::controller(AdminController::class)->middleware(['permission:manage users'])->group(function () {
             Route::get('/users', 'users')->name('admin.users');
@@ -101,7 +99,7 @@ Route::middleware(['auth'])->group(function () {
             Route::put('/users/{user}', 'updateUser')->name('admin.users.update');
             Route::delete('/users/{user}', 'destroyUser')->name('admin.users.delete');
         });
-        
+
         // Roles
         Route::controller(\App\Http\Controllers\RoleController::class)->middleware(['permission:manage roles'])->group(function () {
             Route::get('/roles', 'index')->name('admin.roles');
@@ -137,14 +135,14 @@ Route::middleware(['auth'])->group(function () {
             Route::put('/positions/{position}', 'update')->name('admin.positions.update');
             Route::delete('/positions/{position}', 'destroy')->name('admin.positions.delete');
         });
-        
+
         Route::middleware(['permission:manage categories'])->group(function () {
             Route::get('/categories', [MasterController::class, 'categories'])->name('admin.categories');
             Route::post('/categories', [MasterController::class, 'storeCategory'])->name('admin.categories.store');
             Route::get('/categories/{category}/edit', [MasterController::class, 'editCategory'])->name('admin.categories.edit');
             Route::put('/categories/{category}', [MasterController::class, 'updateCategory'])->name('admin.categories.update');
             Route::delete('/categories/{category}', [MasterController::class, 'destroyCategory'])->name('admin.categories.delete');
-            
+
             Route::get('/subcategories', [MasterController::class, 'subCategories'])->name('admin.subcategories');
             Route::post('/subcategories', [MasterController::class, 'storeSubCategory'])->name('admin.subcategories.store');
             Route::get('/subcategories/{subcategory}/edit', [MasterController::class, 'editSubCategory'])->name('admin.subcategories.edit');
@@ -181,7 +179,7 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['auth'])->prefix('user')->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->name('user.dashboard');
         Route::get('/products', [UserController::class, 'products'])->name('user.products');
-        
+
         Route::get('/tickets', [TicketController::class, 'userTickets'])->name('user.tickets');
         Route::get('/tickets/create', [TicketController::class, 'create'])->name('user.tickets.create');
         Route::post('/tickets', [TicketController::class, 'store'])->name('user.tickets.store');

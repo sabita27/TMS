@@ -1,13 +1,17 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ClientController;
 use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\DesignationController;
+use App\Http\Controllers\Api\GlobalSettingController;
+use App\Http\Controllers\Api\PositionController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Api\ServiceController;
 use App\Http\Controllers\Api\UserController;
-use App\Http\Controllers\Api\GlobalSettingController;
+use App\Http\Controllers\Api\SubcategoryController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -89,10 +93,53 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::prefix('settings')->group(function () {
 
-    Route::get('/', [GlobalSettingController::class, 'index']);  
-    Route::post('/', [GlobalSettingController::class, 'update']);  
+        Route::get('/', [GlobalSettingController::class, 'index']);
+        Route::post('/', [GlobalSettingController::class, 'update']);
 
-    Route::get('/{section}', [GlobalSettingController::class, 'getBySection']);  
+        Route::get('/{section}', [GlobalSettingController::class, 'getBySection']);
+
+    });
+
+    Route::prefix('designations')->group(function () {
+
+        Route::get('/', [DesignationController::class, 'index']);          // List
+        Route::post('/', [DesignationController::class, 'store']);         // Create
+        Route::get('/{id}', [DesignationController::class, 'show']);       // View
+        Route::post('/{id}', [DesignationController::class, 'update']);    // Update
+        Route::delete('/{id}', [DesignationController::class, 'destroy']); // Delete
+
+    });
+
+    Route::prefix('positions')->group(function () {
+
+        Route::get('/', [PositionController::class, 'index']);          // List
+        Route::post('/', [PositionController::class, 'store']);         // Create
+        Route::get('/{id}', [PositionController::class, 'show']);       // View
+        Route::post('/{id}', [PositionController::class, 'update']);    // Update
+        Route::delete('/{id}', [PositionController::class, 'destroy']); // Delete
+
+    });
+
+    Route::prefix('categories')->group(function () {
+
+        Route::get('/', [CategoryController::class, 'index']);          // List
+        Route::post('/', [CategoryController::class, 'store']);         // Create
+        Route::get('/{id}', [CategoryController::class, 'show']);       // View
+        Route::post('/{id}', [CategoryController::class, 'update']);    // Update
+        Route::delete('/{id}', [CategoryController::class, 'destroy']); // Delete
+
+    });
+
+Route::prefix('subcategories')->group(function () {
+
+  // 🔥 IMPORTANT (category based)
+    Route::get('/category/{id}', [SubcategoryController::class, 'getByCategory']);
+
+    Route::get('/', [SubcategoryController::class, 'index']);              // List
+    Route::post('/', [SubcategoryController::class, 'store']);             // Create
+    Route::get('/view/{id}', [SubcategoryController::class, 'show']);      // Single
+    Route::post('/{id}', [SubcategoryController::class, 'update']);        // Update
+    Route::delete('/{id}', [SubcategoryController::class, 'destroy']);     // Delete
 
 });
 
