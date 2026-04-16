@@ -11,8 +11,13 @@
         <div style="display: flex; flex-direction: column; gap: 2rem;">
             <div class="card profile-info-card">
                 <div style="position: relative; display: inline-block; margin-bottom: 1.5rem;">
-                    <img src="https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&background=4f46e5&color=fff&size=128" 
-                         style="width: 120px; height: 120px; border-radius: 50%; border: 4px solid #fff; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">
+                    @if($user->profile_picture)
+                        <img src="{{ Storage::url($user->profile_picture) }}" 
+                             style="width: 120px; height: 120px; border-radius: 50%; border: 4px solid #fff; box-shadow: 0 10px 20px rgba(0,0,0,0.1); object-fit: cover;">
+                    @else
+                        <img src="https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&background=4f46e5&color=fff&size=128" 
+                             style="width: 120px; height: 120px; border-radius: 50%; border: 4px solid #fff; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">
+                    @endif
                     <div style="position: absolute; bottom: 5px; right: 5px; background: #10b981; width: 20px; height: 20px; border-radius: 50%; border: 3px solid #fff;"></div>
                 </div>
                 <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #1e293b;">{{ $user->name }}</h3>
@@ -45,28 +50,33 @@
                     <i class="fas fa-user-circle" style="color: var(--primary-color);"></i> Personal Information
                 </h3>
                 
-                <form action="{{ route('user.profile.update') }}" method="POST">
+                <form action="{{ route('user.profile.update') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
                     
+                    <div class="form-group" style="margin-bottom: 1.5rem;">
+                        <label class="form-label" style="font-weight: 700;">Profile Picture</label>
+                        <input type="file" name="profile_picture" class="form-control" accept="image/*" style="height: auto; padding: 0.75rem; border-radius: 0.75rem; border: 1px dashed #cbd5e1;">
+                    </div>
+
                     <div class="profile-info-grid">
                         <div class="form-group">
                             <label class="form-label" style="font-weight: 700;">Full Name</label>
-                            <input type="text" name="name" value="{{ $user->name }}" class="form-control" required style="height: 50px; border-radius: 0.75rem;">
+                            <input type="text" value="{{ $user->name }}" class="form-control" readonly style="height: 50px; border-radius: 0.75rem; background-color: #f1f5f9; color: #64748b; cursor: not-allowed;">
                         </div>
                         <div class="form-group">
                             <label class="form-label" style="font-weight: 700;">Phone Number</label>
-                            <input type="text" name="phone" value="{{ $user->phone }}" class="form-control" style="height: 50px; border-radius: 0.75rem;">
+                            <input type="text" value="{{ $user->phone }}" class="form-control" readonly style="height: 50px; border-radius: 0.75rem; background-color: #f1f5f9; color: #64748b; cursor: not-allowed;">
                         </div>
                     </div>
 
                     <div class="form-group" style="margin-bottom: 2rem;">
                         <label class="form-label" style="font-weight: 700;">Email Address</label>
-                        <input type="email" name="email" value="{{ $user->email }}" class="form-control" required style="height: 50px; border-radius: 0.75rem;">
+                        <input type="email" value="{{ $user->email }}" class="form-control" readonly style="height: 50px; border-radius: 0.75rem; background-color: #f1f5f9; color: #64748b; cursor: not-allowed;">
                     </div>
 
                     <button type="submit" class="btn btn-primary" style="padding: 0.85rem 2rem; border-radius: 0.75rem; font-weight: 800;">
-                        Update Profile
+                        Update Profile Picture
                     </button>
                 </form>
             </div>

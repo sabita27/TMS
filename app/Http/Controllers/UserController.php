@@ -59,15 +59,16 @@ class UserController extends Controller
         }
 
         $request->validate([
-            'name'  => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $user->id,
-            'phone' => 'nullable|string|max:15',
+            'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        // ✅ Using update is fine here
-        $user->update($request->only('name', 'email', 'phone'));
+        if ($request->hasFile('profile_picture')) {
+            $path = $request->file('profile_picture')->store('profiles', 'public');
+            $user->profile_picture = $path;
+            $user->save();
+        }
 
-        return back()->with('success', 'Profile updated successfully!');
+        return back()->with('success', 'Profile picture updated successfully!');
     }
 
     public function updatePassword(Request $request)
