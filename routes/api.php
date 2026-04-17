@@ -14,10 +14,10 @@ use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\ServiceController;
 use App\Http\Controllers\Api\SubcategoryController;
+use App\Http\Controllers\Api\TicketController;
 use App\Http\Controllers\Api\TicketPriorityController;
 use App\Http\Controllers\Api\TicketStatusController;
 use App\Http\Controllers\Api\UserController;
-use App\Http\Controllers\Api\TicketController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -55,10 +55,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/', [UserController::class, 'index']);          // List users
         Route::post('/', [UserController::class, 'store']);         // Create user
+        Route::get('/products', [UserController::class, 'products']); // ✅ Browse Products
         Route::get('/{id}', [UserController::class, 'show']);       // View user
         Route::put('/{id}', [UserController::class, 'update']);     // Update user
         Route::delete('/{id}', [UserController::class, 'destroy']); // Delete user
-
+       
     });
 
     Route::apiResource('products', ProductController::class);
@@ -189,8 +190,15 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::prefix('tickets')->group(function () {
-        Route::post('/', [TicketController::class, 'store']); // Create ticket
-        Route::get('/my-tickets', [TicketController::class, 'myTickets']); // My tickets
-        Route::get('/{id}', [TicketController::class, 'show']); // View single ticket
+        Route::get('/assigned', [TicketController::class, 'assignedTickets']);
+        Route::get('/', [TicketController::class, 'index']);
+        Route::get('/conversations', [TicketController::class, 'conversations']);
+        Route::get('/conversations/{id}', [TicketController::class, 'conversationDetail']);    // ✅ VIEW
+        Route::get('/my-tickets', [TicketController::class, 'myTickets']);
+        Route::post('/', [TicketController::class, 'store']);
+        Route::delete('/conversations/{id}', [TicketController::class, 'deleteConversation']); // ✅ DELETE
+        Route::get('/{id}', [TicketController::class, 'show']); // keep last
+
     });
+
 });

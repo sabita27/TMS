@@ -172,4 +172,24 @@ class UserController extends Controller
             'message' => 'User deleted successfully',
         ]);
     }
+
+    /**
+ * 📦 Browse Products (User API)
+ */
+public function products(Request $request)
+{
+    $products = \App\Models\Product::where('status', 1)
+        ->with([
+            'category:id,name',
+            'subCategory:id,name'
+        ])
+        ->latest()
+        ->paginate(12);
+
+    return response()->json([
+        'status' => true,
+        'count'  => $products->total(),
+        'data'   => $products
+    ]);
+}
 }

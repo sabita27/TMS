@@ -123,4 +123,196 @@ class TicketController extends Controller
             'data'   => $ticket,
         ]);
     }
+
+    /**
+     * 📌 All Tickets (Admin / Manager)
+     */
+    public function index(Request $request)
+    {
+        $query = Ticket::with([
+            'user:id,name',
+            'assignedStaff:id,name',
+            'product:id,name',
+            'project:id,name',
+            'service:id,name',
+        ]);
+
+        // ✅ FILTERS (optional but powerful)
+        if ($request->priority) {
+            $query->where('priority', $request->priority);
+        }
+
+        if ($request->status) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->assigned_to) {
+            $query->where('assigned_to', $request->assigned_to);
+        }
+
+        // ✅ PAGINATION
+        $tickets = $query->latest()->paginate(10);
+
+        return response()->json([
+            'status' => true,
+            'data'   => $tickets,
+        ]);
+    }
+
+    /**
+ * 📌 All Conversations (Chat List)
+ */
+public function conversations(Request $request)
+{
+    $tickets = Ticket::with([
+            'user:id,name',
+            'assignedStaff:id,name',
+            'replies' => function ($q) {
+                $q->latest();
+            }
+        ])
+        ->latest()
+        ->get()
+        ->map(function ($ticket) {
+
+            $lastReply = $ticket->replies->first();
+
+            return [
+                'id' => $ticket->id,
+                'ticket_id' => $ticket->ticket_id,
+                'user_name' => $ticket->user->name ?? null,
+                'subject' => $ticket->subject,
+
+                'last_message' => $lastReply
+                    ? $lastReply->replay
+                    : $ticket->description,
+
+                'last_message_by' => $lastReply
+                    ? $lastReply->reply_by
+                    : 'user',
+
+                'status' => $ticket->status,
+
+                'assigned_to' => $ticket->assignedStaff->name ?? null,
+
+                'created_at' => $ticket->created_at->diffForHumans(),
+                'closed_at' => $ticket->closed_at
+                    ? $ticket->closed_at->diffForHumans()
+                    : null,
+            ];
+        });
+
+    return response()->json([
+        'status' => true,
+        'data'   => $tickets,
+    ]);
+}
+
+/**
+ * 📌 View Single Conversation (Full Chat)
+ */
+public function conversationDetail($id)
+{
+    $ticket = Ticket::with([
+        'user:id,name',
+        'assignedStaff:id,name',
+        'product:id,name',
+        'project:id,name',
+        'service:id,name',
+        'replies' => function ($q) {
+            $q->orderBy('id', 'asc');
+        },
+        'replies.user:id,name',
+        'replies.staff:id,name',
+    ])->find($id);
+
+    if (! $ticket) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Conversation not found'
+        ], 404);
+    }
+
+    return response()->json([
+        'status' => true,
+        'data'   => $ticket
+    ]);
+}
+
+/**
+ * 📌 Delete Conversation (Ticket + Replies)
+ */
+public function deleteConversation($id)
+{
+    $user = Auth::user();
+
+    // ✅ Only admin / manager allowed
+    if (! $user || ! $user->hasAnyRole(['admin', 'manager'])) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Unauthorized'
+        ], 403);
+    }
+
+    $ticket = Ticket::find($id);
+
+    if (! $ticket) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Conversation not found'
+        ], 404);
+    }
+
+    // ✅ Delete replies first (optional if cascade exists)
+    $ticket->replies()->delete();
+
+    // ✅ Delete ticket
+    $ticket->delete();
+
+    return response()->json([
+        'status'  => true,
+        'message' => 'Conversation deleted successfully'
+    ]);
+}
+
+/**
+ * 📌 Assigned Tickets (Staff)
+ */
+public function assignedTickets(Request $request)
+{
+    $user = Auth::user();
+
+    if (! $user) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Unauthenticated'
+        ], 401);
+    }
+
+    $query = Ticket::where('assigned_to', $user->id)
+        ->with([
+            'user:id,name',
+            'product:id,name',
+            'project:id,name',
+            'service:id,name'
+        ]);
+
+    // ✅ OPTIONAL FILTERS
+    if ($request->status) {
+        $query->where('status', $request->status);
+    }
+
+    if ($request->priority) {
+        $query->where('priority', $request->priority);
+    }
+
+    // ✅ PAGINATION (recommended)
+    $tickets = $query->latest()->paginate(10);
+
+    return response()->json([
+        'status' => true,
+        'count'  => $tickets->total(),
+        'data'   => $tickets,
+    ]);
+}
 }
